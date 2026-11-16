@@ -1,0 +1,19 @@
+# MounRiver Studio generated files and local debug settings
+/obj/
+/.mrs/
+/.settings/
+
+# Python cache and locally installed dependencies
+__pycache__/
+*.py[cod]
+/PC_Player/packages/
+
+# Download FFmpeg separately when using the PC player
+/PC_Player/ffmpeg.exe
+
+# Local editor and operating-system files
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
+*.log
