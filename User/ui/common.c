@@ -259,13 +259,13 @@ lv_obj_t *ui_row(lv_obj_t *parent, lv_coord_t y, const char *label_text)
 /*********************************************************************
  *                              交互控件
  *********************************************************************/
-/* 滑条：编号从 user_data 进来，统一投给任务线程 */
+/* 滑条：编号从 user_data 进来，统一投给 ui_post_event */
 static void on_slider(lv_event_t *e)
 {
     lv_obj_t *sl = lv_event_get_target(e);
     uint8_t   id = (uint8_t)(uintptr_t)lv_event_get_user_data(e);
 
-    ui_task_event(id, (int32_t)lv_slider_get_value(sl));
+    ui_post_event(id, (int32_t)lv_slider_get_value(sl));
 }
 
 /* 按钮：点一下 */
@@ -273,7 +273,7 @@ static void on_button(lv_event_t *e)
 {
     uint8_t id = (uint8_t)(uintptr_t)lv_event_get_user_data(e);
 
-    ui_task_event(id, 0);
+    ui_post_event(id, 0);
 }
 
 lv_obj_t *ui_slider(lv_obj_t *parent, lv_coord_t x, lv_coord_t y, lv_coord_t w,

@@ -26,7 +26,6 @@
 
 #include "task_runner.h"
 #include "rtthread.h"
-#include "ui/ui_event.h"
 
 /**************************************************************************************************
  *                                        配置
@@ -356,13 +355,4 @@ rt_err_t task_runner_post_set(uint8_t id, int32_t value)
     ev.value = value;
 
     return rt_mq_send(s_cmd_q, &ev, sizeof(ev));
-}
-
-/**
- * @brief  UI 线程 -> 任务线程的控件事件通道（实现在 ui_event.h 里声明）
- * @note   只是 task_runner_post_set 的别名，放在这里是为了让 ui 层不用认识任务运行器
- */
-void ui_task_event(uint8_t id, int32_t value)
-{
-    (void)task_runner_post_set(id, value);
 }

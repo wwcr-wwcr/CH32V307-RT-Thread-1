@@ -9,21 +9,19 @@
 
 #include "menu_ui.h"
 #include "common.h"
+#include "ui_event.h"
 #include <stdio.h>
 
 /**************************************************************************************************
- *                                        内部变量
- **************************************************************************************************/
-static void (*s_cb_prev)(void)  = NULL;
-static void (*s_cb_next)(void)  = NULL;
-static void (*s_cb_enter)(void) = NULL;
-
-/**************************************************************************************************
  *                                        内部函数
+ *
+ * 触摸只走 ui_post_event() 一个入口，和任务页的按钮/滑条完全一样。
+ * 列表页用到的三个控件编号由 menu_core.c 解释：
+ *     1 = 上一个   2 = 下一个   3 = 进入当前任务
  **************************************************************************************************/
-static void on_prev(lv_event_t *e)  { (void)e; if(s_cb_prev  != NULL) { s_cb_prev();  } }
-static void on_next(lv_event_t *e)  { (void)e; if(s_cb_next  != NULL) { s_cb_next();  } }
-static void on_enter(lv_event_t *e) { (void)e; if(s_cb_enter != NULL) { s_cb_enter(); } }
+static void on_prev(lv_event_t *e)  { (void)e; ui_post_event(1, 0); }
+static void on_next(lv_event_t *e)  { (void)e; ui_post_event(2, 0); }
+static void on_enter(lv_event_t *e) { (void)e; ui_post_event(3, 0); }
 
 /* 造一个方形触摸按钮：深色卡片 + 边框 + 居中箭头 */
 static lv_obj_t *make_btn(lv_obj_t *parent, lv_coord_t x, const char *text, lv_event_cb_t cb)
@@ -46,13 +44,6 @@ static lv_obj_t *make_btn(lv_obj_t *parent, lv_coord_t x, const char *text, lv_e
 /**************************************************************************************************
  *                                        对外函数
  **************************************************************************************************/
-void menu_ui_set_tap_cb(void (*on_prev_cb)(void), void (*on_next_cb)(void), void (*on_enter_cb)(void))
-{
-    s_cb_prev  = on_prev_cb;
-    s_cb_next  = on_next_cb;
-    s_cb_enter = on_enter_cb;
-}
-
 void menu_ui_render(uint8_t index, uint8_t total, const char *name)
 {
     static lv_obj_t *s_page    = NULL;

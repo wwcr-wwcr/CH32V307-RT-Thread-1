@@ -46,6 +46,7 @@ void menu_start(void);
  *               2 = 光标下一个（只在列表页有效）
  *               3 = 打开第 arg 个任务（越界返回 -RT_EINVAL）
  *               4 = 回到列表页（等同长按 K4）
+ *               5 = 触摸控件（内部用，发它请调 ui_post_event，因为要带 int32 数值）
  * @param  arg 命令参数
  * @return RT_EOK 成功；-RT_EFULL 队列满（命令被丢弃）；-RT_EINVAL 命令号非法；
  *         -RT_ERROR 菜单还没启动

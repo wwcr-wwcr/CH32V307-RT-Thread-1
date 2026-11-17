@@ -18,7 +18,7 @@
 #include "lcd.h"
 #include "key.h"
 #include "i2c.h"
-#include "menu.h"
+#include "menu/menu.h"
 
 int main(void)
 {

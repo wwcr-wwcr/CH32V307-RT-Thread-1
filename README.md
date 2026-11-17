@@ -57,16 +57,28 @@ CH32V307VCT6（RISC-V 青稞 V4F，144MHz，224KB Flash / 96KB RAM）上的菜�
 | 文件 | 职责 | 能碰 lv_？ |
 | --- | --- | --- |
 | `main.c` | 只做板级初始化然后调 `menu_start()` | 否 |
-| `menu.h` | 对外唯一接口：`menu_start` / `menu_post` / 查询 | — |
-| `menu_core.c` | 页面状态机 + UI 线程主循环 | **是（唯一）** |
-| `task_runner.c` | 任务线程生命周期：创建 / 停止 / 转后台 / 投事件 | 否 |
-| `menu_cmd.c` | MSH 命令，只做「字符串 → `menu_post`」的翻译 | 否 |
+| `menu/menu.h` | 对外唯一接口：`menu_start` / `menu_post` / 查询 | — |
+| `menu/menu_core.c` | 页面状态机 + UI 线程主循环 | **是（唯一）** |
+| `menu/task_runner.c` | 任务线程生命周期：创建 / 停止 / 转后台 / 投事件 | 否 |
+| `menu/menu_cmd.c` | MSH 命令，只做「字符串 → `menu_post`」的翻译 | 否 |
 | `task/task.h` | `app_task_t` 定义，任务回调契约 | — |
 | `task/task_example.c` | 示例任务（麦克风 / 光照 / 数码管 / 音乐 / 节拍器） | 否 |
 | `ui/common.c` | 通用控件封装（页面、卡片、按钮、滑条、曲线） | 是 |
 | `ui/menu_ui.c` | 列表页渲染 | 是 |
 | `ui/task_example_ui.c` | 示例任务的界面 | 是 |
-| `ui/ui_event.h` | UI 线程 → 任务线程的控件事件通道 | — |
+| `ui/ui_event.h` | 触摸事件唯一入口 `ui_post_event(id, value)` | — |
+
+### 触摸只有一个入口
+
+列表页的箭头/卡片和任务页的按钮/滑条，回调里都只有一句 `ui_post_event(id, value)`，不需要知道自己在哪一页：
+
+```
+控件回调 ──ui_post_event──▶ 菜单命令队列(cmd=5) ──▶ UI 线程按页面分发
+                                                     ├ 任务页：转给 on_set(id, value)
+                                                     └ 列表页：1=上一个 2=下一个 3=进入
+```
+
+控件编号由各页面自己定，同一编号在两页含义不同没关系——两页不会同时存在，由 UI 线程按当前页面解释。
 
 ## 3. 线程
 
@@ -128,6 +140,7 @@ rt_err_t menu_post(uint8_t cmd, uint8_t arg);
 | 2 | 光标下一个（仅列表页） | — |
 | 3 | 打开第 N 个任务 | 任务序号，从 0 开始 |
 | 4 | 回到列表页（等同长按 K4） | — |
+| 5 | 触摸控件 | 控件编号；要带 `int32` 数值，请用 `ui_post_event(id, value)` 而不是直接发 5 |
 
 返回值：`RT_EOK` 成功；`-RT_EFULL` 队列满（命令被丢弃，调用方要能感知）；`-RT_EINVAL` 命令号非法；`-RT_ERROR` 菜单还没启动。
 
@@ -156,7 +169,7 @@ const app_task_t task_xxx =
 /* 2. User/task/task.h 末尾加一行 */
 extern const app_task_t task_xxx;
 
-/* 3. User/task_runner.c 的 s_task_list[] 里加一行 */
+/* 3. User/menu/task_runner.c 的 s_task_list[] 里加一行 */
 static const app_task_t *const s_task_list[] =
 {
     &task_example,

@@ -22,6 +22,7 @@
 #include "key.h"
 #include "rtthread.h"
 #include "ui/menu_ui.h"
+#include "ui/ui_event.h"
 #include "lv_port_disp_template.h"
 #include "lv_port_indev_template.h"
 
@@ -38,8 +39,9 @@
  **************************************************************************************************/
 typedef struct
 {
-    uint8_t cmd;                        /* 0~4，含义见 menu.h 里 menu_post 的说明 */
-    uint8_t arg;
+    uint8_t cmd;                        /* 0~5，含义见 menu.h 里 menu_post 的说明 */
+    uint8_t id;                         /* cmd=0 时是 key_id_t，cmd=5 时是控件编号 */
+    int32_t value;                      /* cmd=5 时的控件值，其余命令忽略 */
 } menu_msg_t;
 
 /* 页面状态：只有 ui_entry 这个线程会改，读的地方也都在同一线程里 */
@@ -170,8 +172,8 @@ static void menu_handle(const menu_msg_t *msg)
 {
     switch(msg->cmd)
     {
-        case 0:     /* 模拟按键，arg 是 key_id_t */
-            menu_handle_key((key_id_t)msg->arg);
+        case 0:     /* 模拟按键，id 是 key_id_t */
+            menu_handle_key((key_id_t)msg->id);
             break;
 
         case 1:     /* 光标上一个 */
@@ -188,12 +190,32 @@ static void menu_handle(const menu_msg_t *msg)
             }
             break;
 
-        case 3:     /* 打开第 arg 个任务，越界检查在 task_runner_start 里 */
-            menu_enter(msg->arg);
+        case 3:     /* 打开第 id 个任务，越界检查在 task_runner_start 里 */
+            menu_enter(msg->id);
             break;
 
         case 4:     /* 回到列表页 */
             menu_exit();
+            break;
+
+        case 5:     /* 触摸控件，id 是控件编号，value 是控件值 */
+            if(s_page == 1)
+            {
+                /* 任务页：和实体按键一样，只是转发 */
+                (void)task_runner_post_set(msg->id, msg->value);
+            }
+            else if(msg->id == 1)       /* 列表页 1 = 上一个 */
+            {
+                menu_move(-1);
+            }
+            else if(msg->id == 2)       /* 2 = 下一个 */
+            {
+                menu_move(1);
+            }
+            else if(msg->id == 3)       /* 3 = 进入当前任务 */
+            {
+                menu_enter(s_cursor);
+            }
             break;
 
         default:
@@ -204,11 +226,6 @@ static void menu_handle(const menu_msg_t *msg)
 /**************************************************************************************************
  *                                        UI 线程
  **************************************************************************************************/
-/* 触摸按钮合成按键事件，和真按键走同一条路 */
-static void menu_tap_prev(void)  { (void)menu_post_key(KEY_ID_1); }
-static void menu_tap_next(void)  { (void)menu_post_key(KEY_ID_2); }
-static void menu_tap_enter(void) { (void)menu_post_key(KEY_ID_3); }
-
 /* key 线程回调：只入队，不做任何菜单逻辑 */
 static void menu_on_key(key_id_t key)
 {
@@ -230,10 +247,8 @@ static void ui_entry(void *parameter)
     /* 1.1 触摸输入设备：内部完成 gt911_init */
     lv_port_indev_init();
 
-    /* 1.2 屏幕上的按钮也合成按键事件，复用同一套菜单逻辑 */
-    menu_ui_set_tap_cb(menu_tap_prev, menu_tap_next, menu_tap_enter);
-
-    /* 2. 直接画列表页 */
+    /* 2. 直接画列表页。
+     *    触摸不需要在这里注册回调：界面上的控件自己调 ui_post_event() */
     menu_draw_list();
 
     /* 3. 主循环：收命令 -> 渲染 -> 跑 LVGL */
@@ -292,11 +307,12 @@ void menu_start(void)
     rt_thread_startup(&s_ui_tid);
 }
 
-rt_err_t menu_post(uint8_t cmd, uint8_t arg)
+/* 所有命令的唯一入队口，先校验再发 */
+static rt_err_t menu_post_ex(uint8_t cmd, uint8_t id, int32_t value)
 {
     menu_msg_t msg;
 
-    if(cmd > 4)                         /* 只有 0~4 五个命令 */
+    if(cmd > 5)                         /* 只有 0~5 六个命令 */
     {
         return -RT_EINVAL;
     }
@@ -306,10 +322,22 @@ rt_err_t menu_post(uint8_t cmd, uint8_t arg)
         return -RT_ERROR;               /* 菜单还没启动 */
     }
 
-    msg.cmd = cmd;
-    msg.arg = arg;
+    msg.cmd   = cmd;
+    msg.id    = id;
+    msg.value = value;
 
     return rt_mq_send(s_menu_q, &msg, sizeof(msg));   /* 满时返回 -RT_EFULL */
+}
+
+rt_err_t menu_post(uint8_t cmd, uint8_t arg)
+{
+    return menu_post_ex(cmd, arg, 0);
+}
+
+/* ui_event.h 里的触摸入口：和按键一样只入队，由 UI 线程按页面分发 */
+void ui_post_event(uint8_t id, int32_t value)
+{
+    (void)menu_post_ex(5, id, value);   /* 5 = 触摸控件 */
 }
 
 rt_err_t menu_post_key(key_id_t key)
