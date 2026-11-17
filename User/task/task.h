@@ -12,8 +12,8 @@
  *     所以整机内存占用 = key + menu + 当前这一个任务，不随任务数量增长。
  *
  * 新增界面只需要两步：
- *     1. 照着 task_led.c 写一个 task_xxx.c，填好下面 4 个回调；
- *     2. 到 menu.c 的 g_task_list[] 里加一行。
+ *     1. 照着 task_example.c 写一个 task_xxx.c，填好下面那些回调；
+ *     2. 在 task.h 末尾加一行 extern，再在 task_runner.c 的 s_task_list[] 加一行。
  ******************************************************************************/
 
 #ifndef __TASK_H
@@ -25,6 +25,9 @@ extern "C" {
 
 #include "key.h"
 
+/** 任务线程与菜单 UI 线程共用的时间节拍（ms）。改这里两端一起变 */
+#define APP_TICK_MS     10
+
 /**
  * @brief 一个任务（一个界面 + 一个线程）的描述
  *
@@ -33,7 +36,10 @@ extern "C" {
  * priority   线程优先级，数字越大优先级越低（key=8、menu=9，任务建议 12 左右）
  * setup      线程启动后调用：初始化硬件、画内容区（y >= UI_CONTENT_Y）
  * update     周期刷新（20ms 一次），传 NULL 表示静态界面，线程只等按键不空转
- * on_key     本界面的按键。只会收到 K1/K2/K3；K4 是全局退出键，永远不下发给任务
+ * on_key     本界面的按键，会收到除「K4 长按」以外的全部事件：
+ *               短按 K1~K4 = 1~4，长按 K1~K3 = 5~7，双击 K1~K4 = 9~12
+ *            唯一被菜单截走的是 K4 长按（8），它固定用于返回菜单，永远不会下发。
+ *            也就是说任务里短按 K4（4）是有效的，可以自己用。
  * render     渲染回调，在 UI 线程里被周期调用，里面只调一个 xxx_ui_render 即可。
  *            所有 lv_ 调用只能出现在 render 链路里，逻辑线程绝对不许碰 lv_。
  * teardown   线程退出前调用，释放本任务占用的资源
@@ -53,7 +59,12 @@ typedef struct
     void (*ui_destroy)(void);       /* UI 线程：销毁本任务的页面，归还 LVGL 堆 */
 } app_task_t;
 
-/* 各任务实例（在各自的 task_x.c 里定义） */
+/* 各任务实例（在各自的 task_x.c 里定义）。
+ * 加新任务：这里加一行 extern，再到 task_runner.c 的 s_task_list[] 里加一行地址。 */
 extern const app_task_t task_example;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

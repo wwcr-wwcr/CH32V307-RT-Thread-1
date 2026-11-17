@@ -5,7 +5,6 @@
 
 #include "common.h"
 #include "ui_event.h"
-#include "anime.h"
 #include "rtthread.h"
 #include "rthw.h"
 #include <string.h>
@@ -277,12 +276,6 @@ static void on_button(lv_event_t *e)
     ui_task_event(id, 0);
 }
 
-/* 按钮：按下回弹 */
-static void on_button_press(lv_event_t *e)
-{
-    anime_press(lv_event_get_target(e));
-}
-
 lv_obj_t *ui_slider(lv_obj_t *parent, lv_coord_t x, lv_coord_t y, lv_coord_t w,
                     int32_t min, int32_t max, int32_t value, uint8_t ev_id)
 {
@@ -324,7 +317,6 @@ lv_obj_t *ui_button(lv_obj_t *parent, lv_coord_t x, lv_coord_t y,
     lv_obj_set_style_border_color(btn, UI_C_BORDER, 0);
     lv_obj_add_flag(btn, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(btn, on_button, LV_EVENT_CLICKED, (void *)(uintptr_t)ev_id);
-    lv_obj_add_event_cb(btn, on_button_press, LV_EVENT_PRESSED, NULL);
 
     lbl = ui_text(btn, UI_FONT_BIG, UI_C_VALUE);
     ui_text_set(lbl, text);

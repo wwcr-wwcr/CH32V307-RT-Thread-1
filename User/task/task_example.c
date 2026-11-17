@@ -299,8 +299,11 @@ static void app_event(ev_t ev, int32_t a, int32_t b)
                     beat_set((uint8_t)!app.beat);
                     break;
 
+                /* K4 短按(4)、K1~K3 长按(5~7)、双击(9~12) 都可以在这里自由接管。
+                 * 本示例不用，所以直接忽略。
+                 * 注意：K4 长按(8) 到不了这里，它被菜单固定用作「返回列表」。 */
                 default:
-                    return;                         /* K4 归 menu 管，别在这处理 */
+                    return;
             }
             break;
         }

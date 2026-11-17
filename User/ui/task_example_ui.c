@@ -16,7 +16,6 @@
 
 #include "task_example_ui.h"
 #include "common.h"
-#include "anime.h"
 #include <stdio.h>
 /**************************************************************************************************
  *                                        控件编号
@@ -66,10 +65,6 @@ static void page_build(void)
     s_mic = ui_card(s_page,  12, 64, 96, 88, "MIC",  "--");
     s_lux = ui_card(s_page, 112, 64, 96, 88, "LUX",  "--");
     s_cnt = ui_card(s_page, 212, 64, 96, 88, "7SEG", "9999");
-
-    anime_pop_in(s_mic, 0);
-    anime_pop_in(s_lux, 60);
-    anime_pop_in(s_cnt, 120);
 
     /* 曲线：两条线量程各自独立，MIC 用 ADC 满量程，LUX 用 0~1000 */
     s_plot = ui_plot_create(s_page, 20, 162, 280, 146);
