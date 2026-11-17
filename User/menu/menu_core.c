@@ -61,12 +61,6 @@ static rt_uint8_t       s_ui_stack[UI_STACK_SIZE];
 static void menu_draw_list(void)
 {
     const app_task_t *task = task_runner_at(s_cursor);
-
-    if(task == RT_NULL)
-    {
-        return;                         /* 一个任务都没登记，没什么可画的 */
-    }
-
     menu_ui_render(s_cursor, task_runner_count(), task->name);
 }
 
@@ -134,38 +128,42 @@ static void menu_exit(void)
 /**************************************************************************************************
  *                                        命令分发（只在 UI 线程调用）
  **************************************************************************************************/
-static void menu_handle_key(key_id_t key)
+/**
+ * @brief  按键路由，全工程唯一一份按键语义
+ *
+ * 任务页：只有长按 K4(8) 被菜单截走用于退出，其余（含短按 K4=4）全部下发；
+ * 列表页：K1 上一个、K2 下一个、K3 进入，长按/双击未定义。
+ *
+ * 触摸和命令最终都换算成按键调到这里，所以改按键规则只改这一处。
+ */
+static void menu_key(key_id_t key)
 {
-    /* ---- 列表页 ---- */
-    if(s_page == 0)
-    {
-        if(key == KEY_ID_1)
-        {
-            menu_move(-1);
-        }
-        else if(key == KEY_ID_2)
-        {
-            menu_move(1);
-        }
-        else if(key == KEY_ID_3)
-        {
-            menu_enter(s_cursor);
-        }
-        /* 列表页的长按、双击暂时没有定义，忽略 */
-        return;
-    }
-
     /* ---- 任务页 ---- */
-
-    /* 唯一被菜单截走的键：长按 K4（8）回列表页 */
-    if(key == KEY_ID_LONG_4)
+    if(s_page == 1)
     {
-        menu_exit();
+        if(key == KEY_ID_LONG_4)        /* 长按 K4 = 回列表页 */
+        {
+            menu_exit();
+            return;
+        }
+
+        (void)task_runner_post_key(key);/* 其余全给任务，短按 K4 = 4 也在其中 */
         return;
     }
 
-    /* 其余全部下发给任务，短按 K4 = 4 也在其中 */
-    (void)task_runner_post_key(key);
+    /* ---- 列表页 ---- */
+    if(key == KEY_ID_1)
+    {
+        menu_move(-1);
+    }
+    else if(key == KEY_ID_2)
+    {
+        menu_move(1);
+    }
+    else if(key == KEY_ID_3)
+    {
+        menu_enter(s_cursor);
+    }
 }
 
 static void menu_handle(const menu_msg_t *msg)
@@ -173,17 +171,17 @@ static void menu_handle(const menu_msg_t *msg)
     switch(msg->cmd)
     {
         case 0:     /* 模拟按键，id 是 key_id_t */
-            menu_handle_key((key_id_t)msg->id);
+            menu_key((key_id_t)msg->id);
             break;
 
-        case 1:     /* 光标上一个 */
+        case 1:     /* 光标上一个，只在列表页有意义 */
             if(s_page == 0)
             {
                 menu_move(-1);
             }
             break;
 
-        case 2:     /* 光标下一个 */
+        case 2:     /* 光标下一个，只在列表页有意义 */
             if(s_page == 0)
             {
                 menu_move(1);
@@ -204,17 +202,10 @@ static void menu_handle(const menu_msg_t *msg)
                 /* 任务页：和实体按键一样，只是转发 */
                 (void)task_runner_post_set(msg->id, msg->value);
             }
-            else if(msg->id == 1)       /* 列表页 1 = 上一个 */
+            else if((msg->id >= 1) && (msg->id <= 3))
             {
-                menu_move(-1);
-            }
-            else if(msg->id == 2)       /* 2 = 下一个 */
-            {
-                menu_move(1);
-            }
-            else if(msg->id == 3)       /* 3 = 进入当前任务 */
-            {
-                menu_enter(s_cursor);
+                /* 列表页：控件编号 1/2/3 就是 K1/K2/K3，换算后走同一份按键语义 */
+                menu_key((key_id_t)(msg->id - 1));
             }
             break;
 
@@ -229,7 +220,7 @@ static void menu_handle(const menu_msg_t *msg)
 /* key 线程回调：只入队，不做任何菜单逻辑 */
 static void menu_on_key(key_id_t key)
 {
-    if(menu_post_key(key) != RT_EOK)
+    if(menu_post(0, (uint8_t)key) != RT_EOK)   /* 0 = 模拟按键 */
     {
         s_lost++;
     }
@@ -338,38 +329,6 @@ rt_err_t menu_post(uint8_t cmd, uint8_t arg)
 void ui_post_event(uint8_t id, int32_t value)
 {
     (void)menu_post_ex(5, id, value);   /* 5 = 触摸控件 */
-}
-
-rt_err_t menu_post_key(key_id_t key)
-{
-    if((uint8_t)key >= (uint8_t)KEY_ID_MAX)
-    {
-        return -RT_EINVAL;
-    }
-
-    return menu_post(0, (uint8_t)key);  /* 0 = 模拟按键 */
-}
-
-rt_err_t menu_request_exit(void)
-{
-    return menu_post(4, 0);             /* 4 = 回列表页 */
-}
-
-uint8_t menu_task_count(void)
-{
-    return task_runner_count();
-}
-
-uint8_t menu_task_index(void)
-{
-    return s_cursor;
-}
-
-const char *menu_task_name(uint8_t index)
-{
-    const app_task_t *task = task_runner_at(index);
-
-    return (task != RT_NULL) ? task->name : RT_NULL;
 }
 
 void menu_dump(void)

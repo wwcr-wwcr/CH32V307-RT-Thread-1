@@ -16,6 +16,7 @@
  ******************************************************************************/
 
 #include "menu.h"
+#include "task_runner.h"
 #include "rtthread.h"
 
 #include <stdlib.h>     /* atoi */
@@ -84,10 +85,10 @@ static int menu(int argc, char **argv)
         idx = atoi(argv[2]);
 
         /* 越界在本地就拦掉，不把非法序号投进队列 */
-        if((idx < 0) || (idx >= (int)menu_task_count()))
+        if((idx < 0) || (idx >= (int)task_runner_count()))
         {
             rt_kprintf("menu: 序号 %d 越界，有效范围 0~%d\r\n",
-                       idx, (int)menu_task_count() - 1);
+                       idx, (int)task_runner_count() - 1);
             return -1;
         }
 

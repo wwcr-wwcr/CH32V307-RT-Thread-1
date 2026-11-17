@@ -57,7 +57,7 @@ CH32V307VCT6（RISC-V 青稞 V4F，144MHz，224KB Flash / 96KB RAM）上的菜�
 | 文件 | 职责 | 能碰 lv_？ |
 | --- | --- | --- |
 | `main.c` | 只做板级初始化然后调 `menu_start()` | 否 |
-| `menu/menu.h` | 对外唯一接口：`menu_start` / `menu_post` / 查询 | — |
+| `menu/menu.h` | 对外唯一接口：`menu_start` / `menu_post` / `menu_dump` | — |
 | `menu/menu_core.c` | 页面状态机 + UI 线程主循环 | **是（唯一）** |
 | `menu/task_runner.c` | 任务线程生命周期：创建 / 停止 / 转后台 / 投事件 | 否 |
 | `menu/menu_cmd.c` | MSH 命令，只做「字符串 → `menu_post`」的翻译 | 否 |
@@ -178,6 +178,25 @@ static const app_task_t *const s_task_list[] =
 ```
 
 界面另外写 `User/ui/task_xxx_ui.c` + `task_xxx_ui.h`。
+
+### 任务里怎么用 K4
+
+菜单只截走「长按 K4」，**短按 K4 会正常送到任务的 `on_key()`**，可以自己用：
+
+```c
+static void xxx_on_key(key_id_t key)
+{
+    switch(key)
+    {
+        case KEY_ID_1:     /* K1 短按 */  break;
+        case KEY_ID_4:     /* K4 短按，归任务自己用 */  break;
+        case KEY_ID_LONG_1:/* K1 长按 */  break;
+        case KEY_ID_DBL_1: /* K1 双击 */  break;
+        /* KEY_ID_LONG_4 不会到这里，被菜单拿去退出了 */
+        default: return;
+    }
+}
+```
 
 ### 三条铁律
 

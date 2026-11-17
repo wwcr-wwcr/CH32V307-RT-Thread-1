@@ -216,11 +216,6 @@ const app_task_t *task_runner_current(void)
     return s_task;
 }
 
-rt_bool_t task_runner_running(void)
-{
-    return (s_task_tid != RT_NULL) ? RT_TRUE : RT_FALSE;
-}
-
 int task_runner_start(uint8_t index)
 {
     const app_task_t *task;

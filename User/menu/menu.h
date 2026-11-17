@@ -54,28 +54,9 @@ void menu_start(void);
  */
 rt_err_t menu_post(uint8_t cmd, uint8_t arg);
 
-/**
- * @brief  投递一个按键事件，等价于 menu_post(0, key)
- */
-rt_err_t menu_post_key(key_id_t key);
-
-/**
- * @brief  请求回到列表页，等价于 menu_post(4, 0)
- */
-rt_err_t menu_request_exit(void);
-
 /*********************************************************************
- * 查询（只读，不加锁）
+ * 查询
  *********************************************************************/
-
-/** 任务总数，串口命令用它做越界校验 */
-uint8_t menu_task_count(void);
-
-/** 当前光标所在任务序号 */
-uint8_t menu_task_index(void);
-
-/** 取第 index 个任务的名字，越界返回 NULL */
-const char *menu_task_name(uint8_t index);
 
 /** 打印菜单状态 + 堆占用，MSH 命令 `menu` 用 */
 void menu_dump(void);

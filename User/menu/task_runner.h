@@ -41,9 +41,6 @@ const app_task_t *task_runner_at(uint8_t index);
 /** 当前前台任务，任务页之外返回 NULL */
 const app_task_t *task_runner_current(void);
 
-/** 当前是否有任务线程在跑 */
-rt_bool_t task_runner_running(void);
-
 /*********************************************************************
  * 生命周期（只有菜单线程能调）
  *********************************************************************/
