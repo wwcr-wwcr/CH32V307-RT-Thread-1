@@ -1,10 +1,10 @@
 /******************************************************************************
- * ÎÄ¼şÃû   : uart3.c
- * Ğ¾Æ¬     : CH32V307VCT6
- * ËµÃ÷     : UART3 Çı¶¯£¨PB10 = TX£¬PB11 = RX£©£¬ÖĞ¶Ï½ÓÊÕ + »·ĞÎ»º³å
+ * æ–‡ä»¶å   : uart3.c
+ * èŠ¯ç‰‡     : CH32V307VCT6
+ * è¯´æ˜     : UART3 é©±åŠ¨ï¼ˆPB10 = TXï¼ŒPB11 = RXï¼‰ï¼Œä¸­æ–­æ¥æ”¶ + ç¯å½¢ç¼“å†²
  *
- * ½ÓÊÕ»·ĞÎ»º³åÊÇ±¾ÎÄ¼şË½ÓĞµÄ static ±äÁ¿£¬Íâ²¿¿´²»µ½Ò²²»ĞèÒª³õÊ¼»¯¡£
- * µ÷ÓÃ·½Ö»Òª uart3_init() Ò»´Î£¬ÊÕ·¢¾Í¶¼ÄÜÓÃ¡£
+ * æ¥æ”¶ç¯å½¢ç¼“å†²æ˜¯æœ¬æ–‡ä»¶ç§æœ‰çš„ static å˜é‡ï¼Œå¤–éƒ¨çœ‹ä¸åˆ°ä¹Ÿä¸éœ€è¦åˆå§‹åŒ–ã€‚
+ * è°ƒç”¨æ–¹åªè¦ uart3_init() ä¸€æ¬¡ï¼Œæ”¶å‘å°±éƒ½èƒ½ç”¨ã€‚
  ******************************************************************************/
 
 #include "uart3.h"
@@ -16,13 +16,13 @@
 #include "string.h"
 
 /**************************************************************************************************
- *                                        ½ÓÊÕ»º³å
+ *                                        æ¥æ”¶ç¼“å†²
  **************************************************************************************************/
 static uint8_t            s_rx_buf[UART3_RX_BUFFER_SIZE];
 static struct ring_buffer s_rx_ring;
 
 /**************************************************************************************************
- *                                        ¶ÔÍâº¯Êı
+ *                                        å¯¹å¤–å‡½æ•°
  **************************************************************************************************/
 int uart3_init(uint32_t baud)
 {
@@ -30,19 +30,19 @@ int uart3_init(uint32_t baud)
     USART_InitTypeDef USART_InitStructure = {0};
     NVIC_InitTypeDef  NVIC_InitStructure  = {0};
 
-    /* ÏÈ¹ÒºÃ½ÓÊÕ»º³å£¬ÔÙ¿ªÖĞ¶Ï£ºË³Ğò·´ÁËÖĞ¶ÏÀï»áÍù¿ÕÖ¸ÕëĞ´ */
+    /* å…ˆæŒ‚å¥½æ¥æ”¶ç¼“å†²ï¼Œå†å¼€ä¸­æ–­ï¼šé¡ºåºåäº†ä¸­æ–­é‡Œä¼šå¾€ç©ºæŒ‡é’ˆå†™ */
     rb_param_init(&s_rx_ring, s_rx_buf, (rb_uint16_t)sizeof(s_rx_buf));
 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
 
-    /* TX: PB10 ¸´ÓÃÍÆÍì */
+    /* TX: PB10 å¤ç”¨æ¨æŒ½ */
     GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_10;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_AF_PP;
     GPIO_Init(GPIOB, &GPIO_InitStructure);
 
-    /* RX: PB11 ÉÏÀ­ÊäÈë£¨Ğü¿ÕÊ±±£³Ö¸ßµçÆ½£¬²»»áÊÕµ½ÂÒ×Ö½Ú£© */
+    /* RX: PB11 ä¸Šæ‹‰è¾“å…¥ï¼ˆæ‚¬ç©ºæ—¶ä¿æŒé«˜ç”µå¹³ï¼Œä¸ä¼šæ”¶åˆ°ä¹±å­—èŠ‚ï¼‰ */
     GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_11;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
     GPIO_Init(GPIOB, &GPIO_InitStructure);
@@ -81,14 +81,14 @@ int uart3_send(const void *buf, uint16_t len)
     {
         while(USART_GetFlagStatus(USART3, USART_FLAG_TXE) == RESET)
         {
-            /* µÈ´ı·¢ËÍ¼Ä´æÆ÷¿Õ */
+            /* ç­‰å¾…å‘é€å¯„å­˜å™¨ç©º */
         }
         USART_SendData(USART3, p[i]);
     }
 
     while(USART_GetFlagStatus(USART3, USART_FLAG_TC) == RESET)
     {
-        /* µÈ´ı×îºóÒ»¸ö×Ö½ÚÕæÕı·¢Íê */
+        /* ç­‰å¾…æœ€åä¸€ä¸ªå­—èŠ‚çœŸæ­£å‘å®Œ */
     }
 
     return 0;
@@ -185,7 +185,7 @@ int uart3_printf(const char *fmt, ...)
 }
 
 /**************************************************************************************************
- *                                        ÖĞ¶Ï·şÎñ
+ *                                        ä¸­æ–­æœåŠ¡
  **************************************************************************************************/
 void USART3_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void USART3_IRQHandler(void)
@@ -197,7 +197,7 @@ void USART3_IRQHandler(void)
     {
         uint8_t data = (uint8_t)USART_ReceiveData(USART3);
 
-        /* »º³åÂúÁËÖ±½Ó¶ªÕâ¸ö×Ö½Ú£¬¾ø²»ÔÚÖĞ¶ÏÀïµÈ´ı */
+        /* ç¼“å†²æ»¡äº†ç›´æ¥ä¸¢è¿™ä¸ªå­—èŠ‚ï¼Œç»ä¸åœ¨ä¸­æ–­é‡Œç­‰å¾… */
         (void)rb_write_byte(&s_rx_ring, data);
     }
 

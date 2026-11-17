@@ -26,10 +26,10 @@
 #include <rtdevice.h>
 #include <drv_usart.h>
 
-/* ´®¿ÚÁ÷Ä£Ê½¿ª¹Ø£¨¼û uart_stream.h£©£º1 = uart1 ×¨¹©¶þ½øÖÆÁ÷ */
+/* ä¸²å£æµæ¨¡å¼å¼€å…³ï¼ˆè§ uart_stream.hï¼‰ï¼š1 = uart1 ä¸“ä¾›äºŒè¿›åˆ¶æµ */
 static volatile uint8_t s_uart1_stream = 0;
 
-/* uart_stream.c ÀïµÄÈõ·ûºÅ¶µµ×£ºÃ»Á´½ÓÄÇ¸öÄ£¿éÒ²²»»á±¨´í */
+/* uart_stream.c é‡Œçš„å¼±ç¬¦å·å…œåº•ï¼šæ²¡é“¾æŽ¥é‚£ä¸ªæ¨¡å—ä¹Ÿä¸ä¼šæŠ¥é”™ */
 RT_WEAK void ustream_on_idle(void) { }
 
 void ch32_uart1_stream_set(uint8_t on)
@@ -174,7 +174,7 @@ static int ch32_putc(struct rt_serial_device *serial, char c)
     RT_ASSERT(serial != RT_NULL);
     uart = (struct ch32_uart *)serial->parent.user_data;
 
-    /* Á÷Ä£Ê½£º¿ØÖÆÌ¨Êä³öÖ±½Ó¶ªµô£¬¾ø²»ÄÜ²å½ø»­ÃæÊý¾ÝÀï£¬Ò²¾ø²»ÄÜÔÚÕâÀïËÀµÈ */
+    /* æµæ¨¡å¼ï¼šæŽ§åˆ¶å°è¾“å‡ºç›´æŽ¥ä¸¢æŽ‰ï¼Œç»ä¸èƒ½æ’è¿›ç”»é¢æ•°æ®é‡Œï¼Œä¹Ÿç»ä¸èƒ½åœ¨è¿™é‡Œæ­»ç­‰ */
     if(s_uart1_stream && (uart->USARTx == USART1))
     {
         return 1;
@@ -247,9 +247,9 @@ void USART1_IRQHandler(void)
 
     if(s_uart1_stream)
     {
-        /* Á÷Ä£Ê½£ºDATAR ¹é DMA ¶Á£¬ÕâÀïÖ»¸ºÔðÇå IDLE ±êÖ¾ + °ÑÒÑµ½µÄ×Ö½Ú°á×ß¡£
-         * Çå IDLE ±ØÐë"ÏÈ¶Á STATR ÔÙ¶Á DATAR"£»´Ë¿Ì RXNE Ò»°ãÒÑ¾­ÊÇ 0£¬
-         * ÕâÒ»´Î¶à¶ÁµÄ DATAR ²»»áÇÀ×ß DMA µÄ×Ö½Ú¡£ */
+        /* æµæ¨¡å¼ï¼šDATAR å½’ DMA è¯»ï¼Œè¿™é‡Œåªè´Ÿè´£æ¸… IDLE æ ‡å¿— + æŠŠå·²åˆ°çš„å­—èŠ‚æ¬èµ°ã€‚
+         * æ¸… IDLE å¿…é¡»"å…ˆè¯» STATR å†è¯» DATAR"ï¼›æ­¤åˆ» RXNE ä¸€èˆ¬å·²ç»æ˜¯ 0ï¼Œ
+         * è¿™ä¸€æ¬¡å¤šè¯»çš„ DATAR ä¸ä¼šæŠ¢èµ° DMA çš„å­—èŠ‚ã€‚ */
         if(USART_GetFlagStatus(USART1, USART_FLAG_IDLE) != RESET)
         {
             (void)USART1->STATR;

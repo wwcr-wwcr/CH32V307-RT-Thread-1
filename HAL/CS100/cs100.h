@@ -1,15 +1,15 @@
 /******************************************************************************
- * ÎÄ¼şÃû   : cs100.h
- * Ğ¾Æ¬     : CH32V307VCT6
- * ËµÃ÷     : CS100 ³¬Éù²¨²â¾à£¨PC10=Trig£¬PC11=Echo£¬TIM10 ÊäÈë²¶»ñ£©
+ * æ–‡ä»¶å   : cs100.h
+ * èŠ¯ç‰‡     : CH32V307VCT6
+ * è¯´æ˜     : CS100 è¶…å£°æ³¢æµ‹è·ï¼ˆPC10=Trigï¼ŒPC11=Echoï¼ŒTIM10 è¾“å…¥æ•è·ï¼‰
  *
- * Ê¹ÓÃÊ¾Àı:
+ * ä½¿ç”¨ç¤ºä¾‹:
  *     cs100_init();
- *     float d = cs100_measure();          // Ö±½ÓÄÃµ½¾àÀë£¨cm£©£¬³¬Ê±·µ»Ø -1
+ *     float d = cs100_measure();          // ç›´æ¥æ‹¿åˆ°è·ç¦»ï¼ˆcmï¼‰ï¼Œè¶…æ—¶è¿”å› -1
  *     uint16_t cm;
  *     if(cs100_read_cm(&cm) == 0) { ... }
  *
- * ·µ»ØÖµÔ¼¶¨: 0 = ³É¹¦£¬¸ºÊı = Ê§°Ü£¨-1 ³¬Ê±£¬-2 ²ÎÊı´íÎó£©
+ * è¿”å›å€¼çº¦å®š: 0 = æˆåŠŸï¼Œè´Ÿæ•° = å¤±è´¥ï¼ˆ-1 è¶…æ—¶ï¼Œ-2 å‚æ•°é”™è¯¯ï¼‰
  ******************************************************************************/
 
 #ifndef __CS100_H
@@ -22,73 +22,73 @@ extern "C" {
 #include "ch32v30x_conf.h"
 
 /*********************************************************************
- * Òı½ÅÓë²ÎÊı
+ * å¼•è„šä¸å‚æ•°
  */
 #define CS100_TRIG_GPIO         GPIOC
 #define CS100_TRIG_PIN          GPIO_Pin_10
 #define CS100_ECHO_GPIO         GPIOC
 #define CS100_ECHO_PIN          GPIO_Pin_11
 
-#define CS100_TIM_CLOCK         1000000UL                               /* ¼ÆÊıÆµÂÊ 1MHz£¬1us Ò»¸öÊı */
+#define CS100_TIM_CLOCK         1000000UL                               /* è®¡æ•°é¢‘ç‡ 1MHzï¼Œ1us ä¸€ä¸ªæ•° */
 #define CS100_TIM_PRESCALER     ((SystemCoreClock / CS100_TIM_CLOCK) - 1)
 #define CS100_TIM_PERIOD        0xFFFF
-#define CS100_DEFAULT_TIMEOUT   100                                     /* Ä¬ÈÏµÈ´ı»Ø²¨µÄÊ±¼ä£¨ms£© */
+#define CS100_DEFAULT_TIMEOUT   100                                     /* é»˜è®¤ç­‰å¾…å›æ³¢çš„æ—¶é—´ï¼ˆmsï¼‰ */
 
 /*********************************************************************
- * È«¾Ö±äÁ¿
+ * å…¨å±€å˜é‡
  **************************************************************************************************/
-extern volatile uint32_t timerOverflowNum;      /* ²¶»ñÆÚ¼ä¶¨Ê±Æ÷Òç³ö´ÎÊı */
-extern volatile uint16_t timerCaptureValue;     /* ²¶»ñµ½µÄ¼ÆÊıÖµ */
-extern volatile uint8_t  timerCaptureStartFlag; /* ÒÑ²¶»ñÉÏÉıÑØ */
-extern volatile uint8_t  timerCaptureOverFlag;  /* ²¶»ñÍê³É */
+extern volatile uint32_t timerOverflowNum;      /* æ•è·æœŸé—´å®šæ—¶å™¨æº¢å‡ºæ¬¡æ•° */
+extern volatile uint16_t timerCaptureValue;     /* æ•è·åˆ°çš„è®¡æ•°å€¼ */
+extern volatile uint8_t  timerCaptureStartFlag; /* å·²æ•è·ä¸Šå‡æ²¿ */
+extern volatile uint8_t  timerCaptureOverFlag;  /* æ•è·å®Œæˆ */
 
 /*********************************************************************
- * º¯Êı
+ * å‡½æ•°
  */
 
 /**
- * @brief  ³õÊ¼»¯³¬Éù²¨Ä£¿é£¨¶¨Ê±Æ÷ 10 ÊäÈë²¶»ñ£©
- * @return 0 ³É¹¦
+ * @brief  åˆå§‹åŒ–è¶…å£°æ³¢æ¨¡å—ï¼ˆå®šæ—¶å™¨ 10 è¾“å…¥æ•è·ï¼‰
+ * @return 0 æˆåŠŸ
  */
 int cs100_init(void);
 
 /**
- * @brief  ²âÒ»´Î¾àÀë£¨×èÈû£©
- * @param  timeout_ms  µÈ´ı»Ø²¨µÄ×î³¤Ê±¼ä£¨ºÁÃë£©
- * @return ¾àÀë£¨cm£©£¬³¬Ê±»òÃ»ÓĞ»Ø²¨·µ»Ø -1
+ * @brief  æµ‹ä¸€æ¬¡è·ç¦»ï¼ˆé˜»å¡ï¼‰
+ * @param  timeout_ms  ç­‰å¾…å›æ³¢çš„æœ€é•¿æ—¶é—´ï¼ˆæ¯«ç§’ï¼‰
+ * @return è·ç¦»ï¼ˆcmï¼‰ï¼Œè¶…æ—¶æˆ–æ²¡æœ‰å›æ³¢è¿”å› -1
  */
 float cs100_measure_timeout(uint32_t timeout_ms);
 
 /**
- * @brief  ²âÒ»´Î¾àÀë£¨×èÈû£¬Ê¹ÓÃÄ¬ÈÏ³¬Ê±£©
- * @return ¾àÀë£¨cm£©£¬Ê§°Ü·µ»Ø -1
+ * @brief  æµ‹ä¸€æ¬¡è·ç¦»ï¼ˆé˜»å¡ï¼Œä½¿ç”¨é»˜è®¤è¶…æ—¶ï¼‰
+ * @return è·ç¦»ï¼ˆcmï¼‰ï¼Œå¤±è´¥è¿”å› -1
  */
 float cs100_measure(void);
 
 /**
- * @brief  ²âÒ»´Î¾àÀë£¬½á¹ûÈ¡Õû
- * @param  cm  Êä³ö¾àÀë£¨ÀåÃ×£©
- * @return 0 ³É¹¦£¬-1 ³¬Ê±
+ * @brief  æµ‹ä¸€æ¬¡è·ç¦»ï¼Œç»“æœå–æ•´
+ * @param  cm  è¾“å‡ºè·ç¦»ï¼ˆå˜ç±³ï¼‰
+ * @return 0 æˆåŠŸï¼Œ-1 è¶…æ—¶
  */
 int cs100_read_cm(uint16_t *cm);
 
 /**
- * @brief  °Ñ²¶»ñÖµ»»Ëã³É¸ßµçÆ½Ê±¼ä
- * @param  count     ²¶»ñ¼Ä´æÆ÷Öµ
- * @param  overflow  Òç³ö´ÎÊı
- * @return Ê±¼ä£¨us£©
+ * @brief  æŠŠæ•è·å€¼æ¢ç®—æˆé«˜ç”µå¹³æ—¶é—´
+ * @param  count     æ•è·å¯„å­˜å™¨å€¼
+ * @param  overflow  æº¢å‡ºæ¬¡æ•°
+ * @return æ—¶é—´ï¼ˆusï¼‰
  */
 uint32_t cs100_capture_time_calculate(uint16_t count, uint32_t overflow);
 
 /**
- * @brief  ¸ßµçÆ½Ê±¼ä»»Ëã¾àÀë
- * @param  time_us  »Ø²¨¸ßµçÆ½Ê±¼ä£¨us£©
- * @return ¾àÀë£¨cm£©
+ * @brief  é«˜ç”µå¹³æ—¶é—´æ¢ç®—è·ç¦»
+ * @param  time_us  å›æ³¢é«˜ç”µå¹³æ—¶é—´ï¼ˆusï¼‰
+ * @return è·ç¦»ï¼ˆcmï¼‰
  */
 float cs100_distance_calculate(uint32_t time_us);
 
 /*********************************************************************
- * ¾É½Ó¿Ú¼æÈİ
+ * æ—§æ¥å£å…¼å®¹
  */
 #define CS100_CONTROL_TIM_CLOCK         CS100_TIM_CLOCK
 #define CS100_CONTROL_TIM_PRESCALER     CS100_TIM_PRESCALER
@@ -96,13 +96,13 @@ float cs100_distance_calculate(uint32_t time_us);
 #define cs100_capture_init(arr, psc)    cs100_init()
 
 /*********************************************************************
- * ±¦±¦º¯Êı£¨Ò»ĞĞ¸ã¶¨£¬²»ÓÃ¹Üµ×²ãÏ¸½Ú£©
+ * å®å®å‡½æ•°ï¼ˆä¸€è¡Œæå®šï¼Œä¸ç”¨ç®¡åº•å±‚ç»†èŠ‚ï¼‰
  *********************************************************************/
 
 /**
- * @brief  Ö±½Ó²â¾àÀë£¬Ö»ÒªÕûÊıÀåÃ×£¨×îÊ¡ÊÂ£©
- * @return ¾àÀë£¨cm£©£¬²â²»µ½·µ»Ø 0xFFFF
- * @note   Àı£ºuint16_t d = cs100_distance_cm();
+ * @brief  ç›´æ¥æµ‹è·ç¦»ï¼Œåªè¦æ•´æ•°å˜ç±³ï¼ˆæœ€çœäº‹ï¼‰
+ * @return è·ç¦»ï¼ˆcmï¼‰ï¼Œæµ‹ä¸åˆ°è¿”å› 0xFFFF
+ * @note   ä¾‹ï¼šuint16_t d = cs100_distance_cm();
  */
 uint16_t cs100_distance_cm(void);
 

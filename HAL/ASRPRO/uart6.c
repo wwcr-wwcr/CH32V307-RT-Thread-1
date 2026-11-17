@@ -1,7 +1,7 @@
 /******************************************************************************
- * ÎÄ¼şÃû   : uart6.c
- * Ğ¾Æ¬     : CH32V307VCT6
- * ËµÃ÷     : UART6 Çı¶¯£¨ÖĞ¶Ï½ÓÊÕ + »·ĞÎ»º³å£©
+ * æ–‡ä»¶å   : uart6.c
+ * èŠ¯ç‰‡     : CH32V307VCT6
+ * è¯´æ˜     : UART6 é©±åŠ¨ï¼ˆä¸­æ–­æ¥æ”¶ + ç¯å½¢ç¼“å†²ï¼‰
  ******************************************************************************/
 
 #include "uart6.h"
@@ -13,10 +13,10 @@
 #include "string.h"
 
 /**************************************************************************************************
- *                                        ¶ÔÍâº¯Êı
+ *                                        å¯¹å¤–å‡½æ•°
  **************************************************************************************************/
 /**
- * @brief  ³õÊ¼»¯ UART6
+ * @brief  åˆå§‹åŒ– UART6
  */
 int uart6_init(uint32_t baud)
 {
@@ -27,13 +27,13 @@ int uart6_init(uint32_t baud)
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART6, ENABLE);
 
-    /* TX: PC0 ¸´ÓÃÍÆÍì */
+    /* TX: PC0 å¤ç”¨æ¨æŒ½ */
     GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_0;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_AF_PP;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
 
-    /* RX: PC1 ¸¡¿ÕÊäÈë */
+    /* RX: PC1 æµ®ç©ºè¾“å…¥ */
     GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_1;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
@@ -60,7 +60,7 @@ int uart6_init(uint32_t baud)
 }
 
 /**
- * @brief  ·¢ËÍÊı¾İ
+ * @brief  å‘é€æ•°æ®
  */
 int uart6_send(const void *buf, uint16_t len)
 {
@@ -75,21 +75,21 @@ int uart6_send(const void *buf, uint16_t len)
     {
         while(USART_GetFlagStatus(UART6, USART_FLAG_TXE) == RESET)
         {
-            /* µÈ´ı·¢ËÍ¼Ä´æÆ÷¿Õ */
+            /* ç­‰å¾…å‘é€å¯„å­˜å™¨ç©º */
         }
         USART_SendData(UART6, p[i]);
     }
 
     while(USART_GetFlagStatus(UART6, USART_FLAG_TC) == RESET)
     {
-        /* µÈ´ı·¢ËÍÍê³É */
+        /* ç­‰å¾…å‘é€å®Œæˆ */
     }
 
     return 0;
 }
 
 /**
- * @brief  ·¢ËÍÒ»¸ö×Ö½Ú
+ * @brief  å‘é€ä¸€ä¸ªå­—èŠ‚
  */
 int uart6_putc(uint8_t ch)
 {
@@ -97,7 +97,7 @@ int uart6_putc(uint8_t ch)
 }
 
 /**
- * @brief  ¿É¶Á×Ö½ÚÊı
+ * @brief  å¯è¯»å­—èŠ‚æ•°
  */
 uint16_t uart6_available(void)
 {
@@ -110,7 +110,7 @@ uint16_t uart6_available(void)
 }
 
 /**
- * @brief  ¶ÁÈ¡Ö¸¶¨³¤¶È
+ * @brief  è¯»å–æŒ‡å®šé•¿åº¦
  */
 int uart6_read(uint8_t *buf, uint16_t len, uint32_t timeout_ms)
 {
@@ -149,7 +149,7 @@ int uart6_read(uint8_t *buf, uint16_t len, uint32_t timeout_ms)
 }
 
 /**
- * @brief  Çå¿Õ½ÓÊÕ»º³å
+ * @brief  æ¸…ç©ºæ¥æ”¶ç¼“å†²
  */
 void uart6_flush(void)
 {
@@ -162,7 +162,7 @@ void uart6_flush(void)
 }
 
 /**************************************************************************************************
- *                                        ÖĞ¶Ï·şÎñ
+ *                                        ä¸­æ–­æœåŠ¡
  **************************************************************************************************/
 #ifndef RT_USING_UART6
 void UART6_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
@@ -187,7 +187,7 @@ void UART6_IRQHandler(void)
 #endif /* RT_USING_UART6 */
 
 /**
- * @brief  ·¢×Ö·û´®
+ * @brief  å‘å­—ç¬¦ä¸²
  */
 int uart6_puts(const char *str)
 {
@@ -200,7 +200,7 @@ int uart6_puts(const char *str)
 }
 
 /**
- * @brief  ¸ñÊ½»¯·¢ËÍ
+ * @brief  æ ¼å¼åŒ–å‘é€
  */
 int uart6_printf(const char *fmt, ...)
 {

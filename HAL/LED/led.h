@@ -1,15 +1,15 @@
 /******************************************************************************
- * ÎÄ¼şÃû   : led.h
- * Ğ¾Æ¬     : CH32V307VCT6
- * ËµÃ÷     : °åÔØ RGB LED Çı¶¯£¨PB3=ºì PB4=ÂÌ PB5=À¶£¬µÍµçÆ½µãÁÁ£©
+ * æ–‡ä»¶å   : led.h
+ * èŠ¯ç‰‡     : CH32V307VCT6
+ * è¯´æ˜     : æ¿è½½ RGB LED é©±åŠ¨ï¼ˆPB3=çº¢ PB4=ç»¿ PB5=è“ï¼Œä½ç”µå¹³ç‚¹äº®ï¼‰
  *
- * Ê¹ÓÃÊ¾Àı:
- *     led_init();                        // ³õÊ¼»¯£¬Ä¬ÈÏÈ«Ãğ
- *     led_color_set(LED_COLOR_RED);      // ÁÁºìµÆ
- *     led_brightness_set(LED_ALL, 30);   // È«²¿ 30% ÁÁ¶È£¨ĞèÏÈµ÷ÓÃ led_pwm_init£©
+ * ä½¿ç”¨ç¤ºä¾‹:
+ *     led_init();                        // åˆå§‹åŒ–ï¼Œé»˜è®¤å…¨ç­
+ *     led_color_set(LED_COLOR_RED);      // äº®çº¢ç¯
+ *     led_brightness_set(LED_ALL, 30);   // å…¨éƒ¨ 30% äº®åº¦ï¼ˆéœ€å…ˆè°ƒç”¨ led_pwm_initï¼‰
  *     led_blink(LED_COLOR_BLUE, 3, 200, 200);
  *
- * ·µ»ØÖµÔ¼¶¨: 0 = ³É¹¦£¬¸ºÊı = Ê§°Ü£¨-1 ²ÎÊı´íÎó£¬-2 ³¬Ê±/ÎŞÏìÓ¦£©
+ * è¿”å›å€¼çº¦å®š: 0 = æˆåŠŸï¼Œè´Ÿæ•° = å¤±è´¥ï¼ˆ-1 å‚æ•°é”™è¯¯ï¼Œ-2 è¶…æ—¶/æ— å“åº”ï¼‰
  ******************************************************************************/
 
 #ifndef __LED_H
@@ -22,7 +22,7 @@ extern "C" {
 #include "ch32v30x_conf.h"
 
 /*********************************************************************
- * Òı½Å¶¨Òå
+ * å¼•è„šå®šä¹‰
  */
 #define LED_RED_GPIO        GPIOB
 #define LED_GREEN_GPIO      GPIOB
@@ -31,7 +31,7 @@ extern "C" {
 #define LED_GREEN_PIN       GPIO_Pin_4
 #define LED_BLUE_PIN        GPIO_Pin_5
 
-/* µ×²ãµçÆ½²Ù×÷£¨µÍµçÆ½µãÁÁ£¬ÈçĞèÖ±½Ó²Ù×÷Òı½Å¿ÉÓÃ£© */
+/* åº•å±‚ç”µå¹³æ“ä½œï¼ˆä½ç”µå¹³ç‚¹äº®ï¼Œå¦‚éœ€ç›´æ¥æ“ä½œå¼•è„šå¯ç”¨ï¼‰ */
 #define LED_RED_ON()        (GPIO_ResetBits(LED_RED_GPIO, LED_RED_PIN))
 #define LED_RED_OFF()       (GPIO_SetBits(LED_RED_GPIO, LED_RED_PIN))
 #define LED_GREEN_ON()      (GPIO_ResetBits(LED_GREEN_GPIO, LED_GREEN_PIN))
@@ -41,8 +41,8 @@ extern "C" {
 #define LED_ALL_OFF()       (GPIO_SetBits(GPIOB, LED_RED_PIN | LED_GREEN_PIN | LED_BLUE_PIN))
 
 /*********************************************************************
- * PWM ²ÎÊı£¨²»ĞèÒªÊÖ¶¯¼ÆËã£¬led_pwm_init() ÄÚ²¿Ê¹ÓÃÏÂÃæµÄÖµ£©
- * ¶¨Ê±Æ÷¼ÆÊıÆµÂÊ 1MHz£¬PWM ÆµÂÊ 1kHz£¬ÁÁ¶È·Ö±æÂÊ 1000 ¼¶
+ * PWM å‚æ•°ï¼ˆä¸éœ€è¦æ‰‹åŠ¨è®¡ç®—ï¼Œled_pwm_init() å†…éƒ¨ä½¿ç”¨ä¸‹é¢çš„å€¼ï¼‰
+ * å®šæ—¶å™¨è®¡æ•°é¢‘ç‡ 1MHzï¼ŒPWM é¢‘ç‡ 1kHzï¼Œäº®åº¦åˆ†è¾¨ç‡ 1000 çº§
  */
 #define LED_PWM_TIM_CLOCK       1000000UL
 #define LED_PWM_FREQ_HZ         1000UL
@@ -50,94 +50,94 @@ extern "C" {
 #define LED_PWM_PERIOD          ((LED_PWM_TIM_CLOCK / LED_PWM_FREQ_HZ) - 1)
 
 /*********************************************************************
- * ÀàĞÍ¶¨Òå
+ * ç±»å‹å®šä¹‰
  */
 typedef enum
 {
-    LED_COLOR_BLACK = 0,    /* È«Ãğ */
-    LED_COLOR_WHITE,        /* °× */
-    LED_COLOR_RED,          /* ºì */
-    LED_COLOR_GREEN,        /* ÂÌ */
-    LED_COLOR_BLUE,         /* À¶ */
-    LED_COLOR_YELLOW,       /* »Æ */
-    LED_COLOR_MAGENTA,      /* Æ·ºì */
-    LED_COLOR_CYAN          /* Çà */
+    LED_COLOR_BLACK = 0,    /* å…¨ç­ */
+    LED_COLOR_WHITE,        /* ç™½ */
+    LED_COLOR_RED,          /* çº¢ */
+    LED_COLOR_GREEN,        /* ç»¿ */
+    LED_COLOR_BLUE,         /* è“ */
+    LED_COLOR_YELLOW,       /* é»„ */
+    LED_COLOR_MAGENTA,      /* å“çº¢ */
+    LED_COLOR_CYAN          /* é’ */
 } led_color_t;
 
 typedef enum
 {
-    LED_ALL = 0,            /* ÈıÉ«Ò»Æğ²Ù×÷ */
+    LED_ALL = 0,            /* ä¸‰è‰²ä¸€èµ·æ“ä½œ */
     LED_RED = 1,            /* PB3 */
     LED_GREEN = 2,          /* PB4 */
     LED_BLUE = 3            /* PB5 */
 } led_id_t;
 
 /*********************************************************************
- * È«¾Ö±äÁ¿
+ * å…¨å±€å˜é‡
  */
-extern uint8_t led_level;   /* µ±Ç°ÁÁ¶È°Ù·Ö±È 0~100 */
+extern uint8_t led_level;   /* å½“å‰äº®åº¦ç™¾åˆ†æ¯” 0~100 */
 
 /*********************************************************************
- * º¯Êı
+ * å‡½æ•°
  */
 
 /**
- * @brief  GPIO ·½Ê½³õÊ¼»¯ LED£¨ÉÏµçÄ¬ÈÏÈ«Ãğ£©
- * @return 0 ³É¹¦
+ * @brief  GPIO æ–¹å¼åˆå§‹åŒ– LEDï¼ˆä¸Šç”µé»˜è®¤å…¨ç­ï¼‰
+ * @return 0 æˆåŠŸ
  */
 int led_init(void);
 
 /**
- * @brief  µãÁÁÖ¸¶¨ LED£¨±£³ÖÆäËü LED ×´Ì¬²»±ä£©
+ * @brief  ç‚¹äº®æŒ‡å®š LEDï¼ˆä¿æŒå…¶å®ƒ LED çŠ¶æ€ä¸å˜ï¼‰
  * @param  id  LED_ALL / LED_RED / LED_GREEN / LED_BLUE
  */
 void led_on(led_id_t id);
 
 /**
- * @brief  Ï¨ÃğÖ¸¶¨ LED
+ * @brief  ç†„ç­æŒ‡å®š LED
  * @param  id  LED_ALL / LED_RED / LED_GREEN / LED_BLUE
  */
 void led_off(led_id_t id);
 
 /**
- * @brief  ·­×ªÖ¸¶¨ LED ×´Ì¬
+ * @brief  ç¿»è½¬æŒ‡å®š LED çŠ¶æ€
  * @param  id  LED_ALL / LED_RED / LED_GREEN / LED_BLUE
  */
 void led_toggle(led_id_t id);
 
 /**
- * @brief  °´ÑÕÉ«ÏÔÊ¾£¨³£ÓÃ×éºÏÉ«£©
- * @param  color  ÑÕÉ«Ã¶¾Ù
+ * @brief  æŒ‰é¢œè‰²æ˜¾ç¤ºï¼ˆå¸¸ç”¨ç»„åˆè‰²ï¼‰
+ * @param  color  é¢œè‰²æšä¸¾
  */
 void led_color_set(led_color_t color);
 
 /**
- * @brief  PWM ·½Ê½³õÊ¼»¯£¨ÁÁ¶È¿Éµ÷£©£¬Ä¬ÈÏ 1kHz / 100 ¼¶
- * @return 0 ³É¹¦
- * @note   µ÷ÓÃºó GPIO ÓÉ¶¨Ê±Æ÷ 10 µÄ CH1~CH3 ½Ó¹Ü£¬²»ÄÜÔÙÊ¹ÓÃ led_on/led_off
+ * @brief  PWM æ–¹å¼åˆå§‹åŒ–ï¼ˆäº®åº¦å¯è°ƒï¼‰ï¼Œé»˜è®¤ 1kHz / 100 çº§
+ * @return 0 æˆåŠŸ
+ * @note   è°ƒç”¨å GPIO ç”±å®šæ—¶å™¨ 10 çš„ CH1~CH3 æ¥ç®¡ï¼Œä¸èƒ½å†ä½¿ç”¨ led_on/led_off
  */
 int led_pwm_init(void);
 
 /**
- * @brief  ÉèÖÃÁÁ¶È
+ * @brief  è®¾ç½®äº®åº¦
  * @param  id       LED_ALL / LED_RED / LED_GREEN / LED_BLUE
- * @param  percent  0~100£¬´óÓÚ 100 °´ 100 ´¦Àí
- * @return 0 ³É¹¦£¬-1 ²ÎÊı´íÎó£¬-2 Î´µ÷ÓÃ led_pwm_init
+ * @param  percent  0~100ï¼Œå¤§äº 100 æŒ‰ 100 å¤„ç†
+ * @return 0 æˆåŠŸï¼Œ-1 å‚æ•°é”™è¯¯ï¼Œ-2 æœªè°ƒç”¨ led_pwm_init
  */
 int led_brightness_set(led_id_t id, uint8_t percent);
 
 /**
- * @brief  °´ÑÕÉ«ÉÁË¸
- * @param  color    ÑÕÉ«
- * @param  times    ÉÁË¸´ÎÊı
- * @param  on_ms    ÁÁµÄÊ±¼ä£¨ºÁÃë£©
- * @param  off_ms   ÃğµÄÊ±¼ä£¨ºÁÃë£©
- * @note   ×èÈûº¯Êı£¬½áÊøÒÔºó LED ±£³ÖÏ¨Ãğ
+ * @brief  æŒ‰é¢œè‰²é—ªçƒ
+ * @param  color    é¢œè‰²
+ * @param  times    é—ªçƒæ¬¡æ•°
+ * @param  on_ms    äº®çš„æ—¶é—´ï¼ˆæ¯«ç§’ï¼‰
+ * @param  off_ms   ç­çš„æ—¶é—´ï¼ˆæ¯«ç§’ï¼‰
+ * @note   é˜»å¡å‡½æ•°ï¼Œç»“æŸä»¥å LED ä¿æŒç†„ç­
  */
 void led_blink(led_color_t color, uint8_t times, uint16_t on_ms, uint16_t off_ms);
 
 /*********************************************************************
- * ¾É½Ó¿Ú¼æÈİ£¨ĞÂ´úÂëÇëÊ¹ÓÃÉÏÃæµÄº¯Êı£©
+ * æ—§æ¥å£å…¼å®¹ï¼ˆæ–°ä»£ç è¯·ä½¿ç”¨ä¸Šé¢çš„å‡½æ•°ï¼‰
  */
 #define RED_ON()                LED_RED_ON()
 #define RED_OFF()               LED_RED_OFF()

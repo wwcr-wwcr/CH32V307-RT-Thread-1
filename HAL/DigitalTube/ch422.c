@@ -1,30 +1,30 @@
 /******************************************************************************
- * ÎÄ¼şÃû   : ch422.c
- * Ğ¾Æ¬     : CH32V307VCT6
- * ËµÃ÷     : CH422G ÊıÂë¹ÜÇı¶¯£¨Èí¼ş I2C£©
+ * æ–‡ä»¶å   : ch422.c
+ * èŠ¯ç‰‡     : CH32V307VCT6
+ * è¯´æ˜     : CH422G æ•°ç ç®¡é©±åŠ¨ï¼ˆè½¯ä»¶ I2Cï¼‰
  *
- * ËµÃ÷: ÉÏ²ãÖ»¹Üµ÷ ch422_show_number() / ch422_show_digit()£¬
- *       ¶ÎÂë¡¢Î»Ñ¡¡¢ÃüÁîÈ«²¿ÔÚÕâÀïÆ´ºÃ¡£
+ * è¯´æ˜: ä¸Šå±‚åªç®¡è°ƒ ch422_show_number() / ch422_show_digit()ï¼Œ
+ *       æ®µç ã€ä½é€‰ã€å‘½ä»¤å…¨éƒ¨åœ¨è¿™é‡Œæ‹¼å¥½ã€‚
  ******************************************************************************/
 
 #include "ch422.h"
 #include "rthw.h"
 
 /**************************************************************************************************
- *                                        ²ÎÊı
+ *                                        å‚æ•°
  **************************************************************************************************/
 #define CH422_HALF_DELAY_US     2
 
 /**************************************************************************************************
- *                                        È«¾Ö±äÁ¿
+ *                                        å…¨å±€å˜é‡
  **************************************************************************************************/
-/*                       0     1     2     3     4     5     6     7     8     9   Ğ¡Êıµã  ¿Õ°× */
+/*                       0     1     2     3     4     5     6     7     8     9   å°æ•°ç‚¹  ç©ºç™½ */
 const uint8_t bcdDecode[12] = {0xD7, 0x14, 0xCD, 0x5D, 0x1E, 0x5B, 0xDB, 0x15, 0xDF, 0x5F, 0x20, 0x00};
 
 /**************************************************************************************************
- *                                        ÄÚ²¿º¯Êı
+ *                                        å†…éƒ¨å‡½æ•°
  **************************************************************************************************/
-/* ÆğÊ¼Ìõ¼ş */
+/* èµ·å§‹æ¡ä»¶ */
 static void ch422_i2c_start(void)
 {
     ch422_sda_output();
@@ -36,7 +36,7 @@ static void ch422_i2c_start(void)
     CH422_SCL_0();
 }
 
-/* Í£Ö¹Ìõ¼ş */
+/* åœæ­¢æ¡ä»¶ */
 static void ch422_i2c_stop(void)
 {
     ch422_sda_output();
@@ -48,7 +48,7 @@ static void ch422_i2c_stop(void)
     rt_hw_us_delay(CH422_HALF_DELAY_US);
 }
 
-/* ·¢ËÍÒ»¸ö×Ö½Ú */
+/* å‘é€ä¸€ä¸ªå­—èŠ‚ */
 static void ch422_i2c_send_byte(uint8_t data)
 {
     ch422_sda_output();
@@ -70,7 +70,7 @@ static void ch422_i2c_send_byte(uint8_t data)
         CH422_SCL_0();
     }
 
-    /* µÚ 9 ¸öÊ±ÖÓ£ºCH422 ²»ĞèÒªÅĞ ACK£¬¸øÒ»¸öÊ±ÖÓ¼´¿É */
+    /* ç¬¬ 9 ä¸ªæ—¶é’Ÿï¼šCH422 ä¸éœ€è¦åˆ¤ ACKï¼Œç»™ä¸€ä¸ªæ—¶é’Ÿå³å¯ */
     CH422_SDA_1();
     rt_hw_us_delay(CH422_HALF_DELAY_US);
     CH422_SCL_1();
@@ -78,7 +78,7 @@ static void ch422_i2c_send_byte(uint8_t data)
     CH422_SCL_0();
 }
 
-/* ½ÓÊÕÒ»¸ö×Ö½Ú */
+/* æ¥æ”¶ä¸€ä¸ªå­—èŠ‚ */
 static uint8_t ch422_i2c_read_byte(void)
 {
     uint8_t data = 0;
@@ -109,13 +109,13 @@ static uint8_t ch422_i2c_read_byte(void)
     return data;
 }
 
-/* Î»ºÅ×ªÎ»Ñ¡µØÖ·£º0->0x70 1->0x72 2->0x74 3->0x76 */
+/* ä½å·è½¬ä½é€‰åœ°å€ï¼š0->0x70 1->0x72 2->0x74 3->0x76 */
 static uint8_t ch422_pos_addr(uint8_t pos)
 {
     return (uint8_t)(CH422_ADDRESS_1 + (pos * 2));
 }
 
-/* ¶ÎÂë°´¹²Òõ/¹²Ñô×ö×ª»» */
+/* æ®µç æŒ‰å…±é˜´/å…±é˜³åšè½¬æ¢ */
 static uint8_t ch422_seg_convert(uint8_t seg)
 {
 #if (CH422_SEG_INVERT)
@@ -126,10 +126,10 @@ static uint8_t ch422_seg_convert(uint8_t seg)
 }
 
 /**************************************************************************************************
- *                                        ±¦±¦º¯Êı
+ *                                        å®å®å‡½æ•°
  **************************************************************************************************/
 /**
- * @brief  ³õÊ¼»¯ÊıÂë¹Ü
+ * @brief  åˆå§‹åŒ–æ•°ç ç®¡
  */
 int ch422_init(void)
 {
@@ -137,7 +137,7 @@ int ch422_init(void)
 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOE, ENABLE);
 
-    /* SCL ÓÉÖ÷»úµ¥ÏòÇı¶¯£¬ÓÃÍÆÍìÊä³ö£»SDA ĞèÒª¶Á»Ø£¬ÓÃ¿ªÂ©Êä³ö */
+    /* SCL ç”±ä¸»æœºå•å‘é©±åŠ¨ï¼Œç”¨æ¨æŒ½è¾“å‡ºï¼›SDA éœ€è¦è¯»å›ï¼Œç”¨å¼€æ¼è¾“å‡º */
     GPIO_InitStructure.GPIO_Pin   = CH422_SCL_PIN;
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -149,18 +149,18 @@ int ch422_init(void)
     CH422_SCL_1();
     CH422_SDA_1();
 
-    /* ÏµÍ³ÅäÖÃ£ºIO Êä³ö + ¶¯Ì¬×Ô¶¯É¨Ãè */
+    /* ç³»ç»Ÿé…ç½®ï¼šIO è¾“å‡º + åŠ¨æ€è‡ªåŠ¨æ‰«æ */
     if(ch422_write_bytes(CH422_SYS_CMD, CH422_SYS_DEFAULT) != 0)
     {
         return -1;
     }
 
-    /* ÉÏµçÏÈÇåÆÁ£¬±ÜÃâÏÔÊ¾Ëæ»ú¶Î */
+    /* ä¸Šç”µå…ˆæ¸…å±ï¼Œé¿å…æ˜¾ç¤ºéšæœºæ®µ */
     return ch422_clear();
 }
 
 /**
- * @brief  ÏÔÊ¾Ò»¸ö 0~9999 µÄÕûÊı
+ * @brief  æ˜¾ç¤ºä¸€ä¸ª 0~9999 çš„æ•´æ•°
  */
 int ch422_show_number(uint16_t value)
 {
@@ -176,14 +176,14 @@ int ch422_show_number(uint16_t value)
 
     if(value > max_value)
     {
-        value = max_value;          /* ³¬³öÎ»ÊıÖ±½Ó±¥ºÍ£¬±ÜÃâÏÔÊ¾ÂÒÂë */
+        value = max_value;          /* è¶…å‡ºä½æ•°ç›´æ¥é¥±å’Œï¼Œé¿å…æ˜¾ç¤ºä¹±ç  */
     }
 
     for(pos = 0; pos < CH422_DIGIT_COUNT; pos++)
     {
         uint8_t digit = (uint8_t)((value / divisor) % 10);
 
-        /* Ç°µ¼Áã²»ÏÔÊ¾£¬µ«×îºóÒ»Î»µÄ 0 ÒªÏÔÊ¾ */
+        /* å‰å¯¼é›¶ä¸æ˜¾ç¤ºï¼Œä½†æœ€åä¸€ä½çš„ 0 è¦æ˜¾ç¤º */
         if((value / divisor) == 0 && pos < (CH422_DIGIT_COUNT - 1))
         {
             (void)ch422_show_seg(pos, CH422_SEG_BLANK);
@@ -200,7 +200,7 @@ int ch422_show_number(uint16_t value)
 }
 
 /**
- * @brief  ÏÔÊ¾´øĞ¡ÊıµãµÄÊı
+ * @brief  æ˜¾ç¤ºå¸¦å°æ•°ç‚¹çš„æ•°
  */
 int ch422_show_number_dp(uint16_t value, uint8_t dp_index)
 {
@@ -231,7 +231,7 @@ int ch422_show_number_dp(uint16_t value, uint8_t dp_index)
 
         if((value / divisor) == 0 && pos < (CH422_DIGIT_COUNT - 1))
         {
-            /* Ç°µ¼ÁãÏ¨Ãğ£¬µ«Ğ¡ÊıµãËùÔÚµÄÄÇÒ»Î»Òª±£ÁôĞ¡Êıµã */
+            /* å‰å¯¼é›¶ç†„ç­ï¼Œä½†å°æ•°ç‚¹æ‰€åœ¨çš„é‚£ä¸€ä½è¦ä¿ç•™å°æ•°ç‚¹ */
             (void)ch422_show_seg(pos, dp_on ? CH422_SEG_DP : CH422_SEG_BLANK);
         }
         else
@@ -246,11 +246,11 @@ int ch422_show_number_dp(uint16_t value, uint8_t dp_index)
 }
 
 /**
- * @brief  ÏÔÊ¾´ø·ûºÅÕûÊı
+ * @brief  æ˜¾ç¤ºå¸¦ç¬¦å·æ•´æ•°
  */
 int ch422_show_int(int16_t value)
 {
-    uint16_t divisor = 100;         /* ¸ººÅÕ¼Ò»Î»£¬Ê£ÏÂ 3 Î»Êı×Ö */
+    uint16_t divisor = 100;         /* è´Ÿå·å ä¸€ä½ï¼Œå‰©ä¸‹ 3 ä½æ•°å­— */
     int32_t  mag;
     uint8_t  pos;
 
@@ -262,7 +262,7 @@ int ch422_show_int(int16_t value)
     mag = -(int32_t)value;
     if(mag > 999)
     {
-        mag = 999;                  /* ¸ººÅÕ¼Ò»Î»£¬×î¶àÏÔÊ¾ -999 */
+        mag = 999;                  /* è´Ÿå·å ä¸€ä½ï¼Œæœ€å¤šæ˜¾ç¤º -999 */
     }
 
     (void)ch422_show_char(0, '-');
@@ -287,7 +287,7 @@ int ch422_show_int(int16_t value)
 }
 
 /**
- * @brief  Ä³Ò»Î»ÏÔÊ¾Êı×Ö
+ * @brief  æŸä¸€ä½æ˜¾ç¤ºæ•°å­—
  */
 int ch422_show_digit(uint8_t pos, uint8_t digit)
 {
@@ -300,7 +300,7 @@ int ch422_show_digit(uint8_t pos, uint8_t digit)
 }
 
 /**
- * @brief  Ä³Ò»Î»ÏÔÊ¾Êı×Ö + Ğ¡Êıµã
+ * @brief  æŸä¸€ä½æ˜¾ç¤ºæ•°å­— + å°æ•°ç‚¹
  */
 int ch422_show_digit_dp(uint8_t pos, uint8_t digit, uint8_t dp_on)
 {
@@ -321,7 +321,7 @@ int ch422_show_digit_dp(uint8_t pos, uint8_t digit, uint8_t dp_on)
 }
 
 /**
- * @brief  Ä³Ò»Î»ÏÔÊ¾×Ö·û
+ * @brief  æŸä¸€ä½æ˜¾ç¤ºå­—ç¬¦
  */
 int ch422_show_char(uint8_t pos, char ch)
 {
@@ -348,7 +348,7 @@ int ch422_show_char(uint8_t pos, char ch)
 }
 
 /**
- * @brief  ËÄÎ»È«Ãğ
+ * @brief  å››ä½å…¨ç­
  */
 int ch422_clear(void)
 {
@@ -364,7 +364,7 @@ int ch422_clear(void)
 }
 
 /**
- * @brief  ËÄÎ»È«ÁÁ£¨×Ô¼ì£©
+ * @brief  å››ä½å…¨äº®ï¼ˆè‡ªæ£€ï¼‰
  */
 int ch422_all_on(void)
 {
@@ -380,10 +380,10 @@ int ch422_all_on(void)
 }
 
 /**************************************************************************************************
- *                                        ¸ß¼¶½Ó¿Ú
+ *                                        é«˜çº§æ¥å£
  **************************************************************************************************/
 /**
- * @brief  Ä³Ò»Î»Ö±½ÓĞ´¶ÎÂë
+ * @brief  æŸä¸€ä½ç›´æ¥å†™æ®µç 
  */
 int ch422_show_seg(uint8_t pos, uint8_t seg)
 {
@@ -396,20 +396,20 @@ int ch422_show_seg(uint8_t pos, uint8_t seg)
 }
 
 /**
- * @brief  Êı×Ö×ª¶ÎÂë
+ * @brief  æ•°å­—è½¬æ®µç 
  */
 uint8_t ch422_bcd(uint8_t digit)
 {
     if(digit > 9)
     {
-        return bcdDecode[11];       /* ¿Õ°× */
+        return bcdDecode[11];       /* ç©ºç™½ */
     }
 
     return bcdDecode[digit];
 }
 
 /**
- * @brief  Í¨ÓÃÁ½×Ö½ÚĞ´
+ * @brief  é€šç”¨ä¸¤å­—èŠ‚å†™
  */
 int ch422_write_bytes(uint8_t cmd, uint8_t data)
 {
@@ -422,7 +422,7 @@ int ch422_write_bytes(uint8_t cmd, uint8_t data)
 }
 
 /**
- * @brief  ÏµÍ³ÅäÖÃ
+ * @brief  ç³»ç»Ÿé…ç½®
  */
 int ch422_system_config(uint8_t config)
 {
@@ -430,7 +430,7 @@ int ch422_system_config(uint8_t config)
 }
 
 /**
- * @brief  ¶Á IO ×´Ì¬
+ * @brief  è¯» IO çŠ¶æ€
  */
 uint8_t ch422_read_io(void)
 {
@@ -445,7 +445,7 @@ uint8_t ch422_read_io(void)
 }
 
 /**
- * @brief  SDA ÇĞÎªÊäÈë
+ * @brief  SDA åˆ‡ä¸ºè¾“å…¥
  */
 void ch422_sda_input(void)
 {
@@ -458,7 +458,7 @@ void ch422_sda_input(void)
 }
 
 /**
- * @brief  SDA ÇĞÎª¿ªÂ©Êä³ö
+ * @brief  SDA åˆ‡ä¸ºå¼€æ¼è¾“å‡º
  */
 void ch422_sda_output(void)
 {

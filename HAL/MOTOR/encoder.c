@@ -1,24 +1,24 @@
 /******************************************************************************
- * ÎÄ¼şÃû   : encoder.c
- * Ğ¾Æ¬     : CH32V307VCT6
- * ËµÃ÷     : ÔöÁ¿Ê½±àÂëÆ÷ÊäÈë£¬TIM3 ±àÂëÆ÷Ä£Ê½£¬Èí¼şÀÛ¼Ó¼ÆÊı
+ * æ–‡ä»¶å   : encoder.c
+ * èŠ¯ç‰‡     : CH32V307VCT6
+ * è¯´æ˜     : å¢é‡å¼ç¼–ç å™¨è¾“å…¥ï¼ŒTIM3 ç¼–ç å™¨æ¨¡å¼ï¼Œè½¯ä»¶ç´¯åŠ è®¡æ•°
  ******************************************************************************/
 
 #include "encoder.h"
 #include "rtthread.h"
 
 /**************************************************************************************************
- *                                        ÄÚ²¿±äÁ¿
+ *                                        å†…éƒ¨å˜é‡
  **************************************************************************************************/
-static int16_t  s_last_count = 0;       /* ÉÏÒ»´Î¶ÁÈ¡µÄÓ²¼ş¼ÆÊı */
-static int32_t  s_total      = 0;       /* Èí¼şÀÛ¼Æ¼ÆÊı */
+static int16_t  s_last_count = 0;       /* ä¸Šä¸€æ¬¡è¯»å–çš„ç¡¬ä»¶è®¡æ•° */
+static int32_t  s_total      = 0;       /* è½¯ä»¶ç´¯è®¡è®¡æ•° */
 static uint8_t  s_inited     = 0;
 
 /**************************************************************************************************
- *                                        ¶ÔÍâº¯Êı
+ *                                        å¯¹å¤–å‡½æ•°
  **************************************************************************************************/
 /**
- * @brief  ³õÊ¼»¯±àÂëÆ÷½Ó¿Ú
+ * @brief  åˆå§‹åŒ–ç¼–ç å™¨æ¥å£
  */
 int encoder_init(void)
 {
@@ -35,7 +35,7 @@ int encoder_init(void)
     GPIO_Init(ENCODER_PORT, &GPIO_InitStructure);
 
     TIM_TimeBaseStructure.TIM_Prescaler     = 0;
-    TIM_TimeBaseStructure.TIM_Period        = 0xFFFF;          /* 16 Î»ÂúÁ¿³Ì¼ÆÊı */
+    TIM_TimeBaseStructure.TIM_Period        = 0xFFFF;          /* 16 ä½æ»¡é‡ç¨‹è®¡æ•° */
     TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
     TIM_TimeBaseStructure.TIM_CounterMode   = TIM_CounterMode_Up;
     TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
@@ -54,7 +54,7 @@ int encoder_init(void)
     TIM_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI;
     TIM_ICInit(TIM3, &TIM_ICInitStructure);
 
-    /* TI1 + TI2 Ë«±ßÑØ¼ÆÊı£¬Ò»È¦ 4 ¸ö¼ÆÊı */
+    /* TI1 + TI2 åŒè¾¹æ²¿è®¡æ•°ï¼Œä¸€åœˆ 4 ä¸ªè®¡æ•° */
     TIM_EncoderInterfaceConfig(TIM3, TIM_EncoderMode_TI12, TIM_ICPolarity_Rising, TIM_ICPolarity_Rising);
 
     TIM_SetCounter(TIM3, 0);
@@ -68,7 +68,7 @@ int encoder_init(void)
 }
 
 /**
- * @brief  ¶ÁÈ¡ÔöÁ¿¼ÆÊı
+ * @brief  è¯»å–å¢é‡è®¡æ•°
  */
 int16_t encoder_count_get(void)
 {
@@ -81,7 +81,7 @@ int16_t encoder_count_get(void)
     }
 
     now   = (int16_t)TIM_GetCounter(TIM3);
-    delta = (int16_t)(now - s_last_count);       /* 16 Î»»ØÈÆÒ²ÄÜµÃµ½ÕıÈ·ÔöÁ¿ */
+    delta = (int16_t)(now - s_last_count);       /* 16 ä½å›ç»•ä¹Ÿèƒ½å¾—åˆ°æ­£ç¡®å¢é‡ */
     s_last_count = now;
     s_total     += delta;
 
@@ -89,16 +89,16 @@ int16_t encoder_count_get(void)
 }
 
 /**
- * @brief  ¶ÁÈ¡ÀÛ¼Æ¼ÆÊı
+ * @brief  è¯»å–ç´¯è®¡è®¡æ•°
  */
 int32_t encoder_total_get(void)
 {
-    (void)encoder_count_get();                   /* ÏÈ°ÑÓ²¼ş¼ÆÊı²¢ÈëÀÛ¼ÆÖµ */
+    (void)encoder_count_get();                   /* å…ˆæŠŠç¡¬ä»¶è®¡æ•°å¹¶å…¥ç´¯è®¡å€¼ */
     return s_total;
 }
 
 /**
- * @brief  ÇåÁãÀÛ¼Æ¼ÆÊı
+ * @brief  æ¸…é›¶ç´¯è®¡è®¡æ•°
  */
 void encoder_reset(void)
 {
@@ -108,7 +108,7 @@ void encoder_reset(void)
 }
 
 /**
- * @brief  ²âÁ¿×ªËÙ£¨×èÈû²ÉÑù£©
+ * @brief  æµ‹é‡è½¬é€Ÿï¼ˆé˜»å¡é‡‡æ ·ï¼‰
  */
 float encoder_speed_rpm(uint32_t period_ms)
 {
@@ -119,7 +119,7 @@ float encoder_speed_rpm(uint32_t period_ms)
         return 0.0f;
     }
 
-    (void)encoder_count_get();                   /* ¶ªµôÉÏ´Î²ĞÁôµÄÔöÁ¿ */
+    (void)encoder_count_get();                   /* ä¸¢æ‰ä¸Šæ¬¡æ®‹ç•™çš„å¢é‡ */
     rt_thread_mdelay(period_ms);
     count = encoder_count_get();
 
@@ -127,7 +127,7 @@ float encoder_speed_rpm(uint32_t period_ms)
 }
 
 /**
- * @brief  Ö±½Ó²â×ªËÙ
+ * @brief  ç›´æ¥æµ‹è½¬é€Ÿ
  */
 float encoder_rpm(void)
 {
@@ -135,7 +135,7 @@ float encoder_rpm(void)
 }
 
 /**
- * @brief  ×ªÏò
+ * @brief  è½¬å‘
  */
 int8_t encoder_direction(void)
 {

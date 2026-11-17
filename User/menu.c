@@ -8,77 +8,77 @@
 #include "ui/ui_event.h"
 #include "ui/boot_ui.h"
 
-#define PAGE_MENU     0      //²Ëµ¥×´Ì¬»úµÄ×´Ì¬,ÕâÊÇÔÚÁÐ±í
-#define PAGE_TASK     1      //ÕâÊÇµ½taskÁË
+#define PAGE_MENU     0      //èœå•çŠ¶æ€æœºçš„çŠ¶æ€,è¿™æ˜¯åœ¨åˆ—è¡¨
+#define PAGE_TASK     1      //è¿™æ˜¯åˆ°taskäº†
 
-#define TASK_EVT_KEY        0       //Í¶¸øÈÎÎñÏß³ÌµÄÏûÏ¢ ×ª·¢K1-K3
-#define TASK_EVT_QUIT       1       //ÍË³öÈÎÎñ
-#define TASK_EVT_SET        2       /* ´¥Ãþ¿Ø¼þÊÂ¼þ£¨»¬Ìõ/°´Å¥£© */
-#define TASK_EVT_BG         3       /* ×ªºóÌ¨£ºÏß³Ì±ðÍË£¬Ö»ÅÜ update ²»ÔÙÊÕÊÂ¼þ */
+#define TASK_EVT_KEY        0       //æŠ•ç»™ä»»åŠ¡çº¿ç¨‹çš„æ¶ˆæ¯ è½¬å‘K1-K3
+#define TASK_EVT_QUIT       1       //é€€å‡ºä»»åŠ¡
+#define TASK_EVT_SET        2       /* è§¦æ‘¸æŽ§ä»¶äº‹ä»¶ï¼ˆæ»‘æ¡/æŒ‰é’®ï¼‰ */
+#define TASK_EVT_BG         3       /* è½¬åŽå°ï¼šçº¿ç¨‹åˆ«é€€ï¼Œåªè·‘ update ä¸å†æ”¶äº‹ä»¶ */
 
-#define UI_STACK_SIZE       6144        //UI Ïß³ÌµÄÕ»´óÐ¡
-#define UI_PRIORITY         9           //UI Ïß³ÌÓÅÏÈ¼¶
-#define UI_TICK             10          //Ïß³ÌÊ±¼äÆ¬
-#define UI_PERIOD_MS        10          //Õû¸öÓ¦ÓÃµÄÍ³Ò»½ÚÅÄ
-#define MENU_MQ_DEPTH       8           //²Ëµ¥°´¼ü¶ÓÁÐÊýÁ¿
-#define TASK_MQ_DEPTH       4           //ÈÎÎñÊÂ¼þ¶ÓÁÐÊýÁ¿
-#define MENU_TASK_NUM       (sizeof(g_task_list) / sizeof(g_task_list[0]))      //taskµÄ×ÜÊý
-typedef struct                      //ÏûÏ¢¶ÓÁÐ
+#define UI_STACK_SIZE       6144        //UI çº¿ç¨‹çš„æ ˆå¤§å°
+#define UI_PRIORITY         9           //UI çº¿ç¨‹ä¼˜å…ˆçº§
+#define UI_TICK             10          //çº¿ç¨‹æ—¶é—´ç‰‡
+#define UI_PERIOD_MS        10          //æ•´ä¸ªåº”ç”¨çš„ç»Ÿä¸€èŠ‚æ‹
+#define MENU_MQ_DEPTH       8           //èœå•æŒ‰é”®é˜Ÿåˆ—æ•°é‡
+#define TASK_MQ_DEPTH       4           //ä»»åŠ¡äº‹ä»¶é˜Ÿåˆ—æ•°é‡
+#define MENU_TASK_NUM       (sizeof(g_task_list) / sizeof(g_task_list[0]))      //taskçš„æ€»æ•°
+typedef struct                      //æ¶ˆæ¯é˜Ÿåˆ—
 {
     uint8_t type;   
     uint8_t key;
-    uint8_t id;                     /* TASK_EVT_SET ÓÃ£º¿Ø¼þ±àºÅ */
-    int32_t value;                  /* TASK_EVT_SET ÓÃ£º¿Ø¼þÊýÖµ */
+    uint8_t id;                     /* TASK_EVT_SET ç”¨ï¼šæŽ§ä»¶ç¼–å· */
+    int32_t value;                  /* TASK_EVT_SET ç”¨ï¼šæŽ§ä»¶æ•°å€¼ */
 } task_evt_t;
 
-/* ---- ²Ëµ¥×ÔÉíµÄ×´Ì¬ ---- */
+/* ---- èœå•è‡ªèº«çš„çŠ¶æ€ ---- */
 
-static uint8_t   s_page     = PAGE_MENU;           //²Ëµ¥ÔÚÄÄ¸öÒ³
-static uint8_t   s_cursor       = 0;                         //Ñ¡ÔñÒ³µÄ¹â±êÎ»ÖÃ
-/* ---- µ±Ç°ÈÎÎñ + ÈÎÎñÏß³Ì ---- */
+static uint8_t   s_page     = PAGE_MENU;           //èœå•åœ¨å“ªä¸ªé¡µ
+static uint8_t   s_cursor       = 0;                         //é€‰æ‹©é¡µçš„å…‰æ ‡ä½ç½®
+/* ---- å½“å‰ä»»åŠ¡ + ä»»åŠ¡çº¿ç¨‹ ---- */
 
-static const app_task_t *s_task = RT_NULL;      /* µ±Ç°ÈÎÎñ£¨UI Ïß³ÌÓÃËüäÖÈ¾£© */
+static const app_task_t *s_task = RT_NULL;      /* å½“å‰ä»»åŠ¡ï¼ˆUI çº¿ç¨‹ç”¨å®ƒæ¸²æŸ“ï¼‰ */
 
-/* ---- ²Ëµ¥ + ÈÎÎñµ÷¶ÈÓÃµ½µÄÄÚºË¶ÔÏó£¨È«²¿Ö»ÔÚ menu.c ÄÚ²¿¿É¼û£© ---- */
+/* ---- èœå• + ä»»åŠ¡è°ƒåº¦ç”¨åˆ°çš„å†…æ ¸å¯¹è±¡ï¼ˆå…¨éƒ¨åªåœ¨ menu.c å†…éƒ¨å¯è§ï¼‰ ---- */
 
-/* °´¼ü¶ÓÁÐ£ºkey Ïß³Ì£¨ÖÐ¶ÏÏû¶¶ºó£©ºÍÆÁÉÏÈý¸ö°´Å¥¶¼ÍùÕâÀïÍ¶ key_id_t£¬ */
+/* æŒ‰é”®é˜Ÿåˆ—ï¼škey çº¿ç¨‹ï¼ˆä¸­æ–­æ¶ˆæŠ–åŽï¼‰å’Œå±ä¸Šä¸‰ä¸ªæŒ‰é’®éƒ½å¾€è¿™é‡ŒæŠ• key_id_tï¼Œ */
 static rt_mq_t   s_key_q   = RT_NULL;
-/* ÈÎÎñÊÂ¼þ¶ÓÁÐ£ºUI Ïß³ÌÍùÕâÀïÍ¶ task_evt_t£¨K1~K3 °´¼ü / ÍË³ö / ´¥Ãþ¿Ø¼þ id+ÊýÖµ£©£¬*/
+/* ä»»åŠ¡äº‹ä»¶é˜Ÿåˆ—ï¼šUI çº¿ç¨‹å¾€è¿™é‡ŒæŠ• task_evt_tï¼ˆK1~K3 æŒ‰é”® / é€€å‡º / è§¦æ‘¸æŽ§ä»¶ id+æ•°å€¼ï¼‰ï¼Œ*/
 static rt_mq_t   s_cmd_q   = RT_NULL;
-/* ÈÎÎñÏß³ÌÍË³öÎÕÊÖ*/
+/* ä»»åŠ¡çº¿ç¨‹é€€å‡ºæ¡æ‰‹*/
 static struct rt_semaphore s_exit_sem;
-/* µ±Ç°ÈÎÎñÏß³Ì¾ä±ú*/
+/* å½“å‰ä»»åŠ¡çº¿ç¨‹å¥æŸ„*/
 static rt_thread_t s_task_tid = RT_NULL;
-/* ¶ªÊÂ¼þ¼ÆÊý*/
+/* ä¸¢äº‹ä»¶è®¡æ•°*/
 static uint32_t  s_lost      = 0;
 
-/* UI Ïß³ÌµÄ¿ØÖÆ¿é + ¾²Ì¬Õ»£ºmenu_start() Àï rt_thread_init Ò»´ÎÐÔ½¨ºÃ£¬²»Õ¼¶Ñ¡£
- * ÕâÊÇÈ«ÏµÍ³Î¨Ò»µ÷ÓÃ lv_* / ²Ù×÷ lcd µÄÏß³Ì£¬Õ» 6144 ×Ö½Ú¡£ */
+/* UI çº¿ç¨‹çš„æŽ§åˆ¶å— + é™æ€æ ˆï¼šmenu_start() é‡Œ rt_thread_init ä¸€æ¬¡æ€§å»ºå¥½ï¼Œä¸å å †ã€‚
+ * è¿™æ˜¯å…¨ç³»ç»Ÿå”¯ä¸€è°ƒç”¨ lv_* / æ“ä½œ lcd çš„çº¿ç¨‹ï¼Œæ ˆ 6144 å­—èŠ‚ã€‚ */
 static struct rt_thread s_ui_tid;
 static rt_uint8_t       s_ui_stack[UI_STACK_SIZE];
-static const app_task_t *const g_task_list[] =      //================ÔÚÕâÀïÌí¼Ótask
+static const app_task_t *const g_task_list[] =      //================åœ¨è¿™é‡Œæ·»åŠ task
 {
     &task_example,
 };
 
-/* ÍË³öÒ³ÃæºóÈÔÈ»ÔÚºóÌ¨¼ÌÐøÅÜµÄÈÎÎñ£¨ÍË³öÊ±Ö»×ªºóÌ¨£¬²»Ïú»ÙÏß³Ì£©¡£
+/* é€€å‡ºé¡µé¢åŽä»ç„¶åœ¨åŽå°ç»§ç»­è·‘çš„ä»»åŠ¡ï¼ˆé€€å‡ºæ—¶åªè½¬åŽå°ï¼Œä¸é”€æ¯çº¿ç¨‹ï¼‰ã€‚
  *
- * ÍùÕâÀï¼ÓÖ®Ç°ÏÈÏëÇå³þÁ½¼þÊÂ£º
- *   1. ËüÕ¼²»Õ¼¶ÀÕ¼ÍâÉè£¿ADC Í»·¢ / DAC / TIM ÕâÀà£¬ºóÌ¨¼ÌÐøÅÜ»áºÍ
- *      ºóÃæµÄÈÎÎñÇÀ×ÊÔ´£¬±ðÍùÀï·Å£¨mic_fft ºÍ uart_plot ¶¼³Ô ADC£©¡£
- *   2. ËüÓÐÃ»ÓÐ update£¿Ã»ÓÐ update µÄÏß³Ì×ªºóÌ¨ºóÎÞÊÂ¿É×ö£¬°×Õ¼Ò»·ÝÕ»¡£
+ * å¾€è¿™é‡ŒåŠ ä¹‹å‰å…ˆæƒ³æ¸…æ¥šä¸¤ä»¶äº‹ï¼š
+ *   1. å®ƒå ä¸å ç‹¬å å¤–è®¾ï¼ŸADC çªå‘ / DAC / TIM è¿™ç±»ï¼ŒåŽå°ç»§ç»­è·‘ä¼šå’Œ
+ *      åŽé¢çš„ä»»åŠ¡æŠ¢èµ„æºï¼Œåˆ«å¾€é‡Œæ”¾ï¼ˆmic_fft å’Œ uart_plot éƒ½åƒ ADCï¼‰ã€‚
+ *   2. å®ƒæœ‰æ²¡æœ‰ updateï¼Ÿæ²¡æœ‰ update çš„çº¿ç¨‹è½¬åŽå°åŽæ— äº‹å¯åšï¼Œç™½å ä¸€ä»½æ ˆã€‚
  *
- * µäÐÍÊÊºÏ£ºµ¹¼ÆÊ±¡¢ÄÖÖÓ¡¢Ê±ÖÓ¡¢ºóÌ¨°´¼ü¼ÆÊý¡£
+ * å…¸åž‹é€‚åˆï¼šå€’è®¡æ—¶ã€é—¹é’Ÿã€æ—¶é’Ÿã€åŽå°æŒ‰é”®è®¡æ•°ã€‚
  */
 static const app_task_t *const g_bg_list[] =
 {
-    /* ÔÚÕâÀï¼Ó£¬ÀýÈç£º  &task_countdown,  */
-    RT_NULL,                    /* Õ¼Î»£¬±£Ö¤Êý×é·Ç¿Õ */
+    /* åœ¨è¿™é‡ŒåŠ ï¼Œä¾‹å¦‚ï¼š  &task_countdown,  */
+    RT_NULL,                    /* å ä½ï¼Œä¿è¯æ•°ç»„éžç©º */
 };
 
 #define BG_LIST_NUM     (sizeof(g_bg_list) / sizeof(g_bg_list[0]))
 
-/* Õâ¸öÈÎÎñÍË³öÒ³Ãæºó£¬Òª²»ÒªÁô×ÅÏß³Ì¼ÌÐøÅÜ */
+/* è¿™ä¸ªä»»åŠ¡é€€å‡ºé¡µé¢åŽï¼Œè¦ä¸è¦ç•™ç€çº¿ç¨‹ç»§ç»­è·‘ */
 static uint8_t task_keep_alive(const app_task_t *task)
 {
     uint32_t i;
@@ -102,25 +102,25 @@ static uint8_t task_keep_alive(const app_task_t *task)
 static void task_start(uint8_t index);
 static void task_stop(void);
 static void menu_post_key(key_id_t key);
-static void menu_tap_prev(void)  { menu_post_key(KEY_ID_1); }           //´¥Ãþ°´¼üºÏ³É
+static void menu_tap_prev(void)  { menu_post_key(KEY_ID_1); }           //è§¦æ‘¸æŒ‰é”®åˆæˆ
 static void menu_tap_next(void)  { menu_post_key(KEY_ID_2); }
 static void menu_tap_enter(void) { menu_post_key(KEY_ID_3); }
-/* ÁÐ±íÒ³£º½»¸ø menu_ui Ò»¸öº¯Êý¸ã¶¨ */
+/* åˆ—è¡¨é¡µï¼šäº¤ç»™ menu_ui ä¸€ä¸ªå‡½æ•°æžå®š */
 static void menu_draw_list(void)
 {
-    menu_ui_render(s_cursor, (uint8_t)MENU_TASK_NUM, g_task_list[s_cursor]->name);          //äÖÈ¾
+    menu_ui_render(s_cursor, (uint8_t)MENU_TASK_NUM, g_task_list[s_cursor]->name);          //æ¸²æŸ“
 }
 
-/* K3£º½øÈëÈÎÎñ */
-static void menu_enter(uint8_t index)       //´«ÈëÔÚÄÄ¸ötaskÉÏ
+/* K3ï¼šè¿›å…¥ä»»åŠ¡ */
+static void menu_enter(uint8_t index)       //ä¼ å…¥åœ¨å“ªä¸ªtaskä¸Š
 {
-    s_task = g_task_list[index];        //s_task¾ÍÊÇ½øÈëÏßtaskµÄÃû×Ö
-    s_page    = PAGE_TASK;              //°Ñ×´Ì¬Éè¶¨³É½øtask
+    s_task = g_task_list[index];        //s_taskå°±æ˜¯è¿›å…¥çº¿taskçš„åå­—
+    s_page    = PAGE_TASK;              //æŠŠçŠ¶æ€è®¾å®šæˆè¿›task
 
-    task_start(index);              /* Âß¼­Ïß³ÌÆðÀ´£¬½çÃæÓÉ render »Øµ÷»­ */
+    task_start(index);              /* é€»è¾‘çº¿ç¨‹èµ·æ¥ï¼Œç•Œé¢ç”± render å›žè°ƒç”» */
 }
 
-/* K4£ºÍË³öÈÎÎñ */
+/* K4ï¼šé€€å‡ºä»»åŠ¡ */
 static void menu_exit(void)
 {
     const app_task_t *task = s_task;
@@ -129,8 +129,8 @@ static void menu_exit(void)
     {
         task_evt_t ev;
 
-        /* ³£×¤ÈÎÎñ£º²»Ïú»ÙÏß³Ì£¬Ö»·¢Ò»Ìõ"×ªºóÌ¨"£¬Ïß³ÌÊÕµ½ºó×Ô¼ºÇÐÄ£Ê½¼ÌÐøÅÜ¡£
-         * ÕâÀï²»Çå s_task_tid ¡ª¡ª ¾ä±ú¶ªÁËÎÞËùÎ½£¬ÕâÖÖÈÎÎñ¹Øµôºó²»»áÔÙ´ò¿ª¡£ */
+        /* å¸¸é©»ä»»åŠ¡ï¼šä¸é”€æ¯çº¿ç¨‹ï¼Œåªå‘ä¸€æ¡"è½¬åŽå°"ï¼Œçº¿ç¨‹æ”¶åˆ°åŽè‡ªå·±åˆ‡æ¨¡å¼ç»§ç»­è·‘ã€‚
+         * è¿™é‡Œä¸æ¸… s_task_tid â€”â€” å¥æŸ„ä¸¢äº†æ— æ‰€è°“ï¼Œè¿™ç§ä»»åŠ¡å…³æŽ‰åŽä¸ä¼šå†æ‰“å¼€ã€‚ */
         ev.type  = TASK_EVT_BG;
         ev.key   = 0;
         ev.id    = 0;
@@ -142,26 +142,26 @@ static void menu_exit(void)
         task_stop();
     }
 
-    s_page    = PAGE_MENU;              //°Ñ×´Ì¬Éè¶¨³ÉÔÚmenu²Ëµ¥ÉÏ
-    s_task = RT_NULL;                   //s_task¸³0
+    s_page    = PAGE_MENU;              //æŠŠçŠ¶æ€è®¾å®šæˆåœ¨menuèœå•ä¸Š
+    s_task = RT_NULL;                   //s_taskèµ‹0
 
     menu_draw_list();
     if((task != RT_NULL) && (task->ui_destroy != RT_NULL))
     {
         task->ui_destroy();
-    }                                   //°ÑlvglÉ¾³ý
+    }                                   //æŠŠlvglåˆ é™¤
 }
 
-static void menu_dispatch_key(key_id_t key)             //Èç¹ûkey°´ÏÂ
+static void menu_dispatch_key(key_id_t key)             //å¦‚æžœkeyæŒ‰ä¸‹
 {
-    task_evt_t ev;                      //½«taskÏûÏ¢¶ÓÁÐÉè¶¨Îªev
+    task_evt_t ev;                      //å°†taskæ¶ˆæ¯é˜Ÿåˆ—è®¾å®šä¸ºev
 
-    if(s_page == PAGE_MENU)             //Èç¹ûÔÚmenu½çÃæÉÏ
+    if(s_page == PAGE_MENU)             //å¦‚æžœåœ¨menuç•Œé¢ä¸Š
     {
         if(key == KEY_ID_1)
         {
             s_cursor = (uint8_t)((s_cursor + MENU_TASK_NUM - 1) % MENU_TASK_NUM);
-            menu_draw_list();           //äÖÈ¾Õâ¸ötask
+            menu_draw_list();           //æ¸²æŸ“è¿™ä¸ªtask
         }
         else if(key == KEY_ID_2)
         {
@@ -170,12 +170,12 @@ static void menu_dispatch_key(key_id_t key)             //Èç¹ûkey°´ÏÂ
         }
         else if(key == KEY_ID_3)
         {
-            menu_enter(s_cursor);       //½øÈëÕâ¸ötask
+            menu_enter(s_cursor);       //è¿›å…¥è¿™ä¸ªtask
         }
         return;
     }
 
-    /* ÈÎÎñÒ³£ºK4 ÊÇÓ²ÍË³ö£¬¾ø²»×ª·¢ */
+    /* ä»»åŠ¡é¡µï¼šK4 æ˜¯ç¡¬é€€å‡ºï¼Œç»ä¸è½¬å‘ */
     if(key == KEY_ID_4)
     {
         menu_exit();
@@ -203,77 +203,77 @@ static void ui_entry(void *parameter)
 
     (void)parameter;
 
-    /* 1. LVGL ³õÊ¼»¯£¨ÄÚ²¿»á lcd_init + lv_init + ×¢²áÏÔÊ¾Çý¶¯£© */
+    /* 1. LVGL åˆå§‹åŒ–ï¼ˆå†…éƒ¨ä¼š lcd_init + lv_init + æ³¨å†Œæ˜¾ç¤ºé©±åŠ¨ï¼‰ */
     lv_port_disp_init();
 
-    /* 1.1 ´¥ÃþÊäÈëÉè±¸£¨GT911£¬ÄÚ²¿»á gt911_init£© */
+    /* 1.1 è§¦æ‘¸è¾“å…¥è®¾å¤‡ï¼ˆGT911ï¼Œå†…éƒ¨ä¼š gt911_initï¼‰ */
     lv_port_indev_init();
 
-    /* 1.2 ´¥Ãþ°´Å¥£ººÏ³É°´¼üÊÂ¼þ£¬¸´ÓÃÏÖÓÐ°´¼üÂß¼­ */
+    /* 1.2 è§¦æ‘¸æŒ‰é’®ï¼šåˆæˆæŒ‰é”®äº‹ä»¶ï¼Œå¤ç”¨çŽ°æœ‰æŒ‰é”®é€»è¾‘ */
     menu_ui_set_tap_cb(menu_tap_prev, menu_tap_next, menu_tap_enter);
 
-    /* 2. ÏÈ°ÑÊ×ÆÁ»­ºÃ£¨¶¯»­ÔÚ¸²¸Ç²ãÏÂÃæÅÜÍê£©£¬ÔÙ¸ÇÆô¶¯²ã */
+    /* 2. å…ˆæŠŠé¦–å±ç”»å¥½ï¼ˆåŠ¨ç”»åœ¨è¦†ç›–å±‚ä¸‹é¢è·‘å®Œï¼‰ï¼Œå†ç›–å¯åŠ¨å±‚ */
     menu_draw_list();
     boot_ui_show();
 
-    /* 3. Ö÷Ñ­»·£º°´¼ü -> äÖÈ¾ -> LVGL ÐÄÌø */
+    /* 3. ä¸»å¾ªçŽ¯ï¼šæŒ‰é”® -> æ¸²æŸ“ -> LVGL å¿ƒè·³ */
     for(;;)
     {
-        /* Æô¶¯¶¯»­²¥Íê£ºÖ»°Ñ¸²¸Ç²ãÉ¾µô£¬Â¶³öÒÑ¾­»­ºÃµÄÊ×ÆÁ */
-        if((s_boot_ready == 0) && (boot_ui_done() != 0))        //Ö»ÔÚ¿ªÊ¼µ÷ÓÃÒ»´Î
+        /* å¯åŠ¨åŠ¨ç”»æ’­å®Œï¼šåªæŠŠè¦†ç›–å±‚åˆ æŽ‰ï¼Œéœ²å‡ºå·²ç»ç”»å¥½çš„é¦–å± */
+        if((s_boot_ready == 0) && (boot_ui_done() != 0))        //åªåœ¨å¼€å§‹è°ƒç”¨ä¸€æ¬¡
         {
             s_boot_ready = 1;
             boot_ui_close();
         }
 
         if(rt_mq_recv(s_key_q, &key, sizeof(key),
-                      rt_tick_from_millisecond(UI_PERIOD_MS)) == RT_EOK)            //´ÓkeyÏûÏ¢¶ÓÁÐÖÐ¶ÁÈ¡°´¼üÐÅÏ¢,Í¬Ê±ËÀµÈ10ms
+                      rt_tick_from_millisecond(UI_PERIOD_MS)) == RT_EOK)            //ä»Žkeyæ¶ˆæ¯é˜Ÿåˆ—ä¸­è¯»å–æŒ‰é”®ä¿¡æ¯,åŒæ—¶æ­»ç­‰10ms
         {
             menu_dispatch_key(key);
         }
 
-        /* ÈÎÎñÒ³£ºÈÎÎñµÄ render ÔÚÕâÀïÅÜ£¬±£Ö¤ËùÓÐ lv_ ¶¼ÔÚ±¾Ïß³Ì */
-        if((s_page == PAGE_TASK) && (s_task != RT_NULL) &&              //ÓÐÄÚÈÝ¾Í°Ñ¶«Î÷»­ÔÚÆÁÄ»ÉÏ
+        /* ä»»åŠ¡é¡µï¼šä»»åŠ¡çš„ render åœ¨è¿™é‡Œè·‘ï¼Œä¿è¯æ‰€æœ‰ lv_ éƒ½åœ¨æœ¬çº¿ç¨‹ */
+        if((s_page == PAGE_TASK) && (s_task != RT_NULL) &&              //æœ‰å†…å®¹å°±æŠŠä¸œè¥¿ç”»åœ¨å±å¹•ä¸Š
            (s_task->render != RT_NULL))
         {
             s_task->render();
         }
 
-        /* ±ØÐëÖÜÆÚµ÷ÓÃ£¬¶¯»­ºÍË¢ÐÂ¶¼¿¿Ëü */
-        lv_timer_handler();                 //lvglµÄÊ±Ðò
+        /* å¿…é¡»å‘¨æœŸè°ƒç”¨ï¼ŒåŠ¨ç”»å’Œåˆ·æ–°éƒ½é å®ƒ */
+        lv_timer_handler();                 //lvglçš„æ—¶åº
     }
 }
 
 
-void menu_start(void)                                       //ÉÏµçÆô¶¯
+void menu_start(void)                                       //ä¸Šç”µå¯åŠ¨
 {
-    s_key_q = rt_mq_create("menu", sizeof(key_id_t), MENU_MQ_DEPTH, RT_IPC_FLAG_FIFO);          //KEY¸øUIÏß³Ì ×°°´¼ü±àºÅ
-    s_cmd_q = rt_mq_create("task", sizeof(task_evt_t), TASK_MQ_DEPTH, RT_IPC_FLAG_FIFO);        //UIÏß³Ì¸øÈÎÎñÏß³Ì  ×°ÊÂ¼þKEY/QIOT/SET
+    s_key_q = rt_mq_create("menu", sizeof(key_id_t), MENU_MQ_DEPTH, RT_IPC_FLAG_FIFO);          //KEYç»™UIçº¿ç¨‹ è£…æŒ‰é”®ç¼–å·
+    s_cmd_q = rt_mq_create("task", sizeof(task_evt_t), TASK_MQ_DEPTH, RT_IPC_FLAG_FIFO);        //UIçº¿ç¨‹ç»™ä»»åŠ¡çº¿ç¨‹  è£…äº‹ä»¶KEY/QIOT/SET
     if(s_key_q == RT_NULL || s_cmd_q == RT_NULL)
     {
         rt_kprintf("menu: mq create failed\r\n");
         return;
     }
 
-    rt_sem_init(&s_exit_sem, "texit", 0, RT_IPC_FLAG_FIFO);     //Ìí¼ÓÒ»¸ös_exit_semÐÅºÅÁ¿(),ÓÐÈË·¢ÐÅºÅ+,ÓÐÈËÏû·Ñ-,ÊÍ·ÅÓÃ	rt_sem_detach
+    rt_sem_init(&s_exit_sem, "texit", 0, RT_IPC_FLAG_FIFO);     //æ·»åŠ ä¸€ä¸ªs_exit_semä¿¡å·é‡(),æœ‰äººå‘ä¿¡å·+,æœ‰äººæ¶ˆè´¹-,é‡Šæ”¾ç”¨	rt_sem_detach
 
-    key_event_register(menu_post_key);                  //×¢²á°´¼üÏß³Ì
-    key_start();                                        //Æô¶¯°´¼üÏß³Ì
+    key_event_register(menu_post_key);                  //æ³¨å†ŒæŒ‰é”®çº¿ç¨‹
+    key_start();                                        //å¯åŠ¨æŒ‰é”®çº¿ç¨‹
 
     if(rt_thread_init(&s_ui_tid, "ui", ui_entry, RT_NULL,
                       s_ui_stack, sizeof(s_ui_stack),
-                      UI_PRIORITY, UI_TICK) != RT_EOK)   //³õÊ¼»¯Ïß³Ì
+                      UI_PRIORITY, UI_TICK) != RT_EOK)   //åˆå§‹åŒ–çº¿ç¨‹
     {
         rt_kprintf("menu: ui thread init failed\r\n");
         return;
     }
 
-    rt_thread_startup(&s_ui_tid);               //¿ªÊ¼UIÖ÷Ïß³Ì
+    rt_thread_startup(&s_ui_tid);               //å¼€å§‹UIä¸»çº¿ç¨‹
 }
 
 
 /**************************************************************************************************
- *                                        Æß¡¢ÈÎÎñÏß³Ìµ÷¶È                                        
+ *                                        ä¸ƒã€ä»»åŠ¡çº¿ç¨‹è°ƒåº¦                                        
  **************************************************************************************************/
 
 static void task_entry(void *parameter)
@@ -281,17 +281,17 @@ static void task_entry(void *parameter)
     const app_task_t *task = (const app_task_t *)parameter;
     task_evt_t ev;
     rt_int32_t timeout;
-    uint8_t    bg = 0;                      /* 0 = Ç°Ì¨£¬1 = ÒÑ×ªºóÌ¨ */
+    uint8_t    bg = 0;                      /* 0 = å‰å°ï¼Œ1 = å·²è½¬åŽå° */
 
-    if(task->setup != RT_NULL)              //Èç¹ûÓÐ¿ªÊ¼¾ÍÔËÐÐ¿ªÊ¼
+    if(task->setup != RT_NULL)              //å¦‚æžœæœ‰å¼€å§‹å°±è¿è¡Œå¼€å§‹
     {
         task->setup();
     }
 
     for(;;)
     {
-        /* ×ªºóÌ¨Ö®ºó¾Í²»ÔÙÊÕÊÂ¼þ¶ÓÁÐÁË£¬·ñÔò»á°ÑÇ°Ì¨ÈÎÎñµÄÊÂ¼þ³Ôµô¡£
-         * bg ÊÇÏß³Ì×Ô¼ºµÄ¾Ö²¿±äÁ¿£¬ËùÒÔ°×Ãûµ¥Àï·Å¼¸¸öÈÎÎñ¶¼»¥²»¸ÉÈÅ¡£ */
+        /* è½¬åŽå°ä¹‹åŽå°±ä¸å†æ”¶äº‹ä»¶é˜Ÿåˆ—äº†ï¼Œå¦åˆ™ä¼šæŠŠå‰å°ä»»åŠ¡çš„äº‹ä»¶åƒæŽ‰ã€‚
+         * bg æ˜¯çº¿ç¨‹è‡ªå·±çš„å±€éƒ¨å˜é‡ï¼Œæ‰€ä»¥ç™½åå•é‡Œæ”¾å‡ ä¸ªä»»åŠ¡éƒ½äº’ä¸å¹²æ‰°ã€‚ */
         if(bg != 0u)
         {
             if(task->update != RT_NULL)
@@ -306,15 +306,15 @@ static void task_entry(void *parameter)
         timeout = (task->update != RT_NULL)
                 ? (rt_int32_t)rt_tick_from_millisecond(UI_PERIOD_MS)
                 : (rt_int32_t)RT_WAITING_FOREVER;
-                                                                                        //»ñÈ¡Òª¸üÐÂµÄÊÂ¼þÆ¬
-        if(rt_mq_recv(s_cmd_q, &ev, sizeof(ev), timeout) == RT_EOK)                     //UIÏß³Ì¸øÈÎÎñÏß³ÌµÄÈÎÎñ,Ã»ÓÐ¾ÍµÈ´ýtimeout
+                                                                                        //èŽ·å–è¦æ›´æ–°çš„äº‹ä»¶ç‰‡
+        if(rt_mq_recv(s_cmd_q, &ev, sizeof(ev), timeout) == RT_EOK)                     //UIçº¿ç¨‹ç»™ä»»åŠ¡çº¿ç¨‹çš„ä»»åŠ¡,æ²¡æœ‰å°±ç­‰å¾…timeout
         {
             if(ev.type == TASK_EVT_QUIT)
             {
                 break;
             }
 
-            if(ev.type == TASK_EVT_BG)      /* ±»ÒªÇó×ªºóÌ¨£ºÇÐÄ£Ê½£¬±ðÍË³ö */
+            if(ev.type == TASK_EVT_BG)      /* è¢«è¦æ±‚è½¬åŽå°ï¼šåˆ‡æ¨¡å¼ï¼Œåˆ«é€€å‡º */
             {
                 bg = 1;
                 continue;
@@ -339,15 +339,15 @@ static void task_entry(void *parameter)
         }
     }
 
-    if(task->teardown != RT_NULL)           //Èç¹ûÓÐ¹Ø±Õ¾ÍÔËÐÐ¹Ø±Õ
+    if(task->teardown != RT_NULL)           //å¦‚æžœæœ‰å…³é—­å°±è¿è¡Œå…³é—­
     {
         task->teardown();
     }
 
-    /* Í¨Öª UI Ïß³ÌºóÖ±½Ó·µ»Ø¾ÍÐÐ¡£
-     * Õâ¸öÄÚºËÀï rt_thread_delete(self) ²»»áµ÷¶È£¬·µ»Øºó»¹»áÔÙ×ßÒ»±é
-     * rt_thread_exit()£¬Í¬Ò»¸öÏß³Ì±»ÇåÀíÁ½´Î£¨ÖØ¸´ detach ¶¨Ê±Æ÷ +
-     * ÖØ¸´¹Òµ½ defunct Á´±í£©¡£½»¸ø·µ»ØÂ·¾¶ÇåÀíÒ»´Î¾Í¹»¡£ */
+    /* é€šçŸ¥ UI çº¿ç¨‹åŽç›´æŽ¥è¿”å›žå°±è¡Œã€‚
+     * è¿™ä¸ªå†…æ ¸é‡Œ rt_thread_delete(self) ä¸ä¼šè°ƒåº¦ï¼Œè¿”å›žåŽè¿˜ä¼šå†èµ°ä¸€é
+     * rt_thread_exit()ï¼ŒåŒä¸€ä¸ªçº¿ç¨‹è¢«æ¸…ç†ä¸¤æ¬¡ï¼ˆé‡å¤ detach å®šæ—¶å™¨ +
+     * é‡å¤æŒ‚åˆ° defunct é“¾è¡¨ï¼‰ã€‚äº¤ç»™è¿”å›žè·¯å¾„æ¸…ç†ä¸€æ¬¡å°±å¤Ÿã€‚ */
     rt_sem_release(&s_exit_sem);
 }
 
@@ -360,10 +360,10 @@ static void task_stop(void)
         return;
     }
 
-    /* ÇåµôÉÏÒ»´Î³¬Ê±²ÐÁôµÄ¼ÆÊý£¬·ñÔòÏÂÒ»´Î take »áÁ¢¿Ì·µ»Ø */
+    /* æ¸…æŽ‰ä¸Šä¸€æ¬¡è¶…æ—¶æ®‹ç•™çš„è®¡æ•°ï¼Œå¦åˆ™ä¸‹ä¸€æ¬¡ take ä¼šç«‹åˆ»è¿”å›ž */
     (void)rt_sem_control(&s_exit_sem, RT_IPC_CMD_RESET, RT_NULL);
 
-    /* ÌÍ¿Õ¶ÓÁÐ£ºÉÏÒ»¸öÈÎÎñÃ»´¦ÀíÍêµÄ°´¼ü/¿Ø¼þÊÂ¼þ£¬²»ÄÜÁ÷µ½ÏÂÒ»¸öÈÎÎñ */
+    /* æŽç©ºé˜Ÿåˆ—ï¼šä¸Šä¸€ä¸ªä»»åŠ¡æ²¡å¤„ç†å®Œçš„æŒ‰é”®/æŽ§ä»¶äº‹ä»¶ï¼Œä¸èƒ½æµåˆ°ä¸‹ä¸€ä¸ªä»»åŠ¡ */
     while(rt_mq_recv(s_cmd_q, &ev, sizeof(ev), 0) == RT_EOK)
     {
     }
@@ -374,8 +374,8 @@ static void task_stop(void)
 
     if(rt_sem_take(&s_exit_sem, rt_tick_from_millisecond(3000)) != RT_EOK)
     {
-        /* ÕâÀï¾ø¶Ô²»ÄÜÇ¿É¾£ºÏß³Ì¿ÉÄÜÕý×èÈûÔÚÇý¶¯Àï£¬´Ó±ðµÄÏß³Ì free µô
-         * ËüÕýÔÚÓÃµÄÕ»»á°ÑÄÚºË¹ÒÆðÁ´±íºÍ¶ÑÒ»Æð¸ã»µ¡£ */
+        /* è¿™é‡Œç»å¯¹ä¸èƒ½å¼ºåˆ ï¼šçº¿ç¨‹å¯èƒ½æ­£é˜»å¡žåœ¨é©±åŠ¨é‡Œï¼Œä»Žåˆ«çš„çº¿ç¨‹ free æŽ‰
+         * å®ƒæ­£åœ¨ç”¨çš„æ ˆä¼šæŠŠå†…æ ¸æŒ‚èµ·é“¾è¡¨å’Œå †ä¸€èµ·æžåã€‚ */
         rt_kprintf("menu: task exit timeout\r\n");
     }
 
@@ -386,7 +386,7 @@ static void task_start(uint8_t index)
 {
     const app_task_t *task = g_task_list[index];
 
-    s_task_tid = rt_thread_create(task->name, task_entry, (void *)task,                 //´´½¨Ïß³Ì
+    s_task_tid = rt_thread_create(task->name, task_entry, (void *)task,                 //åˆ›å»ºçº¿ç¨‹
                                      task->stack_size, task->priority, UI_TICK);
     if(s_task_tid == RT_NULL)
     {
@@ -397,7 +397,7 @@ static void task_start(uint8_t index)
     rt_thread_startup(s_task_tid);
 }
 
-/* UI Ïß³Ì£¨»¬Ìõ/°´Å¥£©-> µ±Ç°ÈÎÎñµÄÂß¼­Ïß³Ì */
+/* UI çº¿ç¨‹ï¼ˆæ»‘æ¡/æŒ‰é’®ï¼‰-> å½“å‰ä»»åŠ¡çš„é€»è¾‘çº¿ç¨‹ */
 void ui_task_event(uint8_t id, int32_t value)
 {
     task_evt_t ev;
@@ -417,9 +417,9 @@ void ui_task_event(uint8_t id, int32_t value)
 }
 
 
-/* Î¨Ò»µÄ°´¼üÍ¶µÝ¿Ú£ºÎïÀí°´¼ü£¨key Ïß³Ì£©ºÍÆÁÉÏ°´Å¥£¨UI Ïß³Ì£©¶¼×ßÕâÀï¡£
- * Á½±ß×îºó¶¼Ö»ÊÇÍù²Ëµ¥¶ÓÁÐÀïÈûÒ»¸ö key_id_t£¬²Ëµ¥Âß¼­²»ÓÃÇø·ÖÀ´Ô´¡£ */
-static void menu_post_key(key_id_t key)         //ÔÚkey.c±»s_key_cbº¯ÊýÖÆ×÷µ÷ÓÃ
+/* å”¯ä¸€çš„æŒ‰é”®æŠ•é€’å£ï¼šç‰©ç†æŒ‰é”®ï¼ˆkey çº¿ç¨‹ï¼‰å’Œå±ä¸ŠæŒ‰é’®ï¼ˆUI çº¿ç¨‹ï¼‰éƒ½èµ°è¿™é‡Œã€‚
+ * ä¸¤è¾¹æœ€åŽéƒ½åªæ˜¯å¾€èœå•é˜Ÿåˆ—é‡Œå¡žä¸€ä¸ª key_id_tï¼Œèœå•é€»è¾‘ä¸ç”¨åŒºåˆ†æ¥æºã€‚ */
+static void menu_post_key(key_id_t key)         //åœ¨key.cè¢«s_key_cbå‡½æ•°åˆ¶ä½œè°ƒç”¨
 {
     if(s_key_q == RT_NULL)
     {
@@ -439,7 +439,7 @@ static void menu_cmd(void)
 
     rt_memory_info(&total, &used, RT_NULL);
 
-    /* ²Ëµ¥Ò³ / ÈÎÎñÒ³·Ö¿ª´òÓ¡£¬Ò»ÑÛ¿´³ö "µ±Ç°ÔÚÄÄ" ºÍ "¹â±êÍ£ÔÚÄÄ" */
+    /* èœå•é¡µ / ä»»åŠ¡é¡µåˆ†å¼€æ‰“å°ï¼Œä¸€çœ¼çœ‹å‡º "å½“å‰åœ¨å“ª" å’Œ "å…‰æ ‡åœåœ¨å“ª" */
     rt_kprintf("menu : page=%s, task=%s, cursor=%d, lost=%lu\r\n",
                (s_page == PAGE_MENU) ? "SELECT" : "TASK",
                (s_task != RT_NULL) ? s_task->name : "-",

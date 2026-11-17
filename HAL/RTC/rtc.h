@@ -1,17 +1,17 @@
 /******************************************************************************
- * ÎÄ¼şÃû   : rtc.h
- * Ğ¾Æ¬     : CH32V307VCT6
- * ËµÃ÷     : ÄÚ²¿ RTC ÊµÊ±Ê±ÖÓ£¨HSE/128 ×÷ÎªÊ±ÖÓÔ´£¬µôµçÓÉÅ¦¿Ûµç³ØÎ¬³Ö£©
+ * æ–‡ä»¶å   : rtc.h
+ * èŠ¯ç‰‡     : CH32V307VCT6
+ * è¯´æ˜     : å†…éƒ¨ RTC å®æ—¶æ—¶é’Ÿï¼ˆHSE/128 ä½œä¸ºæ—¶é’Ÿæºï¼Œæ‰ç”µç”±çº½æ‰£ç”µæ± ç»´æŒï¼‰
  *
- * Ê¹ÓÃÊ¾Àı:
- *     rtc_init();                                  // Ê×´ÎÉÏµçÓÃ±àÒëÊ±¼ä³õÊ¼»¯
- *     rtc_set_datetime(2026, 10, 29, 22, 30, 0);   // ÉèÖÃÊ±¼ä
+ * ä½¿ç”¨ç¤ºä¾‹:
+ *     rtc_init();                                  // é¦–æ¬¡ä¸Šç”µç”¨ç¼–è¯‘æ—¶é—´åˆå§‹åŒ–
+ *     rtc_set_datetime(2026, 10, 29, 22, 30, 0);   // è®¾ç½®æ—¶é—´
  *     rtc_datetime_t dt;
- *     rtc_get_datetime(&dt);                       // ¶ÁÈ¡µ±Ç°Ê±¼ä
- *     printf("%04d-%02d-%02d %02d:%02d:%02d ÖÜ%d\n",
+ *     rtc_get_datetime(&dt);                       // è¯»å–å½“å‰æ—¶é—´
+ *     printf("%04d-%02d-%02d %02d:%02d:%02d å‘¨%d\n",
  *            dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second, dt.week);
  *
- * ·µ»ØÖµÔ¼¶¨: 0 = ³É¹¦£¬¸ºÊı = Ê§°Ü£¨-1 ²ÎÊı´íÎó£¬-2 Ó²¼şÎ´¾ÍĞ÷£©
+ * è¿”å›å€¼çº¦å®š: 0 = æˆåŠŸï¼Œè´Ÿæ•° = å¤±è´¥ï¼ˆ-1 å‚æ•°é”™è¯¯ï¼Œ-2 ç¡¬ä»¶æœªå°±ç»ªï¼‰
  ******************************************************************************/
 
 #ifndef __RTC_H
@@ -24,32 +24,32 @@ extern "C" {
 #include "ch32v30x_conf.h"
 
 /*********************************************************************
- * ³£Á¿
+ * å¸¸é‡
  */
 #define RTC_START_YEAR      1970
 #define RTC_END_YEAR        2099
 #define RTC_SECONDS_PER_DAY 86400UL
 
-/* RTC Ê±ÖÓÔ´£ºHSE(8MHz) / 128 = 62500Hz£¬·ÖÆµµ½ 1Hz */
+/* RTC æ—¶é’Ÿæºï¼šHSE(8MHz) / 128 = 62500Hzï¼Œåˆ†é¢‘åˆ° 1Hz */
 #define RTC_HSE_FREQ_HZ     8000000UL
 #define RTC_CLOCK_HZ        (RTC_HSE_FREQ_HZ / 128UL)
 #define RTC_PRESCALER       (RTC_CLOCK_HZ - 1)
 
 /*********************************************************************
- * ÀàĞÍ¶¨Òå
+ * ç±»å‹å®šä¹‰
  */
 typedef struct
 {
-    uint16_t year;      /* ÍêÕûÄê·İ£¬ÀıÈç 2026 */
+    uint16_t year;      /* å®Œæ•´å¹´ä»½ï¼Œä¾‹å¦‚ 2026 */
     uint8_t  month;     /* 1~12 */
     uint8_t  day;       /* 1~31 */
     uint8_t  hour;      /* 0~23 */
     uint8_t  minute;    /* 0~59 */
     uint8_t  second;    /* 0~59 */
-    uint8_t  week;      /* 0=ÖÜÈÕ 1=ÖÜÒ» ... 6=ÖÜÁù */
+    uint8_t  week;      /* 0=å‘¨æ—¥ 1=å‘¨ä¸€ ... 6=å‘¨å…­ */
 } rtc_datetime_t;
 
-/* ¼æÈİ¾É´úÂëµÄ½á¹¹ÌåÃû */
+/* å…¼å®¹æ—§ä»£ç çš„ç»“æ„ä½“å */
 typedef struct
 {
     volatile uint8_t  hour;
@@ -62,68 +62,68 @@ typedef struct
 } _calendar_obj;
 
 /*********************************************************************
- * È«¾Ö±äÁ¿
+ * å…¨å±€å˜é‡
  */
-extern _calendar_obj calendar;      /* ×î½üÒ»´Î¶ÁÈ¡µÄÊ±¼ä£¨¼æÈİ¾É´úÂë£© */
+extern _calendar_obj calendar;      /* æœ€è¿‘ä¸€æ¬¡è¯»å–çš„æ—¶é—´ï¼ˆå…¼å®¹æ—§ä»£ç ï¼‰ */
 
 /*********************************************************************
- * º¯Êı
+ * å‡½æ•°
  */
 
 /**
- * @brief  ³õÊ¼»¯ RTC
- * @return 0 ³É¹¦£¬-2 Ê±ÖÓÔ´Î´¾ÍĞ÷
- * @note   Èô±¸·İ¼Ä´æÆ÷±»Ğ´¹ı£¨ÓĞµç³Ø£©£¬±£³ÖÔ­Ê±¼ä£»·ñÔòÓÃ±àÒëÊ±¼ä³õÊ¼»¯
+ * @brief  åˆå§‹åŒ– RTC
+ * @return 0 æˆåŠŸï¼Œ-2 æ—¶é’Ÿæºæœªå°±ç»ª
+ * @note   è‹¥å¤‡ä»½å¯„å­˜å™¨è¢«å†™è¿‡ï¼ˆæœ‰ç”µæ± ï¼‰ï¼Œä¿æŒåŸæ—¶é—´ï¼›å¦åˆ™ç”¨ç¼–è¯‘æ—¶é—´åˆå§‹åŒ–
  */
 int rtc_init(void);
 
 /**
- * @brief  ÉèÖÃÈÕÆÚÊ±¼ä
- * @return 0 ³É¹¦£¬-1 ²ÎÊıÔ½½ç
+ * @brief  è®¾ç½®æ—¥æœŸæ—¶é—´
+ * @return 0 æˆåŠŸï¼Œ-1 å‚æ•°è¶Šç•Œ
  */
 int rtc_set_datetime(uint16_t year, uint8_t month, uint8_t day,
                      uint8_t hour, uint8_t minute, uint8_t second);
 
 /**
- * @brief  ¶ÁÈ¡µ±Ç°ÈÕÆÚÊ±¼ä
- * @param  dt  Êä³ö»º³åÇø
- * @return 0 ³É¹¦£¬-1 ²ÎÊıÎª¿Õ
+ * @brief  è¯»å–å½“å‰æ—¥æœŸæ—¶é—´
+ * @param  dt  è¾“å‡ºç¼“å†²åŒº
+ * @return 0 æˆåŠŸï¼Œ-1 å‚æ•°ä¸ºç©º
  */
 int rtc_get_datetime(rtc_datetime_t *dt);
 
 /**
- * @brief  Ö±½ÓÓÃ Unix Ê±¼ä´ÁÉèÖÃÊ±¼ä
- * @return 0 ³É¹¦
+ * @brief  ç›´æ¥ç”¨ Unix æ—¶é—´æˆ³è®¾ç½®æ—¶é—´
+ * @return 0 æˆåŠŸ
  */
 int rtc_set_timestamp(uint32_t seconds);
 
 /**
- * @brief  ¶ÁÈ¡ Unix Ê±¼ä´Á
- * @return ×Ô 1970-01-01 ÆğµÄÃëÊı
+ * @brief  è¯»å– Unix æ—¶é—´æˆ³
+ * @return è‡ª 1970-01-01 èµ·çš„ç§’æ•°
  */
 uint32_t rtc_get_timestamp(void);
 
 /**
- * @brief  ÉèÖÃÄÖÖÓ
- * @return 0 ³É¹¦£¬-1 ²ÎÊıÔ½½ç
+ * @brief  è®¾ç½®é—¹é’Ÿ
+ * @return 0 æˆåŠŸï¼Œ-1 å‚æ•°è¶Šç•Œ
  */
 int rtc_alarm_set(uint16_t year, uint8_t month, uint8_t day,
                   uint8_t hour, uint8_t minute, uint8_t second);
 
 /**
- * @brief  ¼ÆËãÄ³ÌìÊÇĞÇÆÚ¼¸
- * @return 0=ÖÜÈÕ ... 6=ÖÜÁù
+ * @brief  è®¡ç®—æŸå¤©æ˜¯æ˜ŸæœŸå‡ 
+ * @return 0=å‘¨æ—¥ ... 6=å‘¨å…­
  */
 uint8_t rtc_week_calc(uint16_t year, uint8_t month, uint8_t day);
 
 /**
- * @brief  ĞÇÆÚÊı×Ö×ª×Ö·û´®
+ * @brief  æ˜ŸæœŸæ•°å­—è½¬å­—ç¬¦ä¸²
  * @return "Sun" / "Mon" ...
  */
 const char *rtc_week_name(uint8_t week);
 
 /*********************************************************************
- * ¾É½Ó¿Ú¼æÈİ
+ * æ—§æ¥å£å…¼å®¹
  */
 #define RTC_Init()                      rtc_init()
 #define RTC_Set(y, mo, d, h, mi, s)     rtc_set_datetime((y), (mo), (d), (h), (mi), (s))
@@ -131,37 +131,37 @@ const char *rtc_week_name(uint8_t week);
 #define RTC_Get_Week(y, mo, d)          rtc_week_calc((y), (mo), (d))
 
 /**
- * @brief  ¶ÁÈ¡µ±Ç°Ê±¼äµ½ calendar£¨¼æÈİ¾É½Ó¿Ú£©
- * @return 0 ³É¹¦
+ * @brief  è¯»å–å½“å‰æ—¶é—´åˆ° calendarï¼ˆå…¼å®¹æ—§æ¥å£ï¼‰
+ * @return 0 æˆåŠŸ
  */
 int RTC_Get(void);
 
 /*********************************************************************
- * ±¦±¦º¯Êı£¨Ö±½ÓÄÃ×Ö·û´®£¬²»ÓÃ×Ô¼ºÆ´¸ñÊ½£©
+ * å®å®å‡½æ•°ï¼ˆç›´æ¥æ‹¿å­—ç¬¦ä¸²ï¼Œä¸ç”¨è‡ªå·±æ‹¼æ ¼å¼ï¼‰
  *********************************************************************/
 
 /**
- * @brief  ¶Áµ±Ç°Ê±¼ä×Ö·û´® "22:56:22"
- * @param  buf   Êä³ö»º³åÇø£¨ÖÁÉÙ 9 ×Ö½Ú£©
- * @param  size  »º³åÇø´óĞ¡
- * @return 0 ³É¹¦
- * @note   Àı£ºchar t[9]; rtc_time_string(t, sizeof(t)); lcd_text(0,0,t);
+ * @brief  è¯»å½“å‰æ—¶é—´å­—ç¬¦ä¸² "22:56:22"
+ * @param  buf   è¾“å‡ºç¼“å†²åŒºï¼ˆè‡³å°‘ 9 å­—èŠ‚ï¼‰
+ * @param  size  ç¼“å†²åŒºå¤§å°
+ * @return 0 æˆåŠŸ
+ * @note   ä¾‹ï¼šchar t[9]; rtc_time_string(t, sizeof(t)); lcd_text(0,0,t);
  */
 int rtc_time_string(char *buf, uint16_t size);
 
 /**
- * @brief  ¶Áµ±Ç°ÈÕÆÚ×Ö·û´® "2026-10-29"
- * @param  buf   Êä³ö»º³åÇø£¨ÖÁÉÙ 11 ×Ö½Ú£©
- * @param  size  »º³åÇø´óĞ¡
- * @return 0 ³É¹¦
+ * @brief  è¯»å½“å‰æ—¥æœŸå­—ç¬¦ä¸² "2026-10-29"
+ * @param  buf   è¾“å‡ºç¼“å†²åŒºï¼ˆè‡³å°‘ 11 å­—èŠ‚ï¼‰
+ * @param  size  ç¼“å†²åŒºå¤§å°
+ * @return 0 æˆåŠŸ
  */
 int rtc_date_string(char *buf, uint16_t size);
 
 /**
- * @brief  ¶ÁÈÕÆÚÊ±¼ä×Ö·û´® "2026-10-29 22:56:22"
- * @param  buf   Êä³ö»º³åÇø£¨ÖÁÉÙ 20 ×Ö½Ú£©
- * @param  size  »º³åÇø´óĞ¡
- * @return 0 ³É¹¦
+ * @brief  è¯»æ—¥æœŸæ—¶é—´å­—ç¬¦ä¸² "2026-10-29 22:56:22"
+ * @param  buf   è¾“å‡ºç¼“å†²åŒºï¼ˆè‡³å°‘ 20 å­—èŠ‚ï¼‰
+ * @param  size  ç¼“å†²åŒºå¤§å°
+ * @return 0 æˆåŠŸ
  */
 int rtc_datetime_string(char *buf, uint16_t size);
 

@@ -1,14 +1,14 @@
 /******************************************************************************
- * ÎÄ¼şÃû   : heat.h
- * Ğ¾Æ¬     : CH32V307VCT6
- * ËµÃ÷     : ¼ÓÈÈÆ¬ PWM ¹¦ÂÊ¿ØÖÆ£¨PA3 = TIM2_CH4£©
+ * æ–‡ä»¶å   : heat.h
+ * èŠ¯ç‰‡     : CH32V307VCT6
+ * è¯´æ˜     : åŠ çƒ­ç‰‡ PWM åŠŸç‡æ§åˆ¶ï¼ˆPA3 = TIM2_CH4ï¼‰
  *
- * Ê¹ÓÃÊ¾Àı:
+ * ä½¿ç”¨ç¤ºä¾‹:
  *     heat_init();
- *     heat_set_power(50);     // 50% ¹¦ÂÊ
+ *     heat_set_power(50);     // 50% åŠŸç‡
  *     heat_off();
  *
- * ·µ»ØÖµÔ¼¶¨: 0 = ³É¹¦£¬¸ºÊı = Ê§°Ü£¨-1 ²ÎÊı´íÎó£©
+ * è¿”å›å€¼çº¦å®š: 0 = æˆåŠŸï¼Œè´Ÿæ•° = å¤±è´¥ï¼ˆ-1 å‚æ•°é”™è¯¯ï¼‰
  ******************************************************************************/
 
 #ifndef __HEAT_H
@@ -21,50 +21,50 @@ extern "C" {
 #include "ch32v30x_conf.h"
 
 /*********************************************************************
- * ²ÎÊı
+ * å‚æ•°
  */
 #define HEAT_GPIO           GPIOA
 #define HEAT_PIN            GPIO_Pin_3          /* PA3 = TIM2_CH4 */
 #define HEAT_PWM_TIM_CLOCK  1000000UL
-#define HEAT_PWM_FREQ_HZ    1000UL              /* PWM ÆµÂÊ 1kHz */
+#define HEAT_PWM_FREQ_HZ    1000UL              /* PWM é¢‘ç‡ 1kHz */
 #define HEAT_PWM_PRESCALER  ((SystemCoreClock / HEAT_PWM_TIM_CLOCK) - 1)
 #define HEAT_PWM_PERIOD     ((HEAT_PWM_TIM_CLOCK / HEAT_PWM_FREQ_HZ) - 1)
 
 /*********************************************************************
- * È«¾Ö±äÁ¿
+ * å…¨å±€å˜é‡
  */
-extern uint8_t heat_level;      /* µ±Ç°¹¦ÂÊ°Ù·Ö±È 0~100 */
+extern uint8_t heat_level;      /* å½“å‰åŠŸç‡ç™¾åˆ†æ¯” 0~100 */
 
 /*********************************************************************
- * º¯Êı
+ * å‡½æ•°
  */
 
 /**
- * @brief  ³õÊ¼»¯¼ÓÈÈÆ¬ PWM£¨ÉÏµç¹Ø±Õ£©
- * @return 0 ³É¹¦
+ * @brief  åˆå§‹åŒ–åŠ çƒ­ç‰‡ PWMï¼ˆä¸Šç”µå…³é—­ï¼‰
+ * @return 0 æˆåŠŸ
  */
 int heat_init(void);
 
 /**
- * @brief  ÉèÖÃ¼ÓÈÈ¹¦ÂÊ
- * @param  percent  0~100£¬0 ±íÊ¾¹Ø±Õ
- * @return 0 ³É¹¦£¬-1 ²ÎÊı´íÎó
+ * @brief  è®¾ç½®åŠ çƒ­åŠŸç‡
+ * @param  percent  0~100ï¼Œ0 è¡¨ç¤ºå…³é—­
+ * @return 0 æˆåŠŸï¼Œ-1 å‚æ•°é”™è¯¯
  */
 int heat_set_power(uint8_t percent);
 
 /**
- * @brief  ¹Ø±Õ¼ÓÈÈ
+ * @brief  å…³é—­åŠ çƒ­
  */
 void heat_off(void);
 
 /**
- * @brief  ¶ÁÈ¡µ±Ç°¹¦ÂÊ°Ù·Ö±È
+ * @brief  è¯»å–å½“å‰åŠŸç‡ç™¾åˆ†æ¯”
  * @return 0~100
  */
 uint8_t heat_get_power(void);
 
 /*********************************************************************
- * ¾É½Ó¿Ú¼æÈİ
+ * æ—§æ¥å£å…¼å®¹
  */
 #define HEAT_CONTROL_TIM_CLOCK      HEAT_PWM_TIM_CLOCK
 #define HEAT_CONTROL_TIM_PRESCALER  HEAT_PWM_PRESCALER

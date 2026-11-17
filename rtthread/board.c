@@ -40,21 +40,21 @@ void rt_hw_us_delay(rt_uint32_t us)
     rt_uint32_t told, tnow, tcnt = 0;
     rt_uint32_t reload = SysTick->CMP;
 
-    /* �����ʱ������ tick �� */
+    /* 获得延时经过的 tick 数 */
     ticks = us * reload / (1000000 / RT_TICK_PER_SECOND);
-    /* ��õ�ǰʱ�� */
+    /* 获得当前时间 */
     told = SysTick->CNT;
     while (1)
     {
-        /* ѭ����õ�ǰʱ�䣬ֱ���ﵽָ����ʱ����˳�ѭ�� */
+        /* 循环获得当前时间，直到达到指定的时间后退出循环 */
         tnow = SysTick->CNT;
         if (tnow != told)
         {
             if (tnow < told)
             {
-                // ȡ���� SysTick->CNT ������ݼ��������ǵ�����
-                // ͨ��һ�� tcnt ��������ǰ����ֵ tnow ����һʱ�̵ļ���ֵ told �Ĳ�ֵ�����ۼӣ�ע�� SysTick->VAL Ϊ�ݼ����ǵ�����������
-                // �����ۼ�ֵ tcnt����ʱ���� ticks ʱ����ѭ������ tcnt ���ֵΪ 0xffff ffff�������ܳ�����ѭ�������
+                // 取决于 SysTick->CNT 递增或递减，这里是递增的
+                // 通过一个 tcnt 变量将当前计数值 tnow 与上一时刻的计数值 told 的差值进行累加（注意 SysTick->VAL 为递减还是递增计数器）
+                // ，当累加值 tcnt≥延时节拍 ticks 时跳出循环，而 tcnt 最大值为 0xffff ffff，不可能出现死循环的情况
 //                tcnt += told - tnow;
                 tcnt += reload - told + tnow;
             }

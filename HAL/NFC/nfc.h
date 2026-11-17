@@ -1,23 +1,23 @@
 /******************************************************************************
- * ÎÄ¼şÃû   : nfc.h
- * Ğ¾Æ¬     : CH32V307VCT6
- * ËµÃ÷     : NFC ¶Á¿¨Ä£¿éÇı¶¯£¨SPI2£¬Æ¬Ñ¡ PB12£©
+ * æ–‡ä»¶å   : nfc.h
+ * èŠ¯ç‰‡     : CH32V307VCT6
+ * è¯´æ˜     : NFC è¯»å¡æ¨¡å—é©±åŠ¨ï¼ˆSPI2ï¼Œç‰‡é€‰ PB12ï¼‰
  *
- * Ö¡¸ñÊ½: 0x55 + ÃüÁî + ³¤¶È + Êı¾İ + Ğ£ÑéºÍ
+ * å¸§æ ¼å¼: 0x55 + å‘½ä»¤ + é•¿åº¦ + æ•°æ® + æ ¡éªŒå’Œ
  *
- * Ê¹ÓÃÊ¾Àı:
+ * ä½¿ç”¨ç¤ºä¾‹:
  *     nfc_init();
  *     nfc_enable(1);
- *     if(nfc_card_find(0, NULL) == NFC_OK)          // ÕÒµ½¿¨
+ *     if(nfc_card_find(0, NULL) == NFC_OK)          // æ‰¾åˆ°å¡
  *     {
  *         uint8_t buf[16];
  *         if(nfc_block_read(0, buf) == NFC_OK) { ... }
  *     }
  *
- * ·µ»ØÖµÔ¼¶¨:
- *     NFC_OK         0   ³É¹¦
- *     NFC_ERR_NOCARD -1  Ã»ÓĞ¿¨ / ²Ù×÷Ê§°Ü
- *     NFC_ERR_PARAM  -2  ²ÎÊı´íÎó
+ * è¿”å›å€¼çº¦å®š:
+ *     NFC_OK         0   æˆåŠŸ
+ *     NFC_ERR_NOCARD -1  æ²¡æœ‰å¡ / æ“ä½œå¤±è´¥
+ *     NFC_ERR_PARAM  -2  å‚æ•°é”™è¯¯
  ******************************************************************************/
 
 #ifndef __NFC_H
@@ -30,88 +30,88 @@ extern "C" {
 #include "ch32v30x_conf.h"
 
 /*********************************************************************
- * ²ÎÊı
+ * å‚æ•°
  */
 #define NFC_CS_GPIO             GPIOB
 #define NFC_CS_PIN              GPIO_Pin_12
 #define NFC_BLOCK_SIZE          16
 
-/* SPI ÃüÁî */
-#define NFC_CMD_ENABLE_REQ      0x10        /* ¿ª/¹Ø NFC */
+/* SPI å‘½ä»¤ */
+#define NFC_CMD_ENABLE_REQ      0x10        /* å¼€/å…³ NFC */
 #define NFC_CMD_ENABLE_RSP      0x90
-#define NFC_CMD_STATE_GET       0x11        /* ¶Á×´Ì¬ */
+#define NFC_CMD_STATE_GET       0x11        /* è¯»çŠ¶æ€ */
 #define NFC_CMD_STATE_PUT       0x91
-#define NFC_CMD_CARD_FIND_REQ   0x12        /* Ñ°¿¨ */
+#define NFC_CMD_CARD_FIND_REQ   0x12        /* å¯»å¡ */
 #define NFC_CMD_CARD_FIND_RSP   0x92
-#define NFC_CMD_BLOCK_READ_REQ  0x13        /* ¶Á¿é */
+#define NFC_CMD_BLOCK_READ_REQ  0x13        /* è¯»å— */
 #define NFC_CMD_BLOCK_READ_RSP  0x93
-#define NFC_CMD_BLOCK_WRITE_REQ 0x14        /* Ğ´¿é */
+#define NFC_CMD_BLOCK_WRITE_REQ 0x14        /* å†™å— */
 #define NFC_CMD_BLOCK_WRITE_RSP 0x94
 
-/* Ö¡¸ñÊ½ */
+/* å¸§æ ¼å¼ */
 #define NFC_PACKET_START        0x55
 #define NFC_PACKET_HEAD_LEN     4
 #define NFC_PACKET_MAX_LEN      32
 
-/* ×´Ì¬Âë */
+/* çŠ¶æ€ç  */
 #define NFC_OK                  0
 #define NFC_ERR_NOCARD          (-1)
 #define NFC_ERR_PARAM           (-2)
 
 /*********************************************************************
- * º¯Êı
+ * å‡½æ•°
  */
 
 /**
- * @brief  ³õÊ¼»¯ NFC Ä£¿é£¨SPI2 + Æ¬Ñ¡£©
+ * @brief  åˆå§‹åŒ– NFC æ¨¡å—ï¼ˆSPI2 + ç‰‡é€‰ï¼‰
  * @return NFC_OK
  */
 int nfc_init(void);
 
 /**
- * @brief  ¿ª¹Ø NFC ¹¦ÄÜ
- * @param  enable  1 ´ò¿ª£¬0 ¹Ø±Õ
+ * @brief  å¼€å…³ NFC åŠŸèƒ½
+ * @param  enable  1 æ‰“å¼€ï¼Œ0 å…³é—­
  * @return NFC_OK / NFC_ERR_NOCARD
  */
 int nfc_enable(uint8_t enable);
 
 /**
- * @brief  ¶ÁÈ¡Ä£¿é×´Ì¬
- * @param  state  Êä³ö×´Ì¬×Ö½Ú
+ * @brief  è¯»å–æ¨¡å—çŠ¶æ€
+ * @param  state  è¾“å‡ºçŠ¶æ€å­—èŠ‚
  * @return NFC_OK / NFC_ERR_NOCARD
  */
 int nfc_state_read(uint8_t *state);
 
 /**
- * @brief  Ñ°¿¨
- * @param  scan_mode  Ñ°¿¨Ä£Ê½£¨Ò»°ãÌî 0£©
- * @return NFC_OK ÕÒµ½¿¨£¬NFC_ERR_NOCARD Ã»ÓĞ¿¨
+ * @brief  å¯»å¡
+ * @param  scan_mode  å¯»å¡æ¨¡å¼ï¼ˆä¸€èˆ¬å¡« 0ï¼‰
+ * @return NFC_OK æ‰¾åˆ°å¡ï¼ŒNFC_ERR_NOCARD æ²¡æœ‰å¡
  */
 int nfc_card_find(uint8_t scan_mode);
 
 /**
- * @brief  ¶ÁÒ»¸öÊı¾İ¿é
- * @param  block  ¿éºÅ
- * @param  data   Êä³ö»º³åÇø£¨ÖÁÉÙ 16 ×Ö½Ú£©
- * @return NFC_OK / ¸ºÊı´íÎóÂë
+ * @brief  è¯»ä¸€ä¸ªæ•°æ®å—
+ * @param  block  å—å·
+ * @param  data   è¾“å‡ºç¼“å†²åŒºï¼ˆè‡³å°‘ 16 å­—èŠ‚ï¼‰
+ * @return NFC_OK / è´Ÿæ•°é”™è¯¯ç 
  */
 int nfc_block_read(uint8_t block, uint8_t *data);
 
 /**
- * @brief  Ğ´Ò»¸öÊı¾İ¿é
- * @param  block  ¿éºÅ
- * @param  data   ´ıĞ´Êı¾İ£¨16 ×Ö½Ú£©
- * @return NFC_OK / ¸ºÊı´íÎóÂë
+ * @brief  å†™ä¸€ä¸ªæ•°æ®å—
+ * @param  block  å—å·
+ * @param  data   å¾…å†™æ•°æ®ï¼ˆ16 å­—èŠ‚ï¼‰
+ * @return NFC_OK / è´Ÿæ•°é”™è¯¯ç 
  */
 int nfc_block_write(uint8_t block, const uint8_t *data);
 
 /**
- * @brief  SPI µ¥×Ö½ÚÊÕ·¢£¨µ÷ÊÔÓÃ£©
+ * @brief  SPI å•å­—èŠ‚æ”¶å‘ï¼ˆè°ƒè¯•ç”¨ï¼‰
  */
 uint8_t nfc_spi_transfer(uint8_t data);
 
 /*********************************************************************
- * ¾É½Ó¿Ú¼æÈİ
+ * æ—§æ¥å£å…¼å®¹
  */
 #define PCD_FIND_FAIL               0x0081
 #define PCD_SELECT_FAIL             0x0082
@@ -126,13 +126,13 @@ uint8_t nfc_spi_transfer(uint8_t data);
 #define nfc_card_write(b, d)        ((uint8_t)(nfc_block_write((b), (d)) == NFC_OK ? 0 : 1))
 
 /*********************************************************************
- * ±¦±¦º¯Êı£¨Ò»ĞĞÅĞ¶ÏÓĞÃ»ÓĞ¿¨£©
+ * å®å®å‡½æ•°ï¼ˆä¸€è¡Œåˆ¤æ–­æœ‰æ²¡æœ‰å¡ï¼‰
  *********************************************************************/
 
 /**
- * @brief  ÓĞÃ»ÓĞ¿¨ÔÚ¸ĞÓ¦Çø
- * @return 1 ÓĞ¿¨£¬0 Ã»¿¨
- * @note   Àı£ºif(nfc_card_present()) {...}
+ * @brief  æœ‰æ²¡æœ‰å¡åœ¨æ„Ÿåº”åŒº
+ * @return 1 æœ‰å¡ï¼Œ0 æ²¡å¡
+ * @note   ä¾‹ï¼šif(nfc_card_present()) {...}
  */
 uint8_t nfc_card_present(void);
 

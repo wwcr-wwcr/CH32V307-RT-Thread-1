@@ -1,7 +1,7 @@
 /******************************************************************************
- * ÎÄ¼şÃû   : ntc.c
- * Ğ¾Æ¬     : CH32V307VCT6
- * ËµÃ÷     : NTC ÈÈÃôµç×è²âÎÂ£¨B Öµ·¨£©
+ * æ–‡ä»¶å   : ntc.c
+ * èŠ¯ç‰‡     : CH32V307VCT6
+ * è¯´æ˜     : NTC çƒ­æ•ç”µé˜»æµ‹æ¸©ï¼ˆB å€¼æ³•ï¼‰
  ******************************************************************************/
 
 #include "ntc.h"
@@ -9,10 +9,10 @@
 #include "math.h"
 
 /**************************************************************************************************
- *                                        ¶ÔÍâº¯Êı
+ *                                        å¯¹å¤–å‡½æ•°
  **************************************************************************************************/
 /**
- * @brief  ³õÊ¼»¯ NTC ²âÎÂ
+ * @brief  åˆå§‹åŒ– NTC æµ‹æ¸©
  */
 int ntc_init(void)
 {
@@ -20,7 +20,7 @@ int ntc_init(void)
 }
 
 /**
- * @brief  ¶ÁÈ¡ NTC µ±Ç°×èÖµ
+ * @brief  è¯»å– NTC å½“å‰é˜»å€¼
  */
 uint32_t ntc_resistance_get(void)
 {
@@ -35,7 +35,7 @@ uint32_t ntc_resistance_get(void)
     }
     if(adc >= 4095)
     {
-        return 0xFFFFFFFF;      /* ¿ªÂ·»ò¶ÌÂ·£¬·µ»Ø¼«´óÖµ */
+        return 0xFFFFFFFF;      /* å¼€è·¯æˆ–çŸ­è·¯ï¼Œè¿”å›æå¤§å€¼ */
     }
 
     res = (uint32_t)(((uint64_t)adc * NTC_SERIES_RESISTOR) / (4095 - adc));
@@ -44,7 +44,7 @@ uint32_t ntc_resistance_get(void)
 }
 
 /**
- * @brief  ÓÉ ADC ²ÉÑùÖµ»»ËãÎÂ¶È
+ * @brief  ç”± ADC é‡‡æ ·å€¼æ¢ç®—æ¸©åº¦
  */
 float ntc_temperature_convert(uint16_t adc)
 {
@@ -53,7 +53,7 @@ float ntc_temperature_convert(uint16_t adc)
 
     if(adc == 0 || adc >= 4095)
     {
-        return 0.0f;            /* ²ÉÑùÒì³££¬Ö±½Ó·µ»Ø 0 */
+        return 0.0f;            /* é‡‡æ ·å¼‚å¸¸ï¼Œç›´æ¥è¿”å› 0 */
     }
 
     res = (float)adc * (float)NTC_SERIES_RESISTOR / (float)(4095 - adc);
@@ -65,7 +65,7 @@ float ntc_temperature_convert(uint16_t adc)
 }
 
 /**
- * @brief  ¶ÁÈ¡ÎÂ¶È£¨ÉãÊÏ¶È£©
+ * @brief  è¯»å–æ¸©åº¦ï¼ˆæ‘„æ°åº¦ï¼‰
  */
 float ntc_temperature_get(void)
 {
@@ -73,7 +73,7 @@ float ntc_temperature_get(void)
 }
 
 /**
- * @brief  ¶ÁÈ¡ÎÂ¶È£¨0.1¡æ£©
+ * @brief  è¯»å–æ¸©åº¦ï¼ˆ0.1â„ƒï¼‰
  */
 int16_t ntc_temperature_x10_get(void)
 {

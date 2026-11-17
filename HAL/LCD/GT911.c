@@ -1,42 +1,42 @@
 /******************************************************************************
- * ÎÄ¼şÃû   : GT911.c
- * Ğ¾Æ¬     : CH32V307VCT6
- * ËµÃ÷     : GT911 µçÈİ´¥ÃşÆÁÇı¶¯
+ * æ–‡ä»¶å   : GT911.c
+ * èŠ¯ç‰‡     : CH32V307VCT6
+ * è¯´æ˜     : GT911 ç”µå®¹è§¦æ‘¸å±é©±åŠ¨
  ******************************************************************************/
 
 #include "GT911.h"
 #include "rtthread.h"
 
 /**************************************************************************************************
- *                                        È«¾Ö±äÁ¿
+ *                                        å…¨å±€å˜é‡
  **************************************************************************************************/
 Touch_data_t touchData;
 
 #if GT911_USE_TOUCH_INT
-static volatile uint8_t s_touch_int_flag = 0;   /* INT ÖĞ¶Ï±ê¼Ç£¨Ö»ÓÃÖĞ¶Ï·½Ê½Ê±ÓĞĞ§£© */
+static volatile uint8_t s_touch_int_flag = 0;   /* INT ä¸­æ–­æ ‡è®°ï¼ˆåªç”¨ä¸­æ–­æ–¹å¼æ—¶æœ‰æ•ˆï¼‰ */
 #endif
 
 /**************************************************************************************************
- *                                        ÄÚ²¿º¯Êı
+ *                                        å†…éƒ¨å‡½æ•°
  **************************************************************************************************/
-/* Ó²¸´Î»²¢°Ñ I2C µØÖ·Ñ¡Îª 0xBA/0xBB£¨¸´Î»ÆÚ¼ä INT À­µÍ¼´Ñ¡ÖĞ¸ÃµØÖ·£© */
+/* ç¡¬å¤ä½å¹¶æŠŠ I2C åœ°å€é€‰ä¸º 0xBA/0xBBï¼ˆå¤ä½æœŸé—´ INT æ‹‰ä½å³é€‰ä¸­è¯¥åœ°å€ï¼‰ */
 static void gt911_hardware_reset(void)
 {
-    GT911_INT_CLR();            /* INT µÍµçÆ½ -> µØÖ· 0xBA/0xBB */
+    GT911_INT_CLR();            /* INT ä½ç”µå¹³ -> åœ°å€ 0xBA/0xBB */
     GT911_RST_CLR();
     rt_thread_mdelay(20);
 
     GT911_RST_SET();
     rt_thread_mdelay(50);
 
-    gt911_iic_sda_input();      /* ¸´Î»Íê³ÉºóÊÍ·Å INT */
+    gt911_iic_sda_input();      /* å¤ä½å®Œæˆåé‡Šæ”¾ INT */
 }
 
 /**************************************************************************************************
- *                                        ¶ÔÍâº¯Êı
+ *                                        å¯¹å¤–å‡½æ•°
  **************************************************************************************************/
 /**
- * @brief  ¶Á¼Ä´æÆ÷
+ * @brief  è¯»å¯„å­˜å™¨
  */
 int gt911_read_regs(uint16_t reg, uint8_t *buf, uint16_t len)
 {
@@ -83,7 +83,7 @@ int gt911_read_regs(uint16_t reg, uint8_t *buf, uint16_t len)
 }
 
 /**
- * @brief  Ğ´¼Ä´æÆ÷
+ * @brief  å†™å¯„å­˜å™¨
  */
 int gt911_write_regs(uint16_t reg, const uint8_t *buf, uint16_t len)
 {
@@ -127,7 +127,7 @@ int gt911_write_regs(uint16_t reg, const uint8_t *buf, uint16_t len)
 }
 
 /**
- * @brief  ³õÊ¼»¯ GT911
+ * @brief  åˆå§‹åŒ– GT911
  */
 int gt911_init(void)
 {
@@ -156,7 +156,7 @@ int gt911_init(void)
         rt_kprintf("gt911: config %02X %02X %02X %02X\r\n", cfg[0], cfg[1], cfg[2], cfg[3]);
     }
 
-    /* Çåµô¿ÉÄÜ²ĞÁôµÄ´¥Ãş×´Ì¬ */
+    /* æ¸…æ‰å¯èƒ½æ®‹ç•™çš„è§¦æ‘¸çŠ¶æ€ */
     {
         uint8_t zero = 0;
         (void)gt911_write_regs(GT911_REG_STATUS, &zero, 1);
@@ -166,7 +166,7 @@ int gt911_init(void)
 }
 
 /**
- * @brief  ¶ÁÈ¡´¥ÃşÊı¾İ£¨ÂÖÑ¯·½Ê½£©
+ * @brief  è¯»å–è§¦æ‘¸æ•°æ®ï¼ˆè½®è¯¢æ–¹å¼ï¼‰
  */
 int gt911_touch_read(gt911_touch_t *touch)
 {
@@ -185,7 +185,7 @@ int gt911_touch_read(gt911_touch_t *touch)
         return -1;
     }
 
-    /* bit7 = 0 ±íÊ¾Ã»ÓĞĞÂÊı¾İ */
+    /* bit7 = 0 è¡¨ç¤ºæ²¡æœ‰æ–°æ•°æ® */
     if((status & 0x80) == 0)
     {
         touch->count = 0;
@@ -194,7 +194,7 @@ int gt911_touch_read(gt911_touch_t *touch)
 
     count = (uint8_t)(status & 0x0F);
 
-    /* ÏÈÇå×´Ì¬£¬ÔÙ¶Á×ø±ê£¬±ÜÃâ¶ÁµÄ¹ı³ÌÖĞ±»ĞÂÊı¾İ¸²¸Ç */
+    /* å…ˆæ¸…çŠ¶æ€ï¼Œå†è¯»åæ ‡ï¼Œé¿å…è¯»çš„è¿‡ç¨‹ä¸­è¢«æ–°æ•°æ®è¦†ç›– */
     {
         uint8_t zero = 0;
         (void)gt911_write_regs(GT911_REG_STATUS, &zero, 1);
@@ -222,7 +222,7 @@ int gt911_touch_read(gt911_touch_t *touch)
         touch->point[i].y    = (uint16_t)(p[2] | (p[3] << 8));
         touch->point[i].size = (uint16_t)(p[4] | (p[5] << 8));
 
-        /* Í¬²½µ½¼æÈİ½á¹¹Ìå */
+        /* åŒæ­¥åˆ°å…¼å®¹ç»“æ„ä½“ */
         touchData.Touch_xy[i].PointX = touch->point[i].x;
         touchData.Touch_xy[i].PointY = touch->point[i].y;
         touchData.Touch_xy[i].PointS = touch->point[i].size;
@@ -235,7 +235,7 @@ int gt911_touch_read(gt911_touch_t *touch)
 }
 
 /**
- * @brief  ¶ÁÈ¡µ±Ç°´¥ÃşµãÊı
+ * @brief  è¯»å–å½“å‰è§¦æ‘¸ç‚¹æ•°
  */
 uint8_t gt911_touch_count(void)
 {
@@ -250,7 +250,7 @@ uint8_t gt911_touch_count(void)
 }
 
 /**
- * @brief  ¿ª/¹Ø´¥ÃşÖĞ¶Ï
+ * @brief  å¼€/å…³è§¦æ‘¸ä¸­æ–­
  */
 int gt911_int_enable(uint8_t enable)
 {
@@ -286,7 +286,7 @@ int gt911_int_enable(uint8_t enable)
 }
 
 /**
- * @brief  ¼æÈİ¾É½Ó¿Ú£º¶ÁÈ¡´¥ÃşÊı¾İµ½ touchData
+ * @brief  å…¼å®¹æ—§æ¥å£ï¼šè¯»å–è§¦æ‘¸æ•°æ®åˆ° touchData
  */
 void GT911_touch_scanf(Touch_data_t *touch)
 {
@@ -316,11 +316,11 @@ void GT911_touch_scanf(Touch_data_t *touch)
 }
 
 /**************************************************************************************************
- *                                        ÖĞ¶Ï·şÎñ
+ *                                        ä¸­æ–­æœåŠ¡
  **************************************************************************************************/
 #if GT911_USE_TOUCH_INT
-/* ×¢Òâ£ºEXTI2 µÄÍ¨ÓÃ·Ö·¢ÔÚ drivers/drv_gpio.c Àï£¬°´¼ü KEY1 Ò²ÓÃÕâÌõÏß£¬
- * ËùÒÔ´¥Ãş×Ô¼ºµÄÖĞ¶Ï´¦ÀíÄ¬ÈÏ²»±àÒë£¬±ÜÃâÖØ¸´¶¨ÒåºÍÇÀÖĞ¶Ï¡£ */
+/* æ³¨æ„ï¼šEXTI2 çš„é€šç”¨åˆ†å‘åœ¨ drivers/drv_gpio.c é‡Œï¼ŒæŒ‰é”® KEY1 ä¹Ÿç”¨è¿™æ¡çº¿ï¼Œ
+ * æ‰€ä»¥è§¦æ‘¸è‡ªå·±çš„ä¸­æ–­å¤„ç†é»˜è®¤ä¸ç¼–è¯‘ï¼Œé¿å…é‡å¤å®šä¹‰å’ŒæŠ¢ä¸­æ–­ã€‚ */
 void EXTI2_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void EXTI2_IRQHandler(void)
 {
@@ -339,13 +339,13 @@ void EXTI2_IRQHandler(void)
 #endif
 
 /**************************************************************************************************
- *                                        ±¦±¦º¯Êı
+ *                                        å®å®å‡½æ•°
  **************************************************************************************************/
 static uint16_t s_last_x = 0;
 static uint16_t s_last_y = 0;
 
 /**
- * @brief  ÓĞÃ»ÓĞ´¥Ãş
+ * @brief  æœ‰æ²¡æœ‰è§¦æ‘¸
  */
 uint8_t gt911_touched(void)
 {
@@ -355,7 +355,7 @@ uint8_t gt911_touched(void)
 }
 
 /**
- * @brief  ¶ÁÈ¡´¥Ãş×ø±ê
+ * @brief  è¯»å–è§¦æ‘¸åæ ‡
  */
 uint8_t gt911_get_point(uint16_t *x, uint16_t *y)
 {
@@ -376,7 +376,7 @@ uint8_t gt911_get_point(uint16_t *x, uint16_t *y)
 }
 
 /**
- * @brief  ÉÏÒ»´ÎµÄ X ×ø±ê
+ * @brief  ä¸Šä¸€æ¬¡çš„ X åæ ‡
  */
 uint16_t gt911_x(void)
 {
@@ -384,7 +384,7 @@ uint16_t gt911_x(void)
 }
 
 /**
- * @brief  ÉÏÒ»´ÎµÄ Y ×ø±ê
+ * @brief  ä¸Šä¸€æ¬¡çš„ Y åæ ‡
  */
 uint16_t gt911_y(void)
 {

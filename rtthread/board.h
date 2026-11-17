@@ -24,9 +24,9 @@
 #define SRAM_END (0x20000000 + SRAM_SIZE * 1024)
 
 
-//LJL -- board.c  75ÐÐ    
-//ÒªÔÚrtconfig.h  110ÐÐ        ¶¨1¸øÔËÐÐÌõ¼þ
-//×ÔÌí¼ÓÁ¿RT_HEAP_SIZE_NUMBER  ÎªÏµÊý¼´ total memory 1024 * RT_HEAP_SIZE_NUMBER
+//LJL -- board.c  75è¡Œ    
+//è¦åœ¨rtconfig.h  110è¡Œ        å®š1ç»™è¿è¡Œæ¡ä»¶
+//è‡ªæ·»åŠ é‡RT_HEAP_SIZE_NUMBER  ä¸ºç³»æ•°å³ total memory 1024 * RT_HEAP_SIZE_NUMBER
 #define RT_HEAP_SIZE_NUMBER 2
 
 extern int _ebss;

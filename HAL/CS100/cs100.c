@@ -1,7 +1,7 @@
 /******************************************************************************
- * ÎÄ¼şÃû   : cs100.c
- * Ğ¾Æ¬     : CH32V307VCT6
- * ËµÃ÷     : CS100 ³¬Éù²¨²â¾àÇı¶¯
+ * æ–‡ä»¶å   : cs100.c
+ * èŠ¯ç‰‡     : CH32V307VCT6
+ * è¯´æ˜     : CS100 è¶…å£°æ³¢æµ‹è·é©±åŠ¨
  ******************************************************************************/
 
 #include "cs100.h"
@@ -9,17 +9,17 @@
 #include "rthw.h"
 
 /**************************************************************************************************
- *                                        È«¾Ö±äÁ¿
+ *                                        å…¨å±€å˜é‡
  **************************************************************************************************/
-volatile uint32_t timerOverflowNum     = 0;     /* ²¶»ñÆÚ¼ä¶¨Ê±Æ÷Òç³ö´ÎÊı */
-volatile uint16_t timerCaptureValue    = 0;     /* ²¶»ñµ½µÄ¼ÆÊıÖµ */
-volatile uint8_t  timerCaptureStartFlag = 0;    /* ÒÑ²¶»ñµ½ÉÏÉıÑØ */
-volatile uint8_t  timerCaptureOverFlag  = 1;    /* ²¶»ñÍê³É±êÖ¾£¬1 = ¿ÕÏĞ */
+volatile uint32_t timerOverflowNum     = 0;     /* æ•è·æœŸé—´å®šæ—¶å™¨æº¢å‡ºæ¬¡æ•° */
+volatile uint16_t timerCaptureValue    = 0;     /* æ•è·åˆ°çš„è®¡æ•°å€¼ */
+volatile uint8_t  timerCaptureStartFlag = 0;    /* å·²æ•è·åˆ°ä¸Šå‡æ²¿ */
+volatile uint8_t  timerCaptureOverFlag  = 1;    /* æ•è·å®Œæˆæ ‡å¿—ï¼Œ1 = ç©ºé—² */
 
 /**************************************************************************************************
- *                                        ÄÚ²¿º¯Êı
+ *                                        å†…éƒ¨å‡½æ•°
  **************************************************************************************************/
-/* ·¢ËÍ 10us ´¥·¢Âö³å */
+/* å‘é€ 10us è§¦å‘è„‰å†² */
 static void cs100_send_trigger(void)
 {
     GPIO_SetBits(CS100_TRIG_GPIO, CS100_TRIG_PIN);
@@ -28,10 +28,10 @@ static void cs100_send_trigger(void)
 }
 
 /**************************************************************************************************
- *                                        ¶ÔÍâº¯Êı
+ *                                        å¯¹å¤–å‡½æ•°
  **************************************************************************************************/
 /**
- * @brief  ³õÊ¼»¯³¬Éù²¨Ä£¿é
+ * @brief  åˆå§‹åŒ–è¶…å£°æ³¢æ¨¡å—
  */
 int cs100_init(void)
 {
@@ -42,26 +42,26 @@ int cs100_init(void)
 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC | RCC_APB2Periph_TIM10, ENABLE);
 
-    /* Trig£ºÍÆÍìÊä³ö£¬Ä¬ÈÏµÍ */
+    /* Trigï¼šæ¨æŒ½è¾“å‡ºï¼Œé»˜è®¤ä½ */
     GPIO_InitStructure.GPIO_Pin   = CS100_TRIG_PIN;
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(CS100_TRIG_GPIO, &GPIO_InitStructure);
     GPIO_ResetBits(CS100_TRIG_GPIO, CS100_TRIG_PIN);
 
-    /* Echo£º¸¡¿ÕÊäÈë */
+    /* Echoï¼šæµ®ç©ºè¾“å…¥ */
     GPIO_InitStructure.GPIO_Pin  = CS100_ECHO_PIN;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
     GPIO_Init(CS100_ECHO_GPIO, &GPIO_InitStructure);
 
-    /* Ê±»ù£º1MHz£¬ÂúÁ¿³Ì 65535us */
+    /* æ—¶åŸºï¼š1MHzï¼Œæ»¡é‡ç¨‹ 65535us */
     TIM_TimeBaseInitStructure.TIM_Period        = CS100_TIM_PERIOD;
     TIM_TimeBaseInitStructure.TIM_Prescaler     = CS100_TIM_PRESCALER;
     TIM_TimeBaseInitStructure.TIM_ClockDivision = TIM_CKD_DIV1;
     TIM_TimeBaseInitStructure.TIM_CounterMode   = TIM_CounterMode_Up;
     TIM_TimeBaseInit(TIM10, &TIM_TimeBaseInitStructure);
 
-    /* Í¨µÀ 4 ÊäÈë²¶»ñ£¬ÏÈ×¥ÉÏÉıÑØ */
+    /* é€šé“ 4 è¾“å…¥æ•è·ï¼Œå…ˆæŠ“ä¸Šå‡æ²¿ */
     TIM_ICInitStructure.TIM_Channel     = TIM_Channel_4;
     TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;
     TIM_ICInitStructure.TIM_ICFilter    = 0x00;
@@ -89,14 +89,14 @@ int cs100_init(void)
 }
 
 /**
- * @brief  ²âÒ»´Î¾àÀë£¨´ø³¬Ê±£©
+ * @brief  æµ‹ä¸€æ¬¡è·ç¦»ï¼ˆå¸¦è¶…æ—¶ï¼‰
  */
 float cs100_measure_timeout(uint32_t timeout_ms)
 {
     uint32_t elapsed = 0;
     uint32_t width_us;
 
-    /* ¸´Î»²¶»ñ×´Ì¬ */
+    /* å¤ä½æ•è·çŠ¶æ€ */
     timerCaptureOverFlag  = 0;
     timerCaptureStartFlag = 0;
     timerOverflowNum      = 0;
@@ -113,7 +113,7 @@ float cs100_measure_timeout(uint32_t timeout_ms)
         {
             TIM_Cmd(TIM10, DISABLE);
             timerCaptureOverFlag = 1;
-            return -1.0f;                   /* Ã»ÓĞ»Ø²¨ */
+            return -1.0f;                   /* æ²¡æœ‰å›æ³¢ */
         }
         rt_thread_mdelay(1);
         elapsed++;
@@ -125,7 +125,7 @@ float cs100_measure_timeout(uint32_t timeout_ms)
 }
 
 /**
- * @brief  ²âÒ»´Î¾àÀë£¨Ä¬ÈÏ³¬Ê±£©
+ * @brief  æµ‹ä¸€æ¬¡è·ç¦»ï¼ˆé»˜è®¤è¶…æ—¶ï¼‰
  */
 float cs100_measure(void)
 {
@@ -133,7 +133,7 @@ float cs100_measure(void)
 }
 
 /**
- * @brief  ²âÒ»´Î¾àÀë£¬½á¹ûÈ¡Õû
+ * @brief  æµ‹ä¸€æ¬¡è·ç¦»ï¼Œç»“æœå–æ•´
  */
 int cs100_read_cm(uint16_t *cm)
 {
@@ -156,7 +156,7 @@ int cs100_read_cm(uint16_t *cm)
 }
 
 /**
- * @brief  ²¶»ñÖµ»»Ëã¸ßµçÆ½Ê±¼ä
+ * @brief  æ•è·å€¼æ¢ç®—é«˜ç”µå¹³æ—¶é—´
  */
 uint32_t cs100_capture_time_calculate(uint16_t count, uint32_t overflow)
 {
@@ -164,18 +164,18 @@ uint32_t cs100_capture_time_calculate(uint16_t count, uint32_t overflow)
 }
 
 /**
- * @brief  Ê±¼ä»»Ëã¾àÀë
+ * @brief  æ—¶é—´æ¢ç®—è·ç¦»
  */
 float cs100_distance_calculate(uint32_t time_us)
 {
-    /* ÉùËÙ 340m/s = 0.034cm/us£¬Íù·µ³ıÒÔ 2 -> 0.017 * t */
+    /* å£°é€Ÿ 340m/s = 0.034cm/usï¼Œå¾€è¿”é™¤ä»¥ 2 -> 0.017 * t */
     return (float)time_us * 0.017f;
 }
 
 /**************************************************************************************************
- *                                        ÖĞ¶Ï·şÎñ
+ *                                        ä¸­æ–­æœåŠ¡
  **************************************************************************************************/
-/* ¶¨Ê±Æ÷Òç³öÖĞ¶Ï£ºÍ³¼Æ»Ø²¨ÆÚ¼äÒç³öÁË¼¸´Î */
+/* å®šæ—¶å™¨æº¢å‡ºä¸­æ–­ï¼šç»Ÿè®¡å›æ³¢æœŸé—´æº¢å‡ºäº†å‡ æ¬¡ */
 void TIM10_UP_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void TIM10_UP_IRQHandler(void)
 {
@@ -195,7 +195,7 @@ void TIM10_UP_IRQHandler(void)
     FREE_INT_SP();
 }
 
-/* ²¶»ñÖĞ¶Ï£ºÉÏÉıÑØ¿ªÊ¼¼ÆÊ±£¬ÏÂ½µÑØ¼ÇÂ¼¿í¶È */
+/* æ•è·ä¸­æ–­ï¼šä¸Šå‡æ²¿å¼€å§‹è®¡æ—¶ï¼Œä¸‹é™æ²¿è®°å½•å®½åº¦ */
 void TIM10_CC_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void TIM10_CC_IRQHandler(void)
 {
@@ -204,14 +204,14 @@ void TIM10_CC_IRQHandler(void)
 
     if((TIM_GetITStatus(TIM10, TIM_IT_CC4) != RESET) && (timerCaptureOverFlag == 0))
     {
-        if(timerCaptureStartFlag == 1)              /* ÏÂ½µÑØ£ºÒ»¸öÍêÕû»Ø²¨½áÊø */
+        if(timerCaptureStartFlag == 1)              /* ä¸‹é™æ²¿ï¼šä¸€ä¸ªå®Œæ•´å›æ³¢ç»“æŸ */
         {
             timerCaptureValue = TIM_GetCapture4(TIM10);
             TIM_Cmd(TIM10, DISABLE);
             TIM_OC4PolarityConfig(TIM10, TIM_ICPolarity_Rising);
             timerCaptureOverFlag = 1;
         }
-        else                                        /* ÉÏÉıÑØ£º»Ø²¨¿ªÊ¼ */
+        else                                        /* ä¸Šå‡æ²¿ï¼šå›æ³¢å¼€å§‹ */
         {
             TIM_SetCounter(TIM10, 0);
             timerOverflowNum      = 0;
@@ -226,7 +226,7 @@ void TIM10_CC_IRQHandler(void)
 }
 
 /**
- * @brief  Ö±½Ó²â¾àÀë£¨ÕûÊıÀåÃ×£©
+ * @brief  ç›´æ¥æµ‹è·ç¦»ï¼ˆæ•´æ•°å˜ç±³ï¼‰
  */
 uint16_t cs100_distance_cm(void)
 {

@@ -1,10 +1,10 @@
 /******************************************************************************
- * ÎÄ¼şÃû   : menu_ui.c
- * ËµÃ÷     : Ñ¡ÔñÒ³½çÃæ£ºÒ»ÆÁÒ»¸ö TASK n£¬×óÓÒÇĞ»»
+ * æ–‡ä»¶å   : menu_ui.c
+ * è¯´æ˜     : é€‰æ‹©é¡µç•Œé¢ï¼šä¸€å±ä¸€ä¸ª TASK nï¼Œå·¦å³åˆ‡æ¢
  *
- * ´¥ÃşÖ§³Ö£º
- *     ×óÓÒÁ½¸ö¼ıÍ·°´Å¥ + ¿¨Æ¬±¾Éí¶¼¿ÉÒÔµã¡£»Øµ÷Ö»×ö"ºÏ³É°´¼üÊÂ¼ş"£¬
- *     ºÍÊµÌå°´¼ü K1/K2/K3 ×ßÍêÈ«ÏàÍ¬µÄÂ·¾¶£¬²Ëµ¥Âß¼­Ò»ĞĞ¶¼²»ÓÃ¸Ä¡£
+ * è§¦æ‘¸æ”¯æŒï¼š
+ *     å·¦å³ä¸¤ä¸ªç®­å¤´æŒ‰é’® + å¡ç‰‡æœ¬èº«éƒ½å¯ä»¥ç‚¹ã€‚å›è°ƒåªåš"åˆæˆæŒ‰é”®äº‹ä»¶"ï¼Œ
+ *     å’Œå®ä½“æŒ‰é”® K1/K2/K3 èµ°å®Œå…¨ç›¸åŒçš„è·¯å¾„ï¼Œèœå•é€»è¾‘ä¸€è¡Œéƒ½ä¸ç”¨æ”¹ã€‚
  ******************************************************************************/
 
 #include "menu_ui.h"
@@ -13,22 +13,22 @@
 #include <stdio.h>
 
 /**************************************************************************************************
- *                                        ÄÚ²¿±äÁ¿
+ *                                        å†…éƒ¨å˜é‡
  **************************************************************************************************/
 static void (*s_cb_prev)(void)  = NULL;
 static void (*s_cb_next)(void)  = NULL;
 static void (*s_cb_enter)(void) = NULL;
 
 /**************************************************************************************************
- *                                        ÄÚ²¿º¯Êı
+ *                                        å†…éƒ¨å‡½æ•°
  **************************************************************************************************/
-/* °´ÏÂ·´À¡Í³Ò»×ß anime.c£¬±¾ÎÄ¼ş²»³öÏÖÈÎºÎ lv_anim_* */
+/* æŒ‰ä¸‹åé¦ˆç»Ÿä¸€èµ° anime.cï¼Œæœ¬æ–‡ä»¶ä¸å‡ºç°ä»»ä½• lv_anim_* */
 static void on_press(lv_event_t *e) { anime_press(lv_event_get_target(e)); }
 static void on_prev(lv_event_t *e)  { (void)e; if(s_cb_prev  != NULL) { s_cb_prev();  } }
 static void on_next(lv_event_t *e)  { (void)e; if(s_cb_next  != NULL) { s_cb_next();  } }
 static void on_enter(lv_event_t *e) { (void)e; if(s_cb_enter != NULL) { s_cb_enter(); } }
 
-/* ÔìÒ»¸ö·½ĞÎ´¥Ãş°´Å¥£ºÉîÉ«¿¨Æ¬ + ±ß¿ò + ¾ÓÖĞ¼ıÍ· */
+/* é€ ä¸€ä¸ªæ–¹å½¢è§¦æ‘¸æŒ‰é’®ï¼šæ·±è‰²å¡ç‰‡ + è¾¹æ¡† + å±…ä¸­ç®­å¤´ */
 static lv_obj_t *make_btn(lv_obj_t *parent, lv_coord_t x, const char *text, lv_event_cb_t cb)
 {
     lv_obj_t *btn = ui_panel(parent, x, 335, 56, 56, UI_C_CARD);
@@ -48,7 +48,7 @@ static lv_obj_t *make_btn(lv_obj_t *parent, lv_coord_t x, const char *text, lv_e
 }
 
 /**************************************************************************************************
- *                                        ¶ÔÍâº¯Êı
+ *                                        å¯¹å¤–å‡½æ•°
  **************************************************************************************************/
 void menu_ui_set_tap_cb(void (*on_prev_cb)(void), void (*on_next_cb)(void), void (*on_enter_cb)(void))
 {
@@ -69,7 +69,7 @@ void menu_ui_render(uint8_t index, uint8_t total, const char *name)
     char   buf[24];
     int8_t dir;
 
-    /* 1. Ê×´Î½øÈë£º´î½çÃæ + ²¥½øÈë¶¯»­ */
+    /* 1. é¦–æ¬¡è¿›å…¥ï¼šæ­ç•Œé¢ + æ’­è¿›å…¥åŠ¨ç”» */
     if(s_card == NULL)
     {
         lv_obj_t *root;
@@ -79,7 +79,7 @@ void menu_ui_render(uint8_t index, uint8_t total, const char *name)
 
         s_pagebar = ui_title_bar(root, "SELECT", "1/1");
 
-        /* ¿¨Æ¬£ºµãÒ»ÏÂ = ½øÈëµ±Ç°ÈÎÎñ */
+        /* å¡ç‰‡ï¼šç‚¹ä¸€ä¸‹ = è¿›å…¥å½“å‰ä»»åŠ¡ */
         s_card = ui_panel(root, 30, 165, (lv_coord_t)(UI_W - 60), 150, UI_C_CARD);
         lv_obj_set_style_border_width(s_card, 2, 0);
         lv_obj_set_style_border_color(s_card, UI_C_BORDER, 0);
@@ -93,27 +93,27 @@ void menu_ui_render(uint8_t index, uint8_t total, const char *name)
         s_name = ui_text(s_card, UI_FONT_BIG, UI_C_ACCENT);
         ui_text_align(s_name, LV_ALIGN_BOTTOM_MID, 0, -26);
 
-        /* ×óÓÒ¼ıÍ·£ºµãÒ»ÏÂ = ÉÏÒ»¸ö / ÏÂÒ»¸ö */
+        /* å·¦å³ç®­å¤´ï¼šç‚¹ä¸€ä¸‹ = ä¸Šä¸€ä¸ª / ä¸‹ä¸€ä¸ª */
         make_btn(root, 24, "<", on_prev);
         make_btn(root, (lv_coord_t)(UI_W - 24 - 56), ">", on_next);
 
         ui_hint_bar(root, "TAP CARD TO ENTER");
     }
 
-    /* ´Ó±ğµÄÒ³ÃæÇĞ»ØÀ´£ºÖØĞÂ¼¤»î²¢ÖØ²¥½øÈë¶¯»­ */
+    /* ä»åˆ«çš„é¡µé¢åˆ‡å›æ¥ï¼šé‡æ–°æ¿€æ´»å¹¶é‡æ’­è¿›å…¥åŠ¨ç”» */
     if(!ui_page_is_active(s_page))
     {
         ui_page_load(s_page);
         anime_page_in(s_card);
     }
 
-    /* 2. Ã»±ä»¯¾Í²»¶¯£¬Ê¡Ò»´ÎÖØ»æ */
+    /* 2. æ²¡å˜åŒ–å°±ä¸åŠ¨ï¼Œçœä¸€æ¬¡é‡ç»˜ */
     if(index == s_last)
     {
         return;
     }
 
-    /* 3. ¸üĞÂÎÄ×Ö */
+    /* 3. æ›´æ–°æ–‡å­— */
     snprintf(buf, sizeof(buf), "TASK %d", index + 1);
     ui_text_set(s_task, buf);
     ui_text_set(s_name, name);
@@ -121,7 +121,7 @@ void menu_ui_render(uint8_t index, uint8_t total, const char *name)
     snprintf(buf, sizeof(buf), "%d/%d", index + 1, total);
     ui_text_set(s_pagebar, buf);
 
-    /* 4. ²»ÊÇµÚÒ»´ÎµÄ»°£¬²¥ÇĞ»»¶¯»­£¨·½Ïò°´Ë÷Òı±ä»¯ÅĞ¶Ï£© */
+    /* 4. ä¸æ˜¯ç¬¬ä¸€æ¬¡çš„è¯ï¼Œæ’­åˆ‡æ¢åŠ¨ç”»ï¼ˆæ–¹å‘æŒ‰ç´¢å¼•å˜åŒ–åˆ¤æ–­ï¼‰ */
     if(s_last != 0xFF)
     {
         dir = (index > s_last) ? 1 : -1;

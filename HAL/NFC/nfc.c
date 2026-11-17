@@ -1,7 +1,7 @@
 /******************************************************************************
- * ÎÄ¼şÃû   : nfc.c
- * Ğ¾Æ¬     : CH32V307VCT6
- * ËµÃ÷     : NFC ¶Á¿¨Ä£¿éÇı¶¯£¨SPI2£©
+ * æ–‡ä»¶å   : nfc.c
+ * èŠ¯ç‰‡     : CH32V307VCT6
+ * è¯´æ˜     : NFC è¯»å¡æ¨¡å—é©±åŠ¨ï¼ˆSPI2ï¼‰
  ******************************************************************************/
 
 #include "nfc.h"
@@ -10,27 +10,27 @@
 #include "stdio.h"
 
 /**************************************************************************************************
- *                                        ÄÚ²¿º¯Êı
+ *                                        å†…éƒ¨å‡½æ•°
  **************************************************************************************************/
-/* SPI µ¥×Ö½ÚÊÕ·¢ */
+/* SPI å•å­—èŠ‚æ”¶å‘ */
 uint8_t nfc_spi_transfer(uint8_t data)
 {
     while(SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_TXE) == RESET)
     {
-        /* µÈ´ı·¢ËÍ»º³åÇø¿Õ */
+        /* ç­‰å¾…å‘é€ç¼“å†²åŒºç©º */
     }
 
     SPI_I2S_SendData(SPI2, data);
 
     while(SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_RXNE) == RESET)
     {
-        /* µÈ´ı½ÓÊÕÍê³É */
+        /* ç­‰å¾…æ¥æ”¶å®Œæˆ */
     }
 
     return SPI_I2S_ReceiveData(SPI2);
 }
 
-/* ÊÕ·¢Ò»´®Êı¾İ */
+/* æ”¶å‘ä¸€ä¸²æ•°æ® */
 static void nfc_spi_transfer_buf(uint8_t *buf, uint16_t len)
 {
     for(uint16_t i = 0; i < len; i++)
@@ -39,7 +39,7 @@ static void nfc_spi_transfer_buf(uint8_t *buf, uint16_t len)
     }
 }
 
-/* Ö¡Ğ£Ñé£ºÃüÁî×ÖÖ®ºóËùÓĞ×Ö½ÚÀÛ¼ÓÈ¡µÍ 8 Î» */
+/* å¸§æ ¡éªŒï¼šå‘½ä»¤å­—ä¹‹åæ‰€æœ‰å­—èŠ‚ç´¯åŠ å–ä½ 8 ä½ */
 static uint8_t nfc_checksum(const uint8_t *buf, uint16_t len)
 {
     uint8_t sum = 0;
@@ -52,9 +52,9 @@ static uint8_t nfc_checksum(const uint8_t *buf, uint16_t len)
     return sum;
 }
 
-/* ·¢ËÍÃüÁî²¢ÊÕ»ØÏìÓ¦
- * tx£ºÒª·¢ËÍµÄÍêÕûÖ¡£¨²»º¬Ö¡Í· 0x55£¬Ö¡Í·ÓÉ±¾º¯Êı²¹£©
- * rx£ºÏìÓ¦Êı¾İ£¨´ÓÃüÁî×Ö¿ªÊ¼£©
+/* å‘é€å‘½ä»¤å¹¶æ”¶å›å“åº”
+ * txï¼šè¦å‘é€çš„å®Œæ•´å¸§ï¼ˆä¸å«å¸§å¤´ 0x55ï¼Œå¸§å¤´ç”±æœ¬å‡½æ•°è¡¥ï¼‰
+ * rxï¼šå“åº”æ•°æ®ï¼ˆä»å‘½ä»¤å­—å¼€å§‹ï¼‰
  */
 static int nfc_transaction(uint8_t cmd, const uint8_t *payload, uint8_t payload_len,
                            uint8_t *rx, uint8_t rx_len, uint32_t wait_ms)
@@ -71,7 +71,7 @@ static int nfc_transaction(uint8_t cmd, const uint8_t *payload, uint8_t payload_
     }
     tx[3 + payload_len] = nfc_checksum(&tx[1], (uint16_t)(payload_len + 2));
 
-    /* Æ¬Ñ¡À­µÍºóÏÈ·¢ÃüÁî£¬ÑÓÊ±µÈ´ıÄ£¿é´¦Àí£¬ÔÙÔÚÍ¬Ò»Ö¡ÄÚ¶Á»ØÏìÓ¦ */
+    /* ç‰‡é€‰æ‹‰ä½åå…ˆå‘å‘½ä»¤ï¼Œå»¶æ—¶ç­‰å¾…æ¨¡å—å¤„ç†ï¼Œå†åœ¨åŒä¸€å¸§å†…è¯»å›å“åº” */
     GPIO_ResetBits(NFC_CS_GPIO, NFC_CS_PIN);
     nfc_spi_transfer_buf(tx, len);
 
@@ -81,7 +81,7 @@ static int nfc_transaction(uint8_t cmd, const uint8_t *payload, uint8_t payload_
     nfc_spi_transfer_buf(rx, (uint16_t)rx_len);
     GPIO_SetBits(NFC_CS_GPIO, NFC_CS_PIN);
 
-    /* ÏìÓ¦Í·Ğ£Ñé£º0x55 + ÃüÁî¸ßÎ»ÖÃ 1 */
+    /* å“åº”å¤´æ ¡éªŒï¼š0x55 + å‘½ä»¤é«˜ä½ç½® 1 */
     if(rx[0] != NFC_PACKET_START || rx[1] != (uint8_t)(cmd | 0x80))
     {
         return NFC_ERR_NOCARD;
@@ -91,10 +91,10 @@ static int nfc_transaction(uint8_t cmd, const uint8_t *payload, uint8_t payload_
 }
 
 /**************************************************************************************************
- *                                        ¶ÔÍâº¯Êı
+ *                                        å¯¹å¤–å‡½æ•°
  **************************************************************************************************/
 /**
- * @brief  ³õÊ¼»¯ NFC Ä£¿é
+ * @brief  åˆå§‹åŒ– NFC æ¨¡å—
  */
 int nfc_init(void)
 {
@@ -104,7 +104,7 @@ int nfc_init(void)
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
 
-    /* Æ¬Ñ¡£ºÍÆÍìÊä³ö£¬Ä¬ÈÏÀ­¸ß */
+    /* ç‰‡é€‰ï¼šæ¨æŒ½è¾“å‡ºï¼Œé»˜è®¤æ‹‰é«˜ */
     GPIO_InitStructure.GPIO_Pin   = NFC_CS_PIN;
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -137,7 +137,7 @@ int nfc_init(void)
 }
 
 /**
- * @brief  ¿ª¹Ø NFC
+ * @brief  å¼€å…³ NFC
  */
 int nfc_enable(uint8_t enable)
 {
@@ -148,7 +148,7 @@ int nfc_enable(uint8_t enable)
 }
 
 /**
- * @brief  ¶ÁÈ¡Ä£¿é×´Ì¬
+ * @brief  è¯»å–æ¨¡å—çŠ¶æ€
  */
 int nfc_state_read(uint8_t *state)
 {
@@ -170,7 +170,7 @@ int nfc_state_read(uint8_t *state)
 }
 
 /**
- * @brief  Ñ°¿¨
+ * @brief  å¯»å¡
  */
 int nfc_card_find(uint8_t scan_mode)
 {
@@ -182,7 +182,7 @@ int nfc_card_find(uint8_t scan_mode)
         return NFC_ERR_NOCARD;
     }
 
-    /* Õı³£ÏìÓ¦£º0x92 02 00 00 94 */
+    /* æ­£å¸¸å“åº”ï¼š0x92 02 00 00 94 */
     if(rx[2] == 0x02 && rx[3] == 0x00 && rx[4] == 0x00)
     {
         return NFC_OK;
@@ -192,7 +192,7 @@ int nfc_card_find(uint8_t scan_mode)
 }
 
 /**
- * @brief  ¶ÁÒ»¸öÊı¾İ¿é
+ * @brief  è¯»ä¸€ä¸ªæ•°æ®å—
  */
 int nfc_block_read(uint8_t block, uint8_t *data)
 {
@@ -218,7 +218,7 @@ int nfc_block_read(uint8_t block, uint8_t *data)
 }
 
 /**
- * @brief  Ğ´Ò»¸öÊı¾İ¿é
+ * @brief  å†™ä¸€ä¸ªæ•°æ®å—
  */
 int nfc_block_write(uint8_t block, const uint8_t *data)
 {
@@ -247,10 +247,10 @@ int nfc_block_write(uint8_t block, const uint8_t *data)
 }
 
 /**************************************************************************************************
- *                                        ±¦±¦º¯Êı
+ *                                        å®å®å‡½æ•°
  **************************************************************************************************/
 /**
- * @brief  ÓĞÃ»ÓĞ¿¨
+ * @brief  æœ‰æ²¡æœ‰å¡
  */
 uint8_t nfc_card_present(void)
 {

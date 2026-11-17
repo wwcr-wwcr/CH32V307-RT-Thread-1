@@ -5,14 +5,14 @@
 #include <stdint.h>
 
 /**
- * @brief  äÖÈ¾"Âó¿Ë·ç / »·¾³¹â"Ê±¼äÖáÒ³Ãæ
- * @param  mic    Âó¿Ë·ç·å·åÖµ 0~4095
- * @param  lux    VEML7700 ÕÕ¶È lux
- * @param  count  ÊıÂë¹Üµ±Ç°Öµ£¨9999 µ¹Êı£©
- * @param  run    1 = ²ÉÑù/½ÚÅÄÔÚÅÜ
- * @param  music  1 = ÑïÉùÆ÷ÔÚ·Å¸è
- * @param  beat   1 = ·äÃùÆ÷½ÚÅÄÆ÷¿ª×Å
- * @param  seq    ²ÉÑùĞòºÅ£¬±äÁË²ÅÍùÇúÏßÀïÈûÒ»¸öµã
+ * @brief  æ¸²æŸ“"éº¦å…‹é£ / ç¯å¢ƒå…‰"æ—¶é—´è½´é¡µé¢
+ * @param  mic    éº¦å…‹é£å³°å³°å€¼ 0~4095
+ * @param  lux    VEML7700 ç…§åº¦ lux
+ * @param  count  æ•°ç ç®¡å½“å‰å€¼ï¼ˆ9999 å€’æ•°ï¼‰
+ * @param  run    1 = é‡‡æ ·/èŠ‚æ‹åœ¨è·‘
+ * @param  music  1 = æ‰¬å£°å™¨åœ¨æ”¾æ­Œ
+ * @param  beat   1 = èœ‚é¸£å™¨èŠ‚æ‹å™¨å¼€ç€
+ * @param  seq    é‡‡æ ·åºå·ï¼Œå˜äº†æ‰å¾€æ›²çº¿é‡Œå¡ä¸€ä¸ªç‚¹
  */
 void example_ui_render(uint16_t mic, uint16_t lux, uint16_t count,
                        uint8_t run, uint8_t music, uint8_t beat, uint8_t seq);

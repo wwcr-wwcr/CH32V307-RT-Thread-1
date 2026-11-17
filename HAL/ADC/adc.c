@@ -1,7 +1,7 @@
 /******************************************************************************
- * ÎÄ¼şÃû   : adc.c
- * Ğ¾Æ¬     : CH32V307VCT6
- * ËµÃ÷     : ADC1 µ¥´Î×ª»»Çı¶¯
+ * æ–‡ä»¶å   : adc.c
+ * èŠ¯ç‰‡     : CH32V307VCT6
+ * è¯´æ˜     : ADC1 å•æ¬¡è½¬æ¢é©±åŠ¨
  ******************************************************************************/
 
 #include "adc.h"
@@ -9,16 +9,16 @@
 #include "rthw.h"
 
 /**************************************************************************************************
- *                                        È«¾Ö±äÁ¿
+ *                                        å…¨å±€å˜é‡
  **************************************************************************************************/
-int16_t Calibrattion_Val = 0;       /* ADC1 Ğ£×¼Öµ */
+int16_t Calibrattion_Val = 0;       /* ADC1 æ ¡å‡†å€¼ */
 
 static uint8_t s_adc_inited = 0;
 
 /**************************************************************************************************
- *                                        ÄÚ²¿º¯Êı
+ *                                        å†…éƒ¨å‡½æ•°
  **************************************************************************************************/
-/* Í¨µÀºÅ -> Òı½Å£¬·µ»Ø 0 ±íÊ¾¸ÃÍ¨µÀ±¾°åÃ»ÓĞÒı³ö */
+/* é€šé“å· -> å¼•è„šï¼Œè¿”å› 0 è¡¨ç¤ºè¯¥é€šé“æœ¬æ¿æ²¡æœ‰å¼•å‡º */
 static uint8_t adc_pin_of_channel(uint8_t ch, GPIO_TypeDef **port, uint16_t *pin)
 {
     if(ch <= ADC_Channel_7)                         /* PA0~PA7 */
@@ -45,19 +45,19 @@ static uint8_t adc_pin_of_channel(uint8_t ch, GPIO_TypeDef **port, uint16_t *pin
     return 0;
 }
 
-/* Æô¶¯Ò»´Î×ª»»²¢µÈ´ı½á¹û */
-/* µÈ EOC µÄ×î³¤Ñ­»·´ÎÊı¡£ADC Ò»´Î×ª»»ÔÚ 9MHz ADCCLK ÏÂÔ¼ 4.5us£¬
- * ÕâÀï¸øµ½ ~5ms£¬Õı³£Çé¿öÁ¬ÁãÍ·¶¼ÓÃ²»µ½£¬³¬Ê±Ö»¿ÉÄÜÊÇ ADC1 ±»±ğµÄÄ£¿é¸Ä¹ıÅäÖÃ¡£ */
+/* å¯åŠ¨ä¸€æ¬¡è½¬æ¢å¹¶ç­‰å¾…ç»“æœ */
+/* ç­‰ EOC çš„æœ€é•¿å¾ªç¯æ¬¡æ•°ã€‚ADC ä¸€æ¬¡è½¬æ¢åœ¨ 9MHz ADCCLK ä¸‹çº¦ 4.5usï¼Œ
+ * è¿™é‡Œç»™åˆ° ~5msï¼Œæ­£å¸¸æƒ…å†µè¿é›¶å¤´éƒ½ç”¨ä¸åˆ°ï¼Œè¶…æ—¶åªå¯èƒ½æ˜¯ ADC1 è¢«åˆ«çš„æ¨¡å—æ”¹è¿‡é…ç½®ã€‚ */
 #define ADC_EOC_TIMEOUT     200000u
 
 /*
- * ×öÒ»´Î×ª»»²¢µÈ´ı½áÊø¡£
+ * åšä¸€æ¬¡è½¬æ¢å¹¶ç­‰å¾…ç»“æŸã€‚
  *
- * ÎªÊ²Ã´Òª¼Ó³¬Ê± + ×ÔÓú£º
- *     adc_dma.c£¨Ê¾²¨Æ÷ / FFT£©ÓÃµÄÊÇÍ¬Ò»¸ö ADC1£¬Ëü°Ñ ADC1 Åä³É T3_TRGO Íâ²¿´¥·¢
- *     + ADC_DMACmd Ö®ºó²»»¹Ô­¡£ÕâÊ±ºò±¾º¯ÊıÀïµÄ ADC_SoftwareStartConvCmd ¸ù±¾·¢²»³ö
- *     ×ª»»£¬Ô­À´ÄÇ¸öÎŞÏŞµÈ EOC µÄ while »á°ÑÕû¸öÏß³ÌÓÀ¾Ã¿¨ËÀ£¨K4 ¶¼ÍË²»³öÀ´£©¡£
- *     ËùÒÔ³¬Ê±¾ÍÈÏÎª ADC1 ±»ÇÀ¹ıÅäÖÃ£º¹ØµôÍâ²¿´¥·¢ºÍ DMA£¬ÖØĞÂ³õÊ¼»¯ÔÙÊÔÒ»´Î¡£
+ * ä¸ºä»€ä¹ˆè¦åŠ è¶…æ—¶ + è‡ªæ„ˆï¼š
+ *     adc_dma.cï¼ˆç¤ºæ³¢å™¨ / FFTï¼‰ç”¨çš„æ˜¯åŒä¸€ä¸ª ADC1ï¼Œå®ƒæŠŠ ADC1 é…æˆ T3_TRGO å¤–éƒ¨è§¦å‘
+ *     + ADC_DMACmd ä¹‹åä¸è¿˜åŸã€‚è¿™æ—¶å€™æœ¬å‡½æ•°é‡Œçš„ ADC_SoftwareStartConvCmd æ ¹æœ¬å‘ä¸å‡º
+ *     è½¬æ¢ï¼ŒåŸæ¥é‚£ä¸ªæ— é™ç­‰ EOC çš„ while ä¼šæŠŠæ•´ä¸ªçº¿ç¨‹æ°¸ä¹…å¡æ­»ï¼ˆK4 éƒ½é€€ä¸å‡ºæ¥ï¼‰ã€‚
+ *     æ‰€ä»¥è¶…æ—¶å°±è®¤ä¸º ADC1 è¢«æŠ¢è¿‡é…ç½®ï¼šå…³æ‰å¤–éƒ¨è§¦å‘å’Œ DMAï¼Œé‡æ–°åˆå§‹åŒ–å†è¯•ä¸€æ¬¡ã€‚
  */
 static uint16_t adc_convert_once(uint8_t ch)
 {
@@ -69,7 +69,7 @@ static uint16_t adc_convert_once(uint8_t ch)
         uint32_t guard = ADC_EOC_TIMEOUT;
 
         ADC_RegularChannelConfig(ADC1, ch, 1, ADC_DEFAULT_SAMPLE_TIME);
-        ADC_ClearFlag(ADC1, ADC_FLAG_EOC);          /* ÇåµôÉÏÒ»ÂÖÃ»È¡×ßµÄ±êÖ¾ */
+        ADC_ClearFlag(ADC1, ADC_FLAG_EOC);          /* æ¸…æ‰ä¸Šä¸€è½®æ²¡å–èµ°çš„æ ‡å¿— */
         ADC_SoftwareStartConvCmd(ADC1, ENABLE);
 
         while(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == RESET)
@@ -86,20 +86,20 @@ static uint16_t adc_convert_once(uint8_t ch)
             return s_last;
         }
 
-        /* ³¬Ê±£º°ÑÍâ²¿´¥·¢ºÍ DMA ¹Øµô£¬ÖØĞÂÅä»Øµ¥´ÎÈí¼ş´¥·¢Ä£Ê½£¬ÔÙÊÔÒ»´Î */
+        /* è¶…æ—¶ï¼šæŠŠå¤–éƒ¨è§¦å‘å’Œ DMA å…³æ‰ï¼Œé‡æ–°é…å›å•æ¬¡è½¯ä»¶è§¦å‘æ¨¡å¼ï¼Œå†è¯•ä¸€æ¬¡ */
         ADC_DMACmd(ADC1, DISABLE);
         ADC_ExternalTrigConvCmd(ADC1, DISABLE);
         (void)adc_init();
     }
 
-    return s_last;                                  /* Á½´Î¶¼Ã»³É¾Í·µ»ØÉÏÒ»´ÎµÄÖµ */
+    return s_last;                                  /* ä¸¤æ¬¡éƒ½æ²¡æˆå°±è¿”å›ä¸Šä¸€æ¬¡çš„å€¼ */
 }
 
 /**************************************************************************************************
- *                                        ¶ÔÍâº¯Êı
+ *                                        å¯¹å¤–å‡½æ•°
  **************************************************************************************************/
 /**
- * @brief  ³õÊ¼»¯ ADC1
+ * @brief  åˆå§‹åŒ– ADC1
  */
 int adc_init(void)
 {
@@ -107,13 +107,13 @@ int adc_init(void)
 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
 
-    /* PCLK2 = 72MHz£¨APB2 ¶ş·ÖÆµ£©£¬ADC /8 = 9MHz£¬µÍÓÚ 14MHz ÉÏÏŞ */
+    /* PCLK2 = 72MHzï¼ˆAPB2 äºŒåˆ†é¢‘ï¼‰ï¼ŒADC /8 = 9MHzï¼Œä½äº 14MHz ä¸Šé™ */
     RCC_ADCCLKConfig(RCC_PCLK2_Div8);
 
     ADC_DeInit(ADC1);
     ADC_InitStructure.ADC_Mode               = ADC_Mode_Independent;
     ADC_InitStructure.ADC_ScanConvMode       = DISABLE;
-    ADC_InitStructure.ADC_ContinuousConvMode = DISABLE;     /* µ¥´Î×ª»» */
+    ADC_InitStructure.ADC_ContinuousConvMode = DISABLE;     /* å•æ¬¡è½¬æ¢ */
     ADC_InitStructure.ADC_ExternalTrigConv   = ADC_ExternalTrigConv_None;
     ADC_InitStructure.ADC_DataAlign          = ADC_DataAlign_Right;
     ADC_InitStructure.ADC_NbrOfChannel       = 1;
@@ -121,16 +121,16 @@ int adc_init(void)
 
     ADC_Cmd(ADC1, ENABLE);
 
-    ADC_BufferCmd(ADC1, DISABLE);                   /* Ğ£×¼Ç°±ØĞë¹Ø±Õ Buffer */
+    ADC_BufferCmd(ADC1, DISABLE);                   /* æ ¡å‡†å‰å¿…é¡»å…³é—­ Buffer */
     ADC_ResetCalibration(ADC1);
     while(ADC_GetResetCalibrationStatus(ADC1))
     {
-        /* µÈ´ı¸´Î»Ğ£×¼Íê³É */
+        /* ç­‰å¾…å¤ä½æ ¡å‡†å®Œæˆ */
     }
     ADC_StartCalibration(ADC1);
     while(ADC_GetCalibrationStatus(ADC1))
     {
-        /* µÈ´ıĞ£×¼Íê³É */
+        /* ç­‰å¾…æ ¡å‡†å®Œæˆ */
     }
     Calibrattion_Val = Get_CalibrationValue(ADC1);
 
@@ -140,7 +140,7 @@ int adc_init(void)
 }
 
 /**
- * @brief  ÅäÖÃÍ¨µÀ¶ÔÓ¦µÄÒı½Å
+ * @brief  é…ç½®é€šé“å¯¹åº”çš„å¼•è„š
  */
 int adc_channel_init(uint8_t ch)
 {
@@ -170,7 +170,7 @@ int adc_channel_init(uint8_t ch)
 }
 
 /**
- * @brief  µ¥´Î²ÉÑù
+ * @brief  å•æ¬¡é‡‡æ ·
  */
 uint16_t adc_read(uint8_t ch)
 {
@@ -181,7 +181,7 @@ uint16_t adc_read(uint8_t ch)
         adc_init();
     }
 
-    /* Í¨µÀ 0~7 Ö®ÍâµÚÒ»´ÎÊ¹ÓÃÊ±×Ô¶¯ÅäÖÃÒı½Å£¬±ÜÃâÍü¼Ç³õÊ¼»¯ */
+    /* é€šé“ 0~7 ä¹‹å¤–ç¬¬ä¸€æ¬¡ä½¿ç”¨æ—¶è‡ªåŠ¨é…ç½®å¼•è„šï¼Œé¿å…å¿˜è®°åˆå§‹åŒ– */
     (void)adc_channel_init(ch);
 
     val = adc_convert_once(ch);
@@ -190,7 +190,7 @@ uint16_t adc_read(uint8_t ch)
 }
 
 /**
- * @brief  ¶à´Î²ÉÑùÈ¡Æ½¾ù
+ * @brief  å¤šæ¬¡é‡‡æ ·å–å¹³å‡
  */
 uint16_t adc_read_avg(uint8_t ch, uint8_t times)
 {
@@ -208,7 +208,7 @@ uint16_t adc_read_avg(uint8_t ch, uint8_t times)
 
     (void)adc_channel_init(ch);
 
-    (void)adc_convert_once(ch);             /* ¶ªµôµÚÒ»´Î£¬µÈÄÚ²¿²ÉÑùµçÈİÎÈ¶¨ */
+    (void)adc_convert_once(ch);             /* ä¸¢æ‰ç¬¬ä¸€æ¬¡ï¼Œç­‰å†…éƒ¨é‡‡æ ·ç”µå®¹ç¨³å®š */
     rt_hw_us_delay(50);
 
     for(uint8_t i = 0; i < times; i++)
@@ -221,7 +221,7 @@ uint16_t adc_read_avg(uint8_t ch, uint8_t times)
 }
 
 /**
- * @brief  ADC Öµ»»ËãµçÑ¹
+ * @brief  ADC å€¼æ¢ç®—ç”µå‹
  */
 uint32_t adc_to_mv(uint16_t val)
 {
@@ -229,7 +229,7 @@ uint32_t adc_to_mv(uint16_t val)
 }
 
 /**
- * @brief  µ¥´Î²ÉÑù²¢»»ËãµçÑ¹
+ * @brief  å•æ¬¡é‡‡æ ·å¹¶æ¢ç®—ç”µå‹
  */
 uint32_t adc_read_mv(uint8_t ch)
 {
@@ -237,7 +237,7 @@ uint32_t adc_read_mv(uint8_t ch)
 }
 
 /**
- * @brief  ¶à´Î²ÉÑùÆ½¾ùºó»»ËãµçÑ¹
+ * @brief  å¤šæ¬¡é‡‡æ ·å¹³å‡åæ¢ç®—ç”µå‹
  */
 uint32_t adc_read_avg_mv(uint8_t ch, uint8_t times)
 {
@@ -245,7 +245,7 @@ uint32_t adc_read_avg_mv(uint8_t ch, uint8_t times)
 }
 
 /**
- * @brief  ²ÉÑùÖµĞ£×¼
+ * @brief  é‡‡æ ·å€¼æ ¡å‡†
  */
 uint16_t adc_value_calibrate(int16_t val)
 {
@@ -264,7 +264,7 @@ uint16_t adc_value_calibrate(int16_t val)
 }
 
 /**
- * @brief  ²ÉÑù²¢»»Ëã³É°Ù·Ö±È
+ * @brief  é‡‡æ ·å¹¶æ¢ç®—æˆç™¾åˆ†æ¯”
  */
 uint8_t adc_percent(uint8_t ch)
 {

@@ -1,6 +1,6 @@
 /******************************************************************************
- * ÎÄ¼şÃû   : common.c
- * ËµÃ÷     : Í¨ÓÃ¿Ø¼ş·â×°£¨º¬ÇúÏßÍ¼ ui_plot_*£©
+ * æ–‡ä»¶å   : common.c
+ * è¯´æ˜     : é€šç”¨æ§ä»¶å°è£…ï¼ˆå«æ›²çº¿å›¾ ui_plot_*ï¼‰
  ******************************************************************************/
 
 #include "common.h"
@@ -12,10 +12,10 @@
 #include <stdio.h>
 
 /**************************************************************************************************
- *                                        ¶ÔÍâº¯Êı
+ *                                        å¯¹å¤–å‡½æ•°
  **************************************************************************************************/
 /**
- * @brief  ´´½¨¶ÀÁ¢Ò³Ãæ
+ * @brief  åˆ›å»ºç‹¬ç«‹é¡µé¢
  */
 lv_obj_t *ui_page_create(void)
 {
@@ -33,7 +33,7 @@ lv_obj_t *ui_page_create(void)
 }
 
 /**
- * @brief  ÇĞ»»Ò³Ãæ
+ * @brief  åˆ‡æ¢é¡µé¢
  */
 void ui_page_load(lv_obj_t *page)
 {
@@ -43,9 +43,9 @@ void ui_page_load(lv_obj_t *page)
     }
 }
 
-/* µİ¹éÇåµôÕûÒ³ËùÓĞ¶ÔÏóÉÏµÄ¶¯»­¡£
- * LVGL µÄ¶¯»­Ö»¼Ç×Å¶ÔÏóÂãÖ¸Õë£¬²»ÏÈÉ¾¾ÍÖ±½Ó lv_obj_del£¬¶¯»­¶¨Ê±Æ÷»á²Èµ½
- * ÒÑ¾­ÊÍ·ÅµÄÄÚ´æ¡£ */
+/* é€’å½’æ¸…æ‰æ•´é¡µæ‰€æœ‰å¯¹è±¡ä¸Šçš„åŠ¨ç”»ã€‚
+ * LVGL çš„åŠ¨ç”»åªè®°ç€å¯¹è±¡è£¸æŒ‡é’ˆï¼Œä¸å…ˆåˆ å°±ç›´æ¥ lv_obj_delï¼ŒåŠ¨ç”»å®šæ—¶å™¨ä¼šè¸©åˆ°
+ * å·²ç»é‡Šæ”¾çš„å†…å­˜ã€‚ */
 static void page_anim_del(lv_obj_t *obj)
 {
     uint32_t i;
@@ -60,10 +60,10 @@ static void page_anim_del(lv_obj_t *obj)
 }
 
 /**
- * @brief  Ïú»ÙÒ»¸öÒ³Ãæ²¢¹é»¹ LVGL ¶Ñ
- * @param  page Ò³ÃæÖ¸ÕëµÄµØÖ·£¬É¾Íê»áÖÃ NULL
- * @note   Ö»ÄÜÔÚ UI Ïß³Ìµ÷ÓÃ£»µ÷ÓÃÇ°±ØĞëÏÈ°Ñ±ğµÄÒ³Ãæ load ÉÏÈ¥£¬
- *         ²»ÄÜÉ¾µ±Ç°ÕıÔÚÏÔÊ¾µÄ screen¡£
+ * @brief  é”€æ¯ä¸€ä¸ªé¡µé¢å¹¶å½’è¿˜ LVGL å †
+ * @param  page é¡µé¢æŒ‡é’ˆçš„åœ°å€ï¼Œåˆ å®Œä¼šç½® NULL
+ * @note   åªèƒ½åœ¨ UI çº¿ç¨‹è°ƒç”¨ï¼›è°ƒç”¨å‰å¿…é¡»å…ˆæŠŠåˆ«çš„é¡µé¢ load ä¸Šå»ï¼Œ
+ *         ä¸èƒ½åˆ å½“å‰æ­£åœ¨æ˜¾ç¤ºçš„ screenã€‚
  */
 void ui_page_destroy(lv_obj_t **page)
 {
@@ -78,7 +78,7 @@ void ui_page_destroy(lv_obj_t **page)
 }
 
 /**
- * @brief  Ò³ÃæÊÇ·ñÕıÔÚÏÔÊ¾
+ * @brief  é¡µé¢æ˜¯å¦æ­£åœ¨æ˜¾ç¤º
  */
 int ui_page_is_active(lv_obj_t *page)
 {
@@ -91,7 +91,7 @@ int ui_page_is_active(lv_obj_t *page)
 }
 
 /**
- * @brief  µ±Ç°»î¶¯ÆÁÄ»
+ * @brief  å½“å‰æ´»åŠ¨å±å¹•
  */
 lv_obj_t *ui_root(void)
 {
@@ -115,7 +115,7 @@ lv_obj_t *ui_root(void)
 }
 
 /**
- * @brief  ±êÌâÀ¸
+ * @brief  æ ‡é¢˜æ 
  */
 lv_obj_t *ui_title_bar(lv_obj_t *root, const char *title, const char *right)
 {
@@ -123,7 +123,7 @@ lv_obj_t *ui_title_bar(lv_obj_t *root, const char *title, const char *right)
     lv_obj_t *lbl;
     lv_obj_t *rbl;
 
-    /* Ğü¸¡½ºÄÒ£¬²»ÔÙÊÇÒ»ÌõÂú¿íµÄÉ«¿é */
+    /* æ‚¬æµ®èƒ¶å›Šï¼Œä¸å†æ˜¯ä¸€æ¡æ»¡å®½çš„è‰²å— */
     bar = ui_panel(root, 12, 10, (lv_coord_t)(UI_W - 24), (lv_coord_t)(UI_TITLE_H - 10), UI_C_CARD);
     lv_obj_set_style_radius(bar, UI_RADIUS, 0);
     lv_obj_set_style_bg_opa(bar, 242, 0);
@@ -142,14 +142,14 @@ lv_obj_t *ui_title_bar(lv_obj_t *root, const char *title, const char *right)
 }
 
 /**
- * @brief  µ×²¿ÌáÊ¾Ìõ
+ * @brief  åº•éƒ¨æç¤ºæ¡
  */
 lv_obj_t *ui_hint_bar(lv_obj_t *root, const char *text)
 {
     lv_obj_t *bar;
     lv_obj_t *lbl;
 
-    /* µ×²¿ÌáÊ¾£ºÍ¬Ñù×ö³ÉĞü¸¡½ºÄÒ£¬Áô³ö±ß¾à */
+    /* åº•éƒ¨æç¤ºï¼šåŒæ ·åšæˆæ‚¬æµ®èƒ¶å›Šï¼Œç•™å‡ºè¾¹è· */
     bar = ui_panel(root, 24, (lv_coord_t)(UI_H - 46), (lv_coord_t)(UI_W - 48), 36, UI_C_CARD);
     lv_obj_set_style_radius(bar, 18, 0);
     lv_obj_set_style_bg_opa(bar, 215, 0);
@@ -164,7 +164,7 @@ lv_obj_t *ui_hint_bar(lv_obj_t *root, const char *text)
 }
 
 /**
- * @brief  ÈİÆ÷
+ * @brief  å®¹å™¨
  */
 lv_obj_t *ui_panel(lv_obj_t *parent, lv_coord_t x, lv_coord_t y,
                    lv_coord_t w, lv_coord_t h, lv_color_t bg)
@@ -184,7 +184,7 @@ lv_obj_t *ui_panel(lv_obj_t *parent, lv_coord_t x, lv_coord_t y,
 }
 
 /**
- * @brief  ÎÄ×Ö
+ * @brief  æ–‡å­—
  */
 lv_obj_t *ui_text(lv_obj_t *parent, const lv_font_t *font, lv_color_t color)
 {
@@ -199,7 +199,7 @@ lv_obj_t *ui_text(lv_obj_t *parent, const lv_font_t *font, lv_color_t color)
 }
 
 /**
- * @brief  ÉèÖÃÎÄ×Ö
+ * @brief  è®¾ç½®æ–‡å­—
  */
 void ui_text_set(lv_obj_t *label, const char *text)
 {
@@ -215,7 +215,7 @@ void ui_text_set(lv_obj_t *label, const char *text)
         text = "";
     }
 
-    /* ÄÚÈİÃ»±ä¾Í²»Éè£¬±ÜÃâÃ¿Ö¡ÎŞÎ½ÖØ»æ */
+    /* å†…å®¹æ²¡å˜å°±ä¸è®¾ï¼Œé¿å…æ¯å¸§æ— è°“é‡ç»˜ */
     old = lv_label_get_text(label);
     if((old != NULL) && (strcmp(old, text) == 0))
     {
@@ -226,7 +226,7 @@ void ui_text_set(lv_obj_t *label, const char *text)
 }
 
 /**
- * @brief  ¶ÔÆë
+ * @brief  å¯¹é½
  */
 void ui_text_align(lv_obj_t *label, lv_align_t align, lv_coord_t x, lv_coord_t y)
 {
@@ -239,7 +239,7 @@ void ui_text_align(lv_obj_t *label, lv_align_t align, lv_coord_t x, lv_coord_t y
 }
 
 /**
- * @brief  Ò»ĞĞ"±êÇ© + ÊıÖµ"
+ * @brief  ä¸€è¡Œ"æ ‡ç­¾ + æ•°å€¼"
  */
 lv_obj_t *ui_row(lv_obj_t *parent, lv_coord_t y, const char *label_text)
 {
@@ -258,9 +258,9 @@ lv_obj_t *ui_row(lv_obj_t *parent, lv_coord_t y, const char *label_text)
 }
 
 /*********************************************************************
- *                              ½»»¥¿Ø¼ş
+ *                              äº¤äº’æ§ä»¶
  *********************************************************************/
-/* »¬Ìõ£º±àºÅ´Ó user_data ½øÀ´£¬Í³Ò»Í¶¸øÈÎÎñÏß³Ì */
+/* æ»‘æ¡ï¼šç¼–å·ä» user_data è¿›æ¥ï¼Œç»Ÿä¸€æŠ•ç»™ä»»åŠ¡çº¿ç¨‹ */
 static void on_slider(lv_event_t *e)
 {
     lv_obj_t *sl = lv_event_get_target(e);
@@ -269,7 +269,7 @@ static void on_slider(lv_event_t *e)
     ui_task_event(id, (int32_t)lv_slider_get_value(sl));
 }
 
-/* °´Å¥£ºµãÒ»ÏÂ */
+/* æŒ‰é’®ï¼šç‚¹ä¸€ä¸‹ */
 static void on_button(lv_event_t *e)
 {
     uint8_t id = (uint8_t)(uintptr_t)lv_event_get_user_data(e);
@@ -277,7 +277,7 @@ static void on_button(lv_event_t *e)
     ui_task_event(id, 0);
 }
 
-/* °´Å¥£º°´ÏÂ»Øµ¯ */
+/* æŒ‰é’®ï¼šæŒ‰ä¸‹å›å¼¹ */
 static void on_button_press(lv_event_t *e)
 {
     anime_press(lv_event_get_target(e));
@@ -408,7 +408,7 @@ lv_obj_t *ui_card(lv_obj_t *parent, lv_coord_t x, lv_coord_t y,
 }
 
 /*********************************************************************
- *                              ÊıÖµÏÔÊ¾
+ *                              æ•°å€¼æ˜¾ç¤º
  *********************************************************************/
 void ui_text_int(lv_obj_t *label, int32_t value)
 {
@@ -440,7 +440,7 @@ void ui_text_x10(lv_obj_t *label, int32_t value_x10, const char *unit)
     uint32_t    mag;
     const char *sign = "";
 
-    /* ÏÈÈ¡¾ø¶ÔÖµ£ºÖ±½Ó -value ÔÚ INT32_MIN Ê±»áÒç³ö */
+    /* å…ˆå–ç»å¯¹å€¼ï¼šç›´æ¥ -value åœ¨ INT32_MIN æ—¶ä¼šæº¢å‡º */
     if(value_x10 < 0)
     {
         mag  = (uint32_t)(-(value_x10 + 1)) + 1u;
@@ -474,30 +474,30 @@ void ui_text_pct(lv_obj_t *label, uint8_t percent)
 }
 
 /**************************************************************************************************
- *                                        ÇúÏßÍ¼£¨×ø±êÖá + ÕÛÏß£©
+ *                                        æ›²çº¿å›¾ï¼ˆåæ ‡è½´ + æŠ˜çº¿ï¼‰
  *
- * ×Ô»æÊµÏÖ£ºLV_EVENT_DRAW_MAIN + lv_draw_line£¬²»½¨ canvas
- * £¨Ò»¿é 256x120 µÄ canvas Òª 61KB ÏÔ´æ£¬°å×Ó×Ü¹²²Å 96KB£©¡£
- * Ö§³ÖÊµÏß/ĞéÏß¡¢ÈÎÒâÑÕÉ«¡¢¶àÍ¨µÀ¡¢Ã¿Í¨µÀ¶ÀÁ¢Á¿³Ì¡£
+ * è‡ªç»˜å®ç°ï¼šLV_EVENT_DRAW_MAIN + lv_draw_lineï¼Œä¸å»º canvas
+ * ï¼ˆä¸€å— 256x120 çš„ canvas è¦ 61KB æ˜¾å­˜ï¼Œæ¿å­æ€»å…±æ‰ 96KBï¼‰ã€‚
+ * æ”¯æŒå®çº¿/è™šçº¿ã€ä»»æ„é¢œè‰²ã€å¤šé€šé“ã€æ¯é€šé“ç‹¬ç«‹é‡ç¨‹ã€‚
  *
- * Ïß³ÌÄ£ĞÍ ¡ª¡ª ×¢Òâ£ºÕâÊÇ common Àï¡¾Î¨Ò»ÔÊĞíÂß¼­²ãµ÷ÓÃ¡¿µÄÁ½¸öº¯Êı£¬
- * ÒòÎªËüÃÇÖ»Ğ´Êı×Ö¡¢Ò»¸ö lv_ ¶¼²»Åö£º
- *     task Ïß³Ì -> ui_plot_push() / ui_plot_clear()
- *     UI  Ïß³Ì -> ui_plot_create / axis / line / refresh / delete
- *     »æÖÆ     -> plot_draw_cb()£¨DRAW_MAIN »Øµ÷£¬ÅÜÔÚ UI Ïß³Ì£©
+ * çº¿ç¨‹æ¨¡å‹ â€”â€” æ³¨æ„ï¼šè¿™æ˜¯ common é‡Œã€å”¯ä¸€å…è®¸é€»è¾‘å±‚è°ƒç”¨ã€‘çš„ä¸¤ä¸ªå‡½æ•°ï¼Œ
+ * å› ä¸ºå®ƒä»¬åªå†™æ•°å­—ã€ä¸€ä¸ª lv_ éƒ½ä¸ç¢°ï¼š
+ *     task çº¿ç¨‹ -> ui_plot_push() / ui_plot_clear()
+ *     UI  çº¿ç¨‹ -> ui_plot_create / axis / line / refresh / delete
+ *     ç»˜åˆ¶     -> plot_draw_cb()ï¼ˆDRAW_MAIN å›è°ƒï¼Œè·‘åœ¨ UI çº¿ç¨‹ï¼‰
  *
- * Èı¸ö¿Ó£¨¶¼ÔÚÏÂÃæ×¢ÊÍÀï±êÁË£©£º
- *   1) lv_draw_line Òª¡¾ÆÁÄ»¾ø¶Ô×ø±ê¡¿£¬ÏÈ lv_obj_get_coords ¼ÓÆ«ÒÆ£»
- *   2) ĞéÏßÏàÎ»±ØĞë¿çµãÁ¬Ğø£¬·ñÔò 4px µÄµã¼ä¾à»áÈÃĞéÏß¿´ÆğÀ´ÏñÊµÏß£»
- *   3) ¸´ºÏ×ÖÃæÁ¿Ã»Ğ´µÄ×Ö¶Î»á±»ÇåÁã£¬ËùÒÔ"ÏÔÊ¾"ÓÃ hidden ·´×Å±ê¡£
+ * ä¸‰ä¸ªå‘ï¼ˆéƒ½åœ¨ä¸‹é¢æ³¨é‡Šé‡Œæ ‡äº†ï¼‰ï¼š
+ *   1) lv_draw_line è¦ã€å±å¹•ç»å¯¹åæ ‡ã€‘ï¼Œå…ˆ lv_obj_get_coords åŠ åç§»ï¼›
+ *   2) è™šçº¿ç›¸ä½å¿…é¡»è·¨ç‚¹è¿ç»­ï¼Œå¦åˆ™ 4px çš„ç‚¹é—´è·ä¼šè®©è™šçº¿çœ‹èµ·æ¥åƒå®çº¿ï¼›
+ *   3) å¤åˆå­—é¢é‡æ²¡å†™çš„å­—æ®µä¼šè¢«æ¸…é›¶ï¼Œæ‰€ä»¥"æ˜¾ç¤º"ç”¨ hidden åç€æ ‡ã€‚
  **************************************************************************************************/
 
-#define PLOT_DEF_DASH       4       /* ĞéÏßÄ¬ÈÏÊµÏß¶Î³¤ */
-#define PLOT_DEF_GAP        3       /* ĞéÏßÄ¬ÈÏ¼ä¸ô³¤ */
-#define PLOT_GRID_INSET     2       /* ÇúÏß»æÖÆÇøÏà¶ÔÍâ¿òÄÚËõ£¬ÃâµÃÑ¹×¡±ß¿ò */
+#define PLOT_DEF_DASH       4       /* è™šçº¿é»˜è®¤å®çº¿æ®µé•¿ */
+#define PLOT_DEF_GAP        3       /* è™šçº¿é»˜è®¤é—´éš”é•¿ */
+#define PLOT_GRID_INSET     2       /* æ›²çº¿ç»˜åˆ¶åŒºç›¸å¯¹å¤–æ¡†å†…ç¼©ï¼Œå…å¾—å‹ä½è¾¹æ¡† */
 
 /**************************************************************************************************
- *                                        Êı¾İ½á¹¹
+ *                                        æ•°æ®ç»“æ„
  **************************************************************************************************/
 struct ui_plot
 {
@@ -509,31 +509,31 @@ struct ui_plot
 
     ui_plot_line_t cfg[UI_PLOT_CH_MAX];
 
-    /* ÈÎÎñÏß³ÌĞ´µÄÔ­Ê¼Êı¾İ */
+    /* ä»»åŠ¡çº¿ç¨‹å†™çš„åŸå§‹æ•°æ® */
     int16_t        raw[UI_PLOT_CH_MAX][UI_PLOT_POINT_MAX];
     uint16_t       raw_cnt[UI_PLOT_CH_MAX];
 
-    /* UI Ïß³Ì¿ìÕÕ£¨»æÖÆÖ»¶ÁÕâ·İ£¬±£Ö¤²»»á±»°ëÂ·¸Äµô£© */
+    /* UI çº¿ç¨‹å¿«ç…§ï¼ˆç»˜åˆ¶åªè¯»è¿™ä»½ï¼Œä¿è¯ä¸ä¼šè¢«åŠè·¯æ”¹æ‰ï¼‰ */
     int16_t        val[UI_PLOT_CH_MAX][UI_PLOT_POINT_MAX];
     uint16_t       cnt[UI_PLOT_CH_MAX];
 
-    /* ÓĞĞÂÊı¾İ²ÅÖØ»æ¡£²»¼ÓÕâ¸öµÄ»°Ã¿Ö¡¶¼ÈÃ LVGL ÖØ»­ 256x120£¬
-     * Á½¿éÍ¼¼ÓÆğÀ´ 12 Íò¸öÏñËØ£¬ÆÁ¸ù±¾Ë¢²»¹ıÀ´£¬½çÃæ»áÃ÷ÏÔÍÏÖ¡ */
+    /* æœ‰æ–°æ•°æ®æ‰é‡ç»˜ã€‚ä¸åŠ è¿™ä¸ªçš„è¯æ¯å¸§éƒ½è®© LVGL é‡ç”» 256x120ï¼Œ
+     * ä¸¤å—å›¾åŠ èµ·æ¥ 12 ä¸‡ä¸ªåƒç´ ï¼Œå±æ ¹æœ¬åˆ·ä¸è¿‡æ¥ï¼Œç•Œé¢ä¼šæ˜æ˜¾æ‹–å¸§ */
     volatile uint8_t dirty;
 };
 
 /**************************************************************************************************
- *                                        ×ø±ê»»Ëã
+ *                                        åæ ‡æ¢ç®—
  **************************************************************************************************/
 
-/* µÚ i ¸öµã»­ÔÚÄÄ¸ö x£º0 ÔÚ×î×ó£¬POINT_MAX-1 ÔÚ×îÓÒ¡£
- * ÓÃ¹Ì¶¨²½¾à£¨²»ÊÇ°´µ±Ç°µãÊı¾ù·Ö£©£¬ÕâÑù¸Õ¿ª»úÊ±ÇúÏß´Ó×óÍùÓÒ³¤£¬ÏñÊ¾²¨Æ÷¡£ */
+/* ç¬¬ i ä¸ªç‚¹ç”»åœ¨å“ªä¸ª xï¼š0 åœ¨æœ€å·¦ï¼ŒPOINT_MAX-1 åœ¨æœ€å³ã€‚
+ * ç”¨å›ºå®šæ­¥è·ï¼ˆä¸æ˜¯æŒ‰å½“å‰ç‚¹æ•°å‡åˆ†ï¼‰ï¼Œè¿™æ ·åˆšå¼€æœºæ—¶æ›²çº¿ä»å·¦å¾€å³é•¿ï¼Œåƒç¤ºæ³¢å™¨ã€‚ */
 static lv_coord_t plot_x(lv_coord_t xl, lv_coord_t xr, uint16_t i)
 {
     return (lv_coord_t)(xl + (int32_t)(xr - xl) * (int32_t)i / (UI_PLOT_POINT_MAX - 1));
 }
 
-/* ÊıÖµ -> y¡£vmin Âäµ½µ×±ß£¬vmax Âäµ½¶¥±ß£¬³¬·¶Î§¼Ğ×¡¡£ */
+/* æ•°å€¼ -> yã€‚vmin è½åˆ°åº•è¾¹ï¼Œvmax è½åˆ°é¡¶è¾¹ï¼Œè¶…èŒƒå›´å¤¹ä½ã€‚ */
 static lv_coord_t plot_y(const ui_plot_line_t *c, int32_t v,
                          lv_coord_t yt, lv_coord_t yb)
 {
@@ -549,10 +549,10 @@ static lv_coord_t plot_y(const ui_plot_line_t *c, int32_t v,
 }
 
 /**************************************************************************************************
- *                                        »­Ïß
+ *                                        ç”»çº¿
  **************************************************************************************************/
 
-/* »­Ò»¶Î£ºÊµÏßÒ»´Î»­Íê£¬ĞéÏßÑØÏß·Ö¶ÎÌô×Å»­ */
+/* ç”»ä¸€æ®µï¼šå®çº¿ä¸€æ¬¡ç”»å®Œï¼Œè™šçº¿æ²¿çº¿åˆ†æ®µæŒ‘ç€ç”» */
 static void plot_seg(lv_draw_ctx_t *ctx, const lv_draw_line_dsc_t *d,
                      lv_coord_t xa, lv_coord_t ya, lv_coord_t xb, lv_coord_t yb,
                      const ui_plot_line_t *c, uint8_t *phase)
@@ -580,7 +580,7 @@ static void plot_seg(lv_draw_ctx_t *ctx, const lv_draw_line_dsc_t *d,
     adx = (dx < 0) ? -dx : dx;
     ady = (dy < 0) ? -dy : dy;
 
-    /* ²½ÊıÈ¡ max(|dx|,|dy|)£ºË®Æ½/´¹Ö±/Ğ±Ïß¶¼²»»áÂ©ÏñËØ£¬Ò²²»ÓÃ¿ª·½Ëã³¤¶È */
+    /* æ­¥æ•°å– max(|dx|,|dy|)ï¼šæ°´å¹³/å‚ç›´/æ–œçº¿éƒ½ä¸ä¼šæ¼åƒç´ ï¼Œä¹Ÿä¸ç”¨å¼€æ–¹ç®—é•¿åº¦ */
     steps = (adx > ady) ? adx : ady;
     if(steps <= 0) { return; }
 
@@ -588,7 +588,7 @@ static void plot_seg(lv_draw_ctx_t *ctx, const lv_draw_line_dsc_t *d,
 
     for(i = 0; i < steps; i++)
     {
-        if(cnt <= dash)                     /* ÂäÔÚÊµÏß¶ÎÀï²Å»­Õâ 1 ÏñËØ */
+        if(cnt <= dash)                     /* è½åœ¨å®çº¿æ®µé‡Œæ‰ç”»è¿™ 1 åƒç´  */
         {
             p1.x = (lv_coord_t)(xa + dx * i / steps);
             p1.y = (lv_coord_t)(ya + dy * i / steps);
@@ -604,7 +604,7 @@ static void plot_seg(lv_draw_ctx_t *ctx, const lv_draw_line_dsc_t *d,
     *phase = cnt;
 }
 
-/* Ò»ÌõÇúÏßµÄÈ«²¿Ïß¶Î */
+/* ä¸€æ¡æ›²çº¿çš„å…¨éƒ¨çº¿æ®µ */
 static void plot_series(lv_draw_ctx_t *ctx, const ui_plot_t *p, uint8_t ch,
                         lv_coord_t xl, lv_coord_t yt,
                         lv_coord_t xr, lv_coord_t yb)
@@ -622,7 +622,7 @@ static void plot_series(lv_draw_ctx_t *ctx, const ui_plot_t *p, uint8_t ch,
     d.color       = lv_color_hex(c->color);
     d.width       = (c->width == 0u) ? 1 : c->width;
     d.opa         = LV_OPA_COVER;
-    d.round_start = 1;                      /* Ô²Í·£¬ÕÛµã²Å²»È±¿Ú */
+    d.round_start = 1;                      /* åœ†å¤´ï¼ŒæŠ˜ç‚¹æ‰ä¸ç¼ºå£ */
     d.round_end   = 1;
 
     for(i = 1; i < n; i++)
@@ -633,7 +633,7 @@ static void plot_series(lv_draw_ctx_t *ctx, const ui_plot_t *p, uint8_t ch,
                  c, &phase);
     }
 
-    /* ²ÉÑùµã±ê¼Ç£ºÊı¾İµãÉÙµÄÊ±ºòºÜÖ±¹Û£¬¶àÁË¾Íºı³ÉÒ»ÍÅ£¬°´ĞèÒª¿ª */
+    /* é‡‡æ ·ç‚¹æ ‡è®°ï¼šæ•°æ®ç‚¹å°‘çš„æ—¶å€™å¾ˆç›´è§‚ï¼Œå¤šäº†å°±ç³Šæˆä¸€å›¢ï¼ŒæŒ‰éœ€è¦å¼€ */
     if(c->dot != 0u)
     {
         lv_draw_rect_dsc_t rd;
@@ -659,7 +659,7 @@ static void plot_series(lv_draw_ctx_t *ctx, const ui_plot_t *p, uint8_t ch,
 }
 
 /**************************************************************************************************
- *                                        DRAW_MAIN »Øµ÷
+ *                                        DRAW_MAIN å›è°ƒ
  **************************************************************************************************/
 static void plot_draw_cb(lv_event_t *e)
 {
@@ -675,7 +675,7 @@ static void plot_draw_cb(lv_event_t *e)
 
     if(p == NULL) { return; }
 
-    lv_obj_get_coords(obj, &co);            /* ¾ø¶Ô×ø±ê£¡¼ûÎÄ¼şÍ·µÚ 1 Ìõ */
+    lv_obj_get_coords(obj, &co);            /* ç»å¯¹åæ ‡ï¼è§æ–‡ä»¶å¤´ç¬¬ 1 æ¡ */
 
     xl = co.x1;  xr = co.x2;
     yt = co.y1;  yb = co.y2;
@@ -685,13 +685,13 @@ static void plot_draw_cb(lv_event_t *e)
     d.width = 1;
     d.opa   = LV_OPA_COVER;
 
-    /* 1. Íâ¿ò */
+    /* 1. å¤–æ¡† */
     a.x = xl; a.y = yt; b.x = xr; b.y = yt; lv_draw_line(ctx, &d, &a, &b);
     a.x = xr; a.y = yt; b.x = xr; b.y = yb; lv_draw_line(ctx, &d, &a, &b);
     a.x = xr; a.y = yb; b.x = xl; b.y = yb; lv_draw_line(ctx, &d, &a, &b);
     a.x = xl; a.y = yb; b.x = xl; b.y = yt; lv_draw_line(ctx, &d, &a, &b);
 
-    /* 2. ÄÚ²¿Íø¸ñ */
+    /* 2. å†…éƒ¨ç½‘æ ¼ */
     for(i = 1; i < p->y_div; i++)
     {
         lv_coord_t y = (lv_coord_t)(yt + (int32_t)(yb - yt) * i / p->y_div);
@@ -706,7 +706,7 @@ static void plot_draw_cb(lv_event_t *e)
         lv_draw_line(ctx, &d, &a, &b);
     }
 
-    /* 3. ÇúÏß£¨ÄÚËõÒ»µã£¬±ğ°Ñ±ß¿ò¸Çµô£© */
+    /* 3. æ›²çº¿ï¼ˆå†…ç¼©ä¸€ç‚¹ï¼Œåˆ«æŠŠè¾¹æ¡†ç›–æ‰ï¼‰ */
     xl += PLOT_GRID_INSET;
     xr -= PLOT_GRID_INSET;
     yt += PLOT_GRID_INSET;
@@ -718,7 +718,7 @@ static void plot_draw_cb(lv_event_t *e)
     }
 }
 
-/* ¶ÔÏó±»É¾Ê±£¨²»¹ÜÊÇ ui_plot_delete »¹ÊÇ¸¸Ò³ÃæÁ¬´øÉ¾£©°Ñ½á¹¹Ìå»¹µô */
+/* å¯¹è±¡è¢«åˆ æ—¶ï¼ˆä¸ç®¡æ˜¯ ui_plot_delete è¿˜æ˜¯çˆ¶é¡µé¢è¿å¸¦åˆ ï¼‰æŠŠç»“æ„ä½“è¿˜æ‰ */
 static void plot_del_cb(lv_event_t *e)
 {
     ui_plot_t *p = (ui_plot_t *)lv_event_get_user_data(e);
@@ -730,7 +730,7 @@ static void plot_del_cb(lv_event_t *e)
 }
 
 /**************************************************************************************************
- *                                        ¶ÔÍâº¯Êı
+ *                                        å¯¹å¤–å‡½æ•°
  **************************************************************************************************/
 ui_plot_t *ui_plot_create(lv_obj_t *parent, lv_coord_t x, lv_coord_t y,
                           lv_coord_t w, lv_coord_t h)
@@ -745,7 +745,7 @@ ui_plot_t *ui_plot_create(lv_obj_t *parent, lv_coord_t x, lv_coord_t y,
 
     memset(p, 0, sizeof(ui_plot_t));
 
-    /* Ä¬ÈÏÑùÊ½£ºÊµÏß 1px£¬Á¿³Ì 0~100£¬ÏÈµ±Ëü´æÔÚ£¬Ê¡µÃÍâÃæÅäÂ©ÁË»­²»³öÀ´ */
+    /* é»˜è®¤æ ·å¼ï¼šå®çº¿ 1pxï¼Œé‡ç¨‹ 0~100ï¼Œå…ˆå½“å®ƒå­˜åœ¨ï¼Œçœå¾—å¤–é¢é…æ¼äº†ç”»ä¸å‡ºæ¥ */
     for(ch = 0; ch < UI_PLOT_CH_MAX; ch++)
     {
         p->cfg[ch].color = 0x3FC8B4u;
@@ -779,7 +779,7 @@ void ui_plot_delete(ui_plot_t *p)
 {
     if((p == NULL) || (p->obj == NULL)) { return; }
 
-    /* ½á¹¹ÌåÔÚ DELETE »Øµ÷ÀïÊÍ·Å£»µ÷ÍêÕâ¾ä p ¾ÍÒ°ÁË */
+    /* ç»“æ„ä½“åœ¨ DELETE å›è°ƒé‡Œé‡Šæ”¾ï¼›è°ƒå®Œè¿™å¥ p å°±é‡äº† */
     lv_obj_del(p->obj);
 }
 
@@ -816,7 +816,7 @@ void ui_plot_push(ui_plot_t *p, uint8_t ch, int32_t v)
     if(v > 32000)  { v = 32000; }
     if(v < -32000) { v = -32000; }
 
-    /* ¹ØÖĞ¶Ï£ºUI Ïß³ÌµÄ render ÓÅÏÈ¼¶¸ü¸ß£¬²»Çå³¡µÄ»°¿ÉÄÜÕıºÃ¶Áµ½"×óÒÆÒ»°ë"µÄÊı×é */
+    /* å…³ä¸­æ–­ï¼šUI çº¿ç¨‹çš„ render ä¼˜å…ˆçº§æ›´é«˜ï¼Œä¸æ¸…åœºçš„è¯å¯èƒ½æ­£å¥½è¯»åˆ°"å·¦ç§»ä¸€åŠ"çš„æ•°ç»„ */
     level = rt_hw_interrupt_disable();
 
     buf = p->raw[ch];
@@ -858,7 +858,7 @@ void ui_plot_refresh(ui_plot_t *p)
     uint8_t   ch;
 
     if((p == NULL) || (p->obj == NULL)) { return; }
-    if(p->dirty == 0u)                  { return; }   /* Ã»ĞÂÊı¾İ£¬Á¬ÖØ»æ¶¼Ê¡ÁË */
+    if(p->dirty == 0u)                  { return; }   /* æ²¡æ–°æ•°æ®ï¼Œè¿é‡ç»˜éƒ½çœäº† */
 
     level = rt_hw_interrupt_disable();
 

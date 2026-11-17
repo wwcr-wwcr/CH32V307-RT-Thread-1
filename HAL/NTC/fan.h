@@ -1,14 +1,14 @@
 /******************************************************************************
- * ÎÄ¼şÃû   : fan.h
- * Ğ¾Æ¬     : CH32V307VCT6
- * ËµÃ÷     : ·çÉÈ PWM µ÷ËÙ£¨PA0 = TIM2_CH1£©
+ * æ–‡ä»¶å   : fan.h
+ * èŠ¯ç‰‡     : CH32V307VCT6
+ * è¯´æ˜     : é£æ‰‡ PWM è°ƒé€Ÿï¼ˆPA0 = TIM2_CH1ï¼‰
  *
- * Ê¹ÓÃÊ¾Àı:
+ * ä½¿ç”¨ç¤ºä¾‹:
  *     fan_init();
- *     fan_set_speed(40);      // 40% ×ªËÙ
+ *     fan_set_speed(40);      // 40% è½¬é€Ÿ
  *     fan_stop();
  *
- * ·µ»ØÖµÔ¼¶¨: 0 = ³É¹¦£¬¸ºÊı = Ê§°Ü£¨-1 ²ÎÊı´íÎó£©
+ * è¿”å›å€¼çº¦å®š: 0 = æˆåŠŸï¼Œè´Ÿæ•° = å¤±è´¥ï¼ˆ-1 å‚æ•°é”™è¯¯ï¼‰
  ******************************************************************************/
 
 #ifndef __FAN_H
@@ -21,50 +21,50 @@ extern "C" {
 #include "ch32v30x_conf.h"
 
 /*********************************************************************
- * ²ÎÊı
+ * å‚æ•°
  */
 #define FAN_GPIO            GPIOA
 #define FAN_PIN             GPIO_Pin_0          /* PA0 = TIM2_CH1 */
 #define FAN_PWM_TIM_CLOCK   1000000UL
-#define FAN_PWM_FREQ_HZ     1000UL              /* PWM ÆµÂÊ 1kHz */
+#define FAN_PWM_FREQ_HZ     1000UL              /* PWM é¢‘ç‡ 1kHz */
 #define FAN_PWM_PRESCALER   ((SystemCoreClock / FAN_PWM_TIM_CLOCK) - 1)
 #define FAN_PWM_PERIOD      ((FAN_PWM_TIM_CLOCK / FAN_PWM_FREQ_HZ) - 1)
 
 /*********************************************************************
- * È«¾Ö±äÁ¿
+ * å…¨å±€å˜é‡
  */
-extern uint8_t fan_level;       /* µ±Ç°×ªËÙ°Ù·Ö±È 0~100 */
+extern uint8_t fan_level;       /* å½“å‰è½¬é€Ÿç™¾åˆ†æ¯” 0~100 */
 
 /*********************************************************************
- * º¯Êı
+ * å‡½æ•°
  */
 
 /**
- * @brief  ³õÊ¼»¯·çÉÈ PWM£¨ÉÏµçÍ£×ª£©
- * @return 0 ³É¹¦
+ * @brief  åˆå§‹åŒ–é£æ‰‡ PWMï¼ˆä¸Šç”µåœè½¬ï¼‰
+ * @return 0 æˆåŠŸ
  */
 int fan_init(void);
 
 /**
- * @brief  ÉèÖÃ·çÉÈ×ªËÙ
- * @param  percent  0~100£¬0 ±íÊ¾Í£×ª
- * @return 0 ³É¹¦£¬-1 ²ÎÊı´íÎó
+ * @brief  è®¾ç½®é£æ‰‡è½¬é€Ÿ
+ * @param  percent  0~100ï¼Œ0 è¡¨ç¤ºåœè½¬
+ * @return 0 æˆåŠŸï¼Œ-1 å‚æ•°é”™è¯¯
  */
 int fan_set_speed(uint8_t percent);
 
 /**
- * @brief  Í£Ö¹·çÉÈ
+ * @brief  åœæ­¢é£æ‰‡
  */
 void fan_stop(void);
 
 /**
- * @brief  ¶ÁÈ¡µ±Ç°×ªËÙ°Ù·Ö±È
+ * @brief  è¯»å–å½“å‰è½¬é€Ÿç™¾åˆ†æ¯”
  * @return 0~100
  */
 uint8_t fan_get_speed(void);
 
 /*********************************************************************
- * ¾É½Ó¿Ú¼æÈİ
+ * æ—§æ¥å£å…¼å®¹
  */
 #define FAN_CONTROL_TIM_CLOCK       FAN_PWM_TIM_CLOCK
 #define FAN_CONTROL_TIM_PRESCALER   FAN_PWM_PRESCALER

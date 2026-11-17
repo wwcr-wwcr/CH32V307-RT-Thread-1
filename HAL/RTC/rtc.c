@@ -1,7 +1,7 @@
 /******************************************************************************
- * ÎÄ¼şÃû   : rtc.c
- * Ğ¾Æ¬     : CH32V307VCT6
- * ËµÃ÷     : ÄÚ²¿ RTC ÊµÊ±Ê±ÖÓÇı¶¯
+ * æ–‡ä»¶å   : rtc.c
+ * èŠ¯ç‰‡     : CH32V307VCT6
+ * è¯´æ˜     : å†…éƒ¨ RTC å®æ—¶æ—¶é’Ÿé©±åŠ¨
  ******************************************************************************/
 
 #include "rtc.h"
@@ -10,17 +10,17 @@
 #include "rtthread.h"
 
 /**************************************************************************************************
- *                                        ÄÚ²¿±äÁ¿
+ *                                        å†…éƒ¨å˜é‡
  **************************************************************************************************/
 static const uint8_t mon_table[12]  = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 static const uint8_t table_week[12] = {0, 3, 3, 6, 1, 4, 6, 2, 5, 0, 3, 5};
 
-_calendar_obj calendar;     /* ¼æÈİ¾É´úÂëµÄÈ«¾ÖÊ±¼ä½á¹¹ */
+_calendar_obj calendar;     /* å…¼å®¹æ—§ä»£ç çš„å…¨å±€æ—¶é—´ç»“æ„ */
 
 /**************************************************************************************************
- *                                        ÄÚ²¿º¯Êı
+ *                                        å†…éƒ¨å‡½æ•°
  **************************************************************************************************/
-/* ÊÇ·ñÈòÄê */
+/* æ˜¯å¦é—°å¹´ */
 static uint8_t rtc_is_leap_year(uint16_t year)
 {
     if(year % 4 != 0)
@@ -34,7 +34,7 @@ static uint8_t rtc_is_leap_year(uint16_t year)
     return (year % 400 == 0) ? 1 : 0;
 }
 
-/* ÈÕÆÚÊ±¼ä×ª Unix Ê±¼ä´Á£¬²ÎÊı·Ç·¨·µ»Ø 0 */
+/* æ—¥æœŸæ—¶é—´è½¬ Unix æ—¶é—´æˆ³ï¼Œå‚æ•°éæ³•è¿”å› 0 */
 static uint32_t rtc_datetime_to_timestamp(uint16_t year, uint8_t month, uint8_t day,
                                           uint8_t hour, uint8_t minute, uint8_t second)
 {
@@ -57,7 +57,7 @@ static uint32_t rtc_datetime_to_timestamp(uint16_t year, uint8_t month, uint8_t 
         seccount += (uint32_t)mon_table[m] * RTC_SECONDS_PER_DAY;
         if(rtc_is_leap_year(year) && m == 1)
         {
-            seccount += RTC_SECONDS_PER_DAY;        /* ÈòÄê 2 ÔÂ¶àÒ»Ìì */
+            seccount += RTC_SECONDS_PER_DAY;        /* é—°å¹´ 2 æœˆå¤šä¸€å¤© */
         }
     }
 
@@ -69,7 +69,7 @@ static uint32_t rtc_datetime_to_timestamp(uint16_t year, uint8_t month, uint8_t 
     return seccount;
 }
 
-/* ÓÃ±àÒëÊ±¼ä³õÊ¼»¯ RTC£¨__DATE__ = "Mmm dd yyyy"£¬__TIME__ = "hh:mm:ss"£© */
+/* ç”¨ç¼–è¯‘æ—¶é—´åˆå§‹åŒ– RTCï¼ˆ__DATE__ = "Mmm dd yyyy"ï¼Œ__TIME__ = "hh:mm:ss"ï¼‰ */
 static void rtc_use_build_time(void)
 {
     const char *date = __DATE__;
@@ -100,7 +100,7 @@ static void rtc_use_build_time(void)
                calendar.hour, calendar.min, calendar.sec);
 }
 
-/* RTC ÖĞ¶ÏÓÅÏÈ¼¶ÅäÖÃ */
+/* RTC ä¸­æ–­ä¼˜å…ˆçº§é…ç½® */
 static void rtc_nvic_config(void)
 {
     NVIC_InitTypeDef NVIC_InitStructure = {0};
@@ -113,10 +113,10 @@ static void rtc_nvic_config(void)
 }
 
 /**************************************************************************************************
- *                                        ¶ÔÍâº¯Êı
+ *                                        å¯¹å¤–å‡½æ•°
  **************************************************************************************************/
 /**
- * @brief  ³õÊ¼»¯ RTC
+ * @brief  åˆå§‹åŒ– RTC
  */
 int rtc_init(void)
 {
@@ -125,7 +125,7 @@ int rtc_init(void)
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);
     PWR_BackupAccessCmd(ENABLE);
 
-    /* ÒÑ¾­ÓĞµç³ØÎ¬³ÖµÄÊ±¼ä£¬Ö»ĞèÒª¶Á»ØÀ´ */
+    /* å·²ç»æœ‰ç”µæ± ç»´æŒçš„æ—¶é—´ï¼Œåªéœ€è¦è¯»å›æ¥ */
     if(BKP_ReadBackupRegister(BKP_DR1) == 0xA1A1)
     {
         RTC_WaitForSynchro();
@@ -153,7 +153,7 @@ int rtc_init(void)
     RTC_WaitForSynchro();
 
     RTC_EnterConfigMode();
-    RTC_SetPrescaler(RTC_PRESCALER);    /* HSE/128 = 62500Hz£¬·ÖÆµµ½ 1Hz */
+    RTC_SetPrescaler(RTC_PRESCALER);    /* HSE/128 = 62500Hzï¼Œåˆ†é¢‘åˆ° 1Hz */
     RTC_WaitForLastTask();
     RTC_ExitConfigMode();
 
@@ -169,7 +169,7 @@ int rtc_init(void)
 }
 
 /**
- * @brief  ÉèÖÃÈÕÆÚÊ±¼ä
+ * @brief  è®¾ç½®æ—¥æœŸæ—¶é—´
  */
 int rtc_set_datetime(uint16_t year, uint8_t month, uint8_t day,
                      uint8_t hour, uint8_t minute, uint8_t second)
@@ -194,7 +194,7 @@ int rtc_set_datetime(uint16_t year, uint8_t month, uint8_t day,
 }
 
 /**
- * @brief  Ö±½ÓÓÃÊ±¼ä´ÁÉèÖÃÊ±¼ä
+ * @brief  ç›´æ¥ç”¨æ—¶é—´æˆ³è®¾ç½®æ—¶é—´
  */
 int rtc_set_timestamp(uint32_t seconds)
 {
@@ -207,7 +207,7 @@ int rtc_set_timestamp(uint32_t seconds)
 }
 
 /**
- * @brief  ¶ÁÈ¡Ê±¼ä´Á
+ * @brief  è¯»å–æ—¶é—´æˆ³
  */
 uint32_t rtc_get_timestamp(void)
 {
@@ -215,7 +215,7 @@ uint32_t rtc_get_timestamp(void)
 }
 
 /**
- * @brief  ÉèÖÃÄÖÖÓ
+ * @brief  è®¾ç½®é—¹é’Ÿ
  */
 int rtc_alarm_set(uint16_t year, uint8_t month, uint8_t day,
                   uint8_t hour, uint8_t minute, uint8_t second)
@@ -240,7 +240,7 @@ int rtc_alarm_set(uint16_t year, uint8_t month, uint8_t day,
 }
 
 /**
- * @brief  ¶ÁÈ¡µ±Ç°ÈÕÆÚÊ±¼ä
+ * @brief  è¯»å–å½“å‰æ—¥æœŸæ—¶é—´
  */
 int rtc_get_datetime(rtc_datetime_t *dt)
 {
@@ -259,7 +259,7 @@ int rtc_get_datetime(rtc_datetime_t *dt)
     days      = timecount / RTC_SECONDS_PER_DAY;
     secs      = timecount % RTC_SECONDS_PER_DAY;
 
-    /* ´Ó 1970 Äê¿ªÊ¼ÖğÄê¿Û¼õ */
+    /* ä» 1970 å¹´å¼€å§‹é€å¹´æ‰£å‡ */
     while(days >= 365)
     {
         uint16_t days_of_year = rtc_is_leap_year(year) ? 366 : 365;
@@ -272,7 +272,7 @@ int rtc_get_datetime(rtc_datetime_t *dt)
         year++;
     }
 
-    /* ÖğÔÂ¿Û¼õ */
+    /* é€æœˆæ‰£å‡ */
     for(uint8_t m = 0; m < 12; m++)
     {
         uint8_t days_of_month = mon_table[m];
@@ -301,7 +301,7 @@ int rtc_get_datetime(rtc_datetime_t *dt)
 }
 
 /**
- * @brief  ¶ÁÈ¡µ±Ç°Ê±¼äµ½ calendar£¨¼æÈİ¾É½Ó¿Ú£©
+ * @brief  è¯»å–å½“å‰æ—¶é—´åˆ° calendarï¼ˆå…¼å®¹æ—§æ¥å£ï¼‰
  */
 int RTC_Get(void)
 {
@@ -324,7 +324,7 @@ int RTC_Get(void)
 }
 
 /**
- * @brief  ¼ÆËãĞÇÆÚ
+ * @brief  è®¡ç®—æ˜ŸæœŸ
  */
 uint8_t rtc_week_calc(uint16_t year, uint8_t month, uint8_t day)
 {
@@ -355,7 +355,7 @@ uint8_t rtc_week_calc(uint16_t year, uint8_t month, uint8_t day)
 }
 
 /**
- * @brief  ĞÇÆÚÊı×Ö×ª×Ö·û´®
+ * @brief  æ˜ŸæœŸæ•°å­—è½¬å­—ç¬¦ä¸²
  */
 const char *rtc_week_name(uint8_t week)
 {
@@ -365,10 +365,10 @@ const char *rtc_week_name(uint8_t week)
 }
 
 /**************************************************************************************************
- *                                        ±¦±¦º¯Êı
+ *                                        å®å®å‡½æ•°
  **************************************************************************************************/
 /**
- * @brief  Ê±¼ä×Ö·û´®
+ * @brief  æ—¶é—´å­—ç¬¦ä¸²
  */
 int rtc_time_string(char *buf, uint16_t size)
 {
@@ -390,7 +390,7 @@ int rtc_time_string(char *buf, uint16_t size)
 }
 
 /**
- * @brief  ÈÕÆÚ×Ö·û´®
+ * @brief  æ—¥æœŸå­—ç¬¦ä¸²
  */
 int rtc_date_string(char *buf, uint16_t size)
 {
@@ -412,7 +412,7 @@ int rtc_date_string(char *buf, uint16_t size)
 }
 
 /**
- * @brief  ÈÕÆÚÊ±¼ä×Ö·û´®
+ * @brief  æ—¥æœŸæ—¶é—´å­—ç¬¦ä¸²
  */
 int rtc_datetime_string(char *buf, uint16_t size)
 {

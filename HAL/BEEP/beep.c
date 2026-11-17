@@ -1,25 +1,25 @@
 /******************************************************************************
- * ÎÄ¼şÃû   : beep.c
- * Ğ¾Æ¬     : CH32V307VCT6
- * ËµÃ÷     : ÎŞÔ´·äÃùÆ÷Çı¶¯£¬°´ÆµÂÊ·¢Éù£¨TIM2_CH3 / PA2£©
+ * æ–‡ä»¶å   : beep.c
+ * èŠ¯ç‰‡     : CH32V307VCT6
+ * è¯´æ˜     : æ— æºèœ‚é¸£å™¨é©±åŠ¨ï¼ŒæŒ‰é¢‘ç‡å‘å£°ï¼ˆTIM2_CH3 / PA2ï¼‰
  ******************************************************************************/
 
 #include "beep.h"
 #include "rtthread.h"
 
 /**************************************************************************************************
- *                                        È«¾Ö±äÁ¿
+ *                                        å…¨å±€å˜é‡
  **************************************************************************************************/
-uint8_t beep_level;                                     /* µ±Ç°Õ¼¿Õ±È 0~100 */
+uint8_t beep_level;                                     /* å½“å‰å ç©ºæ¯” 0~100 */
 const uint16_t beepToneFreq[7] = {262, 294, 330, 349, 392, 440, 494};
 
-static uint16_t s_beep_period = 999;                    /* µ±Ç°ÖÜÆÚÖµ£¨ÉÏµçÄ¬ÈÏ 1kHz£© */
+static uint16_t s_beep_period = 999;                    /* å½“å‰å‘¨æœŸå€¼ï¼ˆä¸Šç”µé»˜è®¤ 1kHzï¼‰ */
 
 /**************************************************************************************************
- *                                        ¶ÔÍâº¯Êı
+ *                                        å¯¹å¤–å‡½æ•°
  **************************************************************************************************/
 /**
- * @brief  ³õÊ¼»¯·äÃùÆ÷
+ * @brief  åˆå§‹åŒ–èœ‚é¸£å™¨
  */
 int beep_init(void)
 {
@@ -35,7 +35,7 @@ int beep_init(void)
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_AF_PP;
     GPIO_Init(BEEP_GPIO, &GPIO_InitStructure);
 
-    s_beep_period = (uint16_t)(BEEP_TIM_CLOCK / 1000 - 1);           /* Ä¬ÈÏ 1kHz */
+    s_beep_period = (uint16_t)(BEEP_TIM_CLOCK / 1000 - 1);           /* é»˜è®¤ 1kHz */
 
     TIM_TimeBaseInitStructure.TIM_Period        = s_beep_period;
     TIM_TimeBaseInitStructure.TIM_Prescaler     = BEEP_TIM_PRESCALER;
@@ -44,14 +44,14 @@ int beep_init(void)
     TIM_TimeBaseInit(TIM2, &TIM_TimeBaseInitStructure);
 
     TIM_OCInitStructure.TIM_OCMode      = TIM_OCMode_PWM1;
-    TIM_OCInitStructure.TIM_Pulse       = 0;                         /* ÉÏµç¾²Òô */
+    TIM_OCInitStructure.TIM_Pulse       = 0;                         /* ä¸Šç”µé™éŸ³ */
     TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
     TIM_OCInitStructure.TIM_OCPolarity  = TIM_OCPolarity_High;
     TIM_OC3Init(TIM2, &TIM_OCInitStructure);
 
     TIM_OC3PreloadConfig(TIM2, TIM_OCPreload_Enable);
     TIM_ARRPreloadConfig(TIM2, ENABLE);
-    TIM_Cmd(TIM2, ENABLE);                                          /* ¼ÆÊıÔËĞĞ£¬Õ¼¿Õ±È 0 ¼´¾²Òô */
+    TIM_Cmd(TIM2, ENABLE);                                          /* è®¡æ•°è¿è¡Œï¼Œå ç©ºæ¯” 0 å³é™éŸ³ */
 
     beep_level = 0;
 
@@ -59,7 +59,7 @@ int beep_init(void)
 }
 
 /**
- * @brief  °´ÆµÂÊ·¢Éù
+ * @brief  æŒ‰é¢‘ç‡å‘å£°
  */
 int beep_freq_set(uint16_t freq_hz)
 {
@@ -73,7 +73,7 @@ int beep_freq_set(uint16_t freq_hz)
     period = (uint16_t)(BEEP_TIM_CLOCK / freq_hz - 1);
 
     TIM_SetAutoreload(TIM2, period);
-    TIM_SetCompare3(TIM2, (uint16_t)((period + 1) / 2));            /* 50% Õ¼¿Õ±È */
+    TIM_SetCompare3(TIM2, (uint16_t)((period + 1) / 2));            /* 50% å ç©ºæ¯” */
 
     s_beep_period = period;
     beep_level    = 50;
@@ -82,7 +82,7 @@ int beep_freq_set(uint16_t freq_hz)
 }
 
 /**
- * @brief  ÉèÖÃÕ¼¿Õ±È
+ * @brief  è®¾ç½®å ç©ºæ¯”
  */
 int beep_duty_set(uint8_t percent)
 {
@@ -98,7 +98,7 @@ int beep_duty_set(uint8_t percent)
 }
 
 /**
- * @brief  Í£Ö¹·¢Éù
+ * @brief  åœæ­¢å‘å£°
  */
 void beep_stop(void)
 {
@@ -107,7 +107,7 @@ void beep_stop(void)
 }
 
 /**
- * @brief  ²¥·ÅÖ¸¶¨Òô½×
+ * @brief  æ’­æ”¾æŒ‡å®šéŸ³é˜¶
  */
 int beep_tone_play(beep_tone_t tone)
 {
@@ -120,7 +120,7 @@ int beep_tone_play(beep_tone_t tone)
 }
 
 /**
- * @brief  ÏìÒ»Éùºó×Ô¶¯Í£Ö¹
+ * @brief  å“ä¸€å£°åè‡ªåŠ¨åœæ­¢
  */
 void beep_once(uint16_t ms)
 {
@@ -130,10 +130,10 @@ void beep_once(uint16_t ms)
 }
 
 /**************************************************************************************************
- *                                        ±¦±¦º¯Êı
+ *                                        å®å®å‡½æ•°
  **************************************************************************************************/
 /**
- * @brief  Ö±½ÓÏì
+ * @brief  ç›´æ¥å“
  */
 int beep_on(void)
 {
@@ -141,7 +141,7 @@ int beep_on(void)
 }
 
 /**
- * @brief  Í£Ö¹·¢Éù
+ * @brief  åœæ­¢å‘å£°
  */
 void beep_off(void)
 {
@@ -149,7 +149,7 @@ void beep_off(void)
 }
 
 /**
- * @brief  Ïì¼¸Éù
+ * @brief  å“å‡ å£°
  */
 void beep_times(uint8_t times, uint16_t on_ms, uint16_t off_ms)
 {

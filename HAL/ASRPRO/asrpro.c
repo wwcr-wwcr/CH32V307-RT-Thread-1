@@ -1,7 +1,7 @@
 /******************************************************************************
- * Œƒº˛√˚   : asrpro.c
- * –æ∆¨     : CH32V307VCT6
- * Àµ√˜     : ASRPRO ”Ô“Ù ∂±ƒ£øÈ«˝∂Ø
+ * Êñá‰ª∂Âêç   : asrpro.c
+ * ËäØÁâá     : CH32V307VCT6
+ * ËØ¥Êòé     : ASRPRO ËØ≠Èü≥ËØÜÂà´Ê®°ÂùóÈ©±Âä®
  ******************************************************************************/
 
 #include "asrpro.h"
@@ -9,21 +9,21 @@
 #include "rtthread.h"
 
 /**************************************************************************************************
- *                                        »´æ÷±‰¡ø
+ *                                        ÂÖ®Â±ÄÂèòÈáè
  **************************************************************************************************/
 uint8_t uart6ReceiveBuf[ASRPRO_RING_BUFFER_SIZE];
 struct ring_buffer uart6ReceiveRingInfo;
 ring_buffer_t p_uart6ReceiveRingInfo;
 
 /**************************************************************************************************
- *                                        ƒ⁄≤ø±‰¡ø
+ *                                        ÂÜÖÈÉ®ÂèòÈáè
  **************************************************************************************************/
 static asrpro_cmd_cb_t s_cmd_cb = NULL;
 
 /**************************************************************************************************
- *                                        ƒ⁄≤ø∫Ø ˝
+ *                                        ÂÜÖÈÉ®ÂáΩÊï∞
  **************************************************************************************************/
-/* ¥”ª∑–Œª∫≥Â»°“ª∏ˆ◊÷Ω⁄ */
+/* ‰ªéÁéØÂΩ¢ÁºìÂÜ≤Âèñ‰∏Ä‰∏™Â≠óËäÇ */
 static int asrpro_get_byte(uint8_t *byte)
 {
     int ret = -1;
@@ -33,7 +33,7 @@ static int asrpro_get_byte(uint8_t *byte)
         return -1;
     }
 
-    NVIC_DisableIRQ(UART6_IRQn);                    /* ∑¿÷π÷–∂œ¥Ú∂œ∂¡÷∏’Î */
+    NVIC_DisableIRQ(UART6_IRQn);                    /* Èò≤Ê≠¢‰∏≠Êñ≠ÊâìÊñ≠ËØªÊåáÈíà */
     if(rb_read_data(p_uart6ReceiveRingInfo, byte, 1) == RB_SUCCESS)
     {
         ret = 0;
@@ -43,7 +43,7 @@ static int asrpro_get_byte(uint8_t *byte)
     return ret;
 }
 
-/* ƒ¨»œ¥¶¿Ì£∫÷ª¥Ú”°»’÷æ£¨∑Ω±„µ⁄“ª¥Œµ˜ ‘ */
+/* ÈªòËÆ§Â§ÑÁêÜÔºöÂè™ÊâìÂç∞Êó•ÂøóÔºåÊñπ‰æøÁ¨¨‰∏ÄÊ¨°Ë∞ÉËØï */
 static void asrpro_default_handler(asrpro_uart_peripheral peripheral, asrpro_uart_cmd cmd)
 {
     static const char *periph_name[] = {
@@ -61,10 +61,10 @@ static void asrpro_default_handler(asrpro_uart_peripheral peripheral, asrpro_uar
 }
 
 /**************************************************************************************************
- *                                        ∂‘Õ‚∫Ø ˝
+ *                                        ÂØπÂ§ñÂáΩÊï∞
  **************************************************************************************************/
 /**
- * @brief  ≥ı ºªØ”Ô“Ùƒ£øÈ
+ * @brief  ÂàùÂßãÂåñËØ≠Èü≥Ê®°Âùó
  */
 int asrpro_init(void)
 {
@@ -77,7 +77,7 @@ int asrpro_init(void)
 }
 
 /**
- * @brief  ◊¢≤·√¸¡Óªÿµ˜
+ * @brief  Ê≥®ÂÜåÂëΩ‰ª§ÂõûË∞É
  */
 void asrpro_callback_set(asrpro_cmd_cb_t cb)
 {
@@ -85,7 +85,7 @@ void asrpro_callback_set(asrpro_cmd_cb_t cb)
 }
 
 /**
- * @brief  ∑¢ÀÕ√¸¡Ó
+ * @brief  ÂèëÈÄÅÂëΩ‰ª§
  */
 int asrpro_send(asrpro_uart_peripheral peripheral, asrpro_uart_cmd cmd)
 {
@@ -101,7 +101,7 @@ int asrpro_send(asrpro_uart_peripheral peripheral, asrpro_uart_cmd cmd)
 }
 
 /**
- * @brief  Ω‚ŒˆΩ” ’ª∫≥Â
+ * @brief  Ëß£ÊûêÊé•Êî∂ÁºìÂÜ≤
  */
 int asrpro_poll(void)
 {
@@ -111,7 +111,7 @@ int asrpro_poll(void)
 
     while(p_uart6ReceiveRingInfo->dat_len > 0)
     {
-        /* 1. ’“÷°Õ∑ */
+        /* 1. ÊâæÂ∏ßÂ§¥ */
         if(asrpro_get_byte(&byte) != 0)
         {
             break;
@@ -121,11 +121,11 @@ int asrpro_poll(void)
             continue;
         }
 
-        /* 2.  ’¬˙“ª÷° */
+        /* 2. Êî∂Êª°‰∏ÄÂ∏ß */
         frame[0] = byte;
         for(uint8_t i = 1; i < ASRPRO_FRAME_LEN; i++)
         {
-            uint32_t timeout = 20;              /* 20ms  ’≤ªµΩæÕµ±∂™÷° */
+            uint32_t timeout = 20;              /* 20ms Êî∂‰∏çÂà∞Â∞±ÂΩì‰∏¢Â∏ß */
 
             while((p_uart6ReceiveRingInfo->dat_len == 0) && (timeout > 0))
             {
@@ -138,13 +138,13 @@ int asrpro_poll(void)
             }
         }
 
-        /* 3. –£—È÷°Œ≤ */
+        /* 3. Ê†°È™åÂ∏ßÂ∞æ */
         if(frame[3] != ASRPRO_FRAME_END1 || frame[4] != ASRPRO_FRAME_END2)
         {
             continue;
         }
 
-        /* 4. ∑÷∑¢ */
+        /* 4. ÂàÜÂèë */
         if(s_cmd_cb != NULL)
         {
             s_cmd_cb((asrpro_uart_peripheral)frame[1], (asrpro_uart_cmd)frame[2]);

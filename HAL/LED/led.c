@@ -1,22 +1,22 @@
 /******************************************************************************
- * ÎÄ¼şÃû   : led.c
- * Ğ¾Æ¬     : CH32V307VCT6
- * ËµÃ÷     : °åÔØ RGB LED Çı¶¯£¨GPIO ¿ª¹Ø + TIM10 PWM µ÷¹â£©
+ * æ–‡ä»¶å   : led.c
+ * èŠ¯ç‰‡     : CH32V307VCT6
+ * è¯´æ˜     : æ¿è½½ RGB LED é©±åŠ¨ï¼ˆGPIO å¼€å…³ + TIM10 PWM è°ƒå…‰ï¼‰
  ******************************************************************************/
 
 #include "led.h"
 #include "rtthread.h"
 
 /**************************************************************************************************
- *                                        È«¾Ö±äÁ¿
+ *                                        å…¨å±€å˜é‡
  **************************************************************************************************/
-uint8_t led_level;                  /* µ±Ç°ÁÁ¶È°Ù·Ö±È 0~100 */
-static uint8_t s_pwm_ready = 0;     /* PWM ÊÇ·ñÒÑ¾­³õÊ¼»¯ */
+uint8_t led_level;                  /* å½“å‰äº®åº¦ç™¾åˆ†æ¯” 0~100 */
+static uint8_t s_pwm_ready = 0;     /* PWM æ˜¯å¦å·²ç»åˆå§‹åŒ– */
 
 /**************************************************************************************************
- *                                        ÄÚ²¿º¯Êı
+ *                                        å†…éƒ¨å‡½æ•°
  **************************************************************************************************/
-/* ¸ù¾İ LED ±àºÅµãÁÁ/Ï¨Ãğ£¬on=1 µãÁÁ£¨µÍµçÆ½ÓĞĞ§£© */
+/* æ ¹æ® LED ç¼–å·ç‚¹äº®/ç†„ç­ï¼Œon=1 ç‚¹äº®ï¼ˆä½ç”µå¹³æœ‰æ•ˆï¼‰ */
 static void led_pin_write(led_id_t id, uint8_t on)
 {
     switch(id)
@@ -44,10 +44,10 @@ static void led_pin_write(led_id_t id, uint8_t on)
 }
 
 /**************************************************************************************************
- *                                        ¶ÔÍâº¯Êı
+ *                                        å¯¹å¤–å‡½æ•°
  **************************************************************************************************/
 /**
- * @brief  GPIO ·½Ê½³õÊ¼»¯ LED
+ * @brief  GPIO æ–¹å¼åˆå§‹åŒ– LED
  */
 int led_init(void)
 {
@@ -60,14 +60,14 @@ int led_init(void)
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
     GPIO_Init(GPIOB, &GPIO_InitStructure);
 
-    LED_ALL_OFF();          /* Ä¬ÈÏÈ«Ãğ */
+    LED_ALL_OFF();          /* é»˜è®¤å…¨ç­ */
     s_pwm_ready = 0;
 
     return 0;
 }
 
 /**
- * @brief  µãÁÁÖ¸¶¨ LED
+ * @brief  ç‚¹äº®æŒ‡å®š LED
  */
 void led_on(led_id_t id)
 {
@@ -75,7 +75,7 @@ void led_on(led_id_t id)
 }
 
 /**
- * @brief  Ï¨ÃğÖ¸¶¨ LED
+ * @brief  ç†„ç­æŒ‡å®š LED
  */
 void led_off(led_id_t id)
 {
@@ -83,7 +83,7 @@ void led_off(led_id_t id)
 }
 
 /**
- * @brief  ·­×ªÖ¸¶¨ LED ×´Ì¬
+ * @brief  ç¿»è½¬æŒ‡å®š LED çŠ¶æ€
  */
 void led_toggle(led_id_t id)
 {
@@ -101,7 +101,7 @@ void led_toggle(led_id_t id)
 }
 
 /**
- * @brief  °´ÑÕÉ«ÏÔÊ¾
+ * @brief  æŒ‰é¢œè‰²æ˜¾ç¤º
  */
 void led_color_set(led_color_t color)
 {
@@ -126,7 +126,7 @@ void led_color_set(led_color_t color)
 }
 
 /**
- * @brief  PWM ·½Ê½³õÊ¼»¯£¨ÁÁ¶È¿Éµ÷£©
+ * @brief  PWM æ–¹å¼åˆå§‹åŒ–ï¼ˆäº®åº¦å¯è°ƒï¼‰
  */
 int led_pwm_init(void)
 {
@@ -136,7 +136,7 @@ int led_pwm_init(void)
 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO | RCC_APB2Periph_GPIOB | RCC_APB2Periph_TIM10, ENABLE);
 
-    GPIO_PinRemapConfig(GPIO_PartialRemap_TIM10, ENABLE);            /* PB3/PB4/PB5 ¸´ÓÃÎª TIM10 Í¨µÀ */
+    GPIO_PinRemapConfig(GPIO_PartialRemap_TIM10, ENABLE);            /* PB3/PB4/PB5 å¤ç”¨ä¸º TIM10 é€šé“ */
     GPIO_InitStructure.GPIO_Pin   = LED_RED_PIN | LED_GREEN_PIN | LED_BLUE_PIN;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_AF_PP;
@@ -149,9 +149,9 @@ int led_pwm_init(void)
     TIM_TimeBaseInit(TIM10, &TIM_TimeBaseInitStructure);
 
     TIM_OCInitStructure.TIM_OCMode      = TIM_OCMode_PWM1;
-    TIM_OCInitStructure.TIM_Pulse       = 0;                        /* ÉÏµçÈ«Ãğ */
+    TIM_OCInitStructure.TIM_Pulse       = 0;                        /* ä¸Šç”µå…¨ç­ */
     TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
-    TIM_OCInitStructure.TIM_OCPolarity  = TIM_OCPolarity_Low;        /* µÍµçÆ½ÓĞĞ§£¬Õ¼¿Õ±ÈÔ½´óÔ½ÁÁ */
+    TIM_OCInitStructure.TIM_OCPolarity  = TIM_OCPolarity_Low;        /* ä½ç”µå¹³æœ‰æ•ˆï¼Œå ç©ºæ¯”è¶Šå¤§è¶Šäº® */
     TIM_OCInitStructure.TIM_OCIdleState = TIM_OCIdleState_Set;
     TIM_OC1Init(TIM10, &TIM_OCInitStructure);
     TIM_OC2Init(TIM10, &TIM_OCInitStructure);
@@ -171,7 +171,7 @@ int led_pwm_init(void)
 }
 
 /**
- * @brief  ÉèÖÃÁÁ¶È
+ * @brief  è®¾ç½®äº®åº¦
  */
 int led_brightness_set(led_id_t id, uint8_t percent)
 {
@@ -205,7 +205,7 @@ int led_brightness_set(led_id_t id, uint8_t percent)
 }
 
 /**
- * @brief  °´ÑÕÉ«ÉÁË¸
+ * @brief  æŒ‰é¢œè‰²é—ªçƒ
  */
 void led_blink(led_color_t color, uint8_t times, uint16_t on_ms, uint16_t off_ms)
 {

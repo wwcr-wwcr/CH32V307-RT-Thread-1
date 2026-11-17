@@ -1,19 +1,19 @@
 /**
  * @file lv_port_disp.c
- * @brief LVGL ÏÔÊ¾½Ó¿Ú£¨ST7796S 320x480£¬FSMC ²¢¿Ú£©
+ * @brief LVGL æ˜¾ç¤ºæ¥å£ï¼ˆST7796S 320x480ï¼ŒFSMC å¹¶å£ï¼‰
  *
- * Ë¢ÆÁ·½Ê½¶şÑ¡Ò»£¨¸ÄÏÂÃæµÄ LCD_DISP_USE_DMA£©£º
+ * åˆ·å±æ–¹å¼äºŒé€‰ä¸€ï¼ˆæ”¹ä¸‹é¢çš„ LCD_DISP_USE_DMAï¼‰ï¼š
  *
- *   0 = Í¬²½Ë¢£ºCPU Ñ­»·Ğ´ LCD->LCD_RAM£¬¼òµ¥µ«»á×èÈû UI Ïß³Ì
- *   1 = DMA Ë¢£ºDMA2_Channel1 + Ë«»º³å£¬
- *              - ÄÚ´æ -> FSMC Êı¾İ¼Ä´æÆ÷£¬M2M Ä£Ê½£¬Ô´µØÖ·µİÔö¡¢Ä¿µØÖ·¹Ì¶¨
- *              - ´«ÊäÍê³ÉÖĞ¶ÏÀï²Åµ÷ lv_disp_flush_ready()£¬ËùÒÔ²»»áËºÁÑ
- *              - CPU ÔÚ°áÔËÆÚ¼ä¿ÉÒÔÈ¥ÅÜ±ğµÄÏß³Ì/¶¯»­£¬UI ¸ü¸úÊÖ
+ *   0 = åŒæ­¥åˆ·ï¼šCPU å¾ªç¯å†™ LCD->LCD_RAMï¼Œç®€å•ä½†ä¼šé˜»å¡ UI çº¿ç¨‹
+ *   1 = DMA åˆ·ï¼šDMA2_Channel1 + åŒç¼“å†²ï¼Œ
+ *              - å†…å­˜ -> FSMC æ•°æ®å¯„å­˜å™¨ï¼ŒM2M æ¨¡å¼ï¼Œæºåœ°å€é€’å¢ã€ç›®åœ°å€å›ºå®š
+ *              - ä¼ è¾“å®Œæˆä¸­æ–­é‡Œæ‰è°ƒ lv_disp_flush_ready()ï¼Œæ‰€ä»¥ä¸ä¼šæ’•è£‚
+ *              - CPU åœ¨æ¬è¿æœŸé—´å¯ä»¥å»è·‘åˆ«çš„çº¿ç¨‹/åŠ¨ç”»ï¼ŒUI æ›´è·Ÿæ‰‹
  *
- * Í¨µÀÑ¡Ôñ£ºDAC ÈÎÎñÓÃµÄÊÇ DMA2_Channel4£¬ÕâÀïÓÃ Channel1£¬»¥²»Ó°Ïì£»
- *           ADC ÓÃµÄÊÇ DMA1_Channel1£¬Ò²ÔÚÁíÒ»×é¿ØÖÆÆ÷ÉÏ¡£
+ * é€šé“é€‰æ‹©ï¼šDAC ä»»åŠ¡ç”¨çš„æ˜¯ DMA2_Channel4ï¼Œè¿™é‡Œç”¨ Channel1ï¼Œäº’ä¸å½±å“ï¼›
+ *           ADC ç”¨çš„æ˜¯ DMA1_Channel1ï¼Œä¹Ÿåœ¨å¦ä¸€ç»„æ§åˆ¶å™¨ä¸Šã€‚
  *
- * ÄÚ´æ£ºË«»º³å 2 x 320x10 x 2B = 12.8KB
+ * å†…å­˜ï¼šåŒç¼“å†² 2 x 320x10 x 2B = 12.8KB
  */
 
 #if 1
@@ -32,11 +32,11 @@
  *********************/
 #define MY_DISP_HOR_RES     320
 #define MY_DISP_VER_RES     480
-#define MY_DISP_BUF_LINES   10                              /* ¾Ö²¿»º³åĞĞÊı */
+#define MY_DISP_BUF_LINES   10                              /* å±€éƒ¨ç¼“å†²è¡Œæ•° */
 #define MY_DISP_BUF_SIZE    (MY_DISP_HOR_RES * MY_DISP_BUF_LINES)
 
-#define LCD_DISP_USE_DMA    1                               /* 1 = DMA Ë¢ÆÁ£¬0 = CPU Í¬²½Ë¢ */
-#define LCD_DMA_CH          DMA2_Channel1                   /* ¿ÕÏĞÍ¨µÀ£¬ºÍ DAC µÄ Ch4 ²»³åÍ» */
+#define LCD_DISP_USE_DMA    1                               /* 1 = DMA åˆ·å±ï¼Œ0 = CPU åŒæ­¥åˆ· */
+#define LCD_DMA_CH          DMA2_Channel1                   /* ç©ºé—²é€šé“ï¼Œå’Œ DAC çš„ Ch4 ä¸å†²çª */
 
 /**********************
  *  STATIC VARIABLES
@@ -45,7 +45,7 @@ static lv_disp_draw_buf_t s_draw_buf;
 static lv_disp_drv_t      s_disp_drv;
 
 #if LCD_DISP_USE_DMA
-/* Ë«»º³å£ºLVGL Íù A »­µÄÊ±ºò£¬DMA ÕıÔÚ°Ñ B ËÍ³öÈ¥ */
+/* åŒç¼“å†²ï¼šLVGL å¾€ A ç”»çš„æ—¶å€™ï¼ŒDMA æ­£åœ¨æŠŠ B é€å‡ºå» */
 static lv_color_t s_buf1[MY_DISP_BUF_SIZE];
 static lv_color_t s_buf2[MY_DISP_BUF_SIZE];
 #else
@@ -56,7 +56,7 @@ static lv_color_t s_buf[MY_DISP_BUF_SIZE];
  *   STATIC FUNCTIONS
  **********************/
 #if LCD_DISP_USE_DMA
-/* DMA ´«ÊäÍê³É£ºÕâÒ»¿éÕæÕıË¢ÍêÁË£¬¸æËß LVGL ¿ÉÒÔ¼ÌĞø */
+/* DMA ä¼ è¾“å®Œæˆï¼šè¿™ä¸€å—çœŸæ­£åˆ·å®Œäº†ï¼Œå‘Šè¯‰ LVGL å¯ä»¥ç»§ç»­ */
 void DMA2_Channel1_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void DMA2_Channel1_IRQHandler(void)
 {
@@ -74,7 +74,7 @@ void DMA2_Channel1_IRQHandler(void)
     FREE_INT_SP();
 }
 
-/* DMA2_Channel1£ºM2M Ä£Ê½£¬PADDR=Ô´(µİÔö) -> MADDR=LCD Êı¾İ¼Ä´æÆ÷(¹Ì¶¨) */
+/* DMA2_Channel1ï¼šM2M æ¨¡å¼ï¼ŒPADDR=æº(é€’å¢) -> MADDR=LCD æ•°æ®å¯„å­˜å™¨(å›ºå®š) */
 static void lcd_dma_init(void)
 {
     DMA_InitTypeDef DMA_InitStructure = {0};
@@ -84,12 +84,12 @@ static void lcd_dma_init(void)
 
     DMA_DeInit(LCD_DMA_CH);
 
-    DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)s_buf1;      /* flush Ê±ÔÙ¸Ä */
+    DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)s_buf1;      /* flush æ—¶å†æ”¹ */
     DMA_InitStructure.DMA_MemoryBaseAddr     = (uint32_t)&LCD->LCD_RAM;
-    DMA_InitStructure.DMA_DIR                = DMA_DIR_PeripheralSRC; /* M2M£ºCPAR ÊÇÔ´ */
+    DMA_InitStructure.DMA_DIR                = DMA_DIR_PeripheralSRC; /* M2Mï¼šCPAR æ˜¯æº */
     DMA_InitStructure.DMA_BufferSize         = MY_DISP_BUF_SIZE;
-    DMA_InitStructure.DMA_PeripheralInc      = DMA_PeripheralInc_Enable;   /* Ô´µİÔö */
-    DMA_InitStructure.DMA_MemoryInc          = DMA_MemoryInc_Disable;      /* ÆÁµØÖ·¹Ì¶¨ */
+    DMA_InitStructure.DMA_PeripheralInc      = DMA_PeripheralInc_Enable;   /* æºé€’å¢ */
+    DMA_InitStructure.DMA_MemoryInc          = DMA_MemoryInc_Disable;      /* å±åœ°å€å›ºå®š */
     DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
     DMA_InitStructure.DMA_MemoryDataSize     = DMA_MemoryDataSize_HalfWord;
     DMA_InitStructure.DMA_Mode               = DMA_Mode_Normal;
@@ -109,7 +109,7 @@ static void lcd_dma_init(void)
 #endif /* LCD_DISP_USE_DMA */
 
 /**
- * @brief  °Ñ LVGL »­ºÃµÄÒ»¿éË¢µ½ÆÁÉÏ
+ * @brief  æŠŠ LVGL ç”»å¥½çš„ä¸€å—åˆ·åˆ°å±ä¸Š
  */
 static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p)
 {
@@ -117,17 +117,17 @@ static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_
 
     (void)disp_drv;
 
-    /* 1. Éè»æÍ¼´°¿Ú£¨CPU Ğ´ FSMC£¬ÃüÁîÏÈÓÚÏñËØµ½´ï£¬Ó²¼ş±£Ö¤Ë³Ğò£© */
+    /* 1. è®¾ç»˜å›¾çª—å£ï¼ˆCPU å†™ FSMCï¼Œå‘½ä»¤å…ˆäºåƒç´ åˆ°è¾¾ï¼Œç¡¬ä»¶ä¿è¯é¡ºåºï¼‰ */
     lcd_set_window((uint16_t)area->x1, (uint16_t)area->y1,
                    (uint16_t)area->x2, (uint16_t)area->y2);
 
 #if LCD_DISP_USE_DMA
-    /* 2. Æğ DMA£¬´«ÍêÔÚÖĞ¶ÏÀï flush_ready */
-    LCD_DMA_CH->PADDR = (uint32_t)color_p;      /* Ô´£ºLVGL µÄÕâ¿é»º³å */
+    /* 2. èµ· DMAï¼Œä¼ å®Œåœ¨ä¸­æ–­é‡Œ flush_ready */
+    LCD_DMA_CH->PADDR = (uint32_t)color_p;      /* æºï¼šLVGL çš„è¿™å—ç¼“å†² */
     DMA_SetCurrDataCounter(LCD_DMA_CH, (uint16_t)total);
     DMA_Cmd(LCD_DMA_CH, ENABLE);
 #else
-    /* 2. CPU Í¬²½Ğ´ */
+    /* 2. CPU åŒæ­¥å†™ */
     lcd_write_data_buf((const uint16_t *)color_p, total);
     lv_disp_flush_ready(disp_drv);
 #endif

@@ -1,18 +1,18 @@
 /******************************************************************************
- * ÎÄ¼şÃû   : motor.h
- * Ğ¾Æ¬     : CH32V307VCT6
- * ËµÃ÷     : Ö±Á÷µç»úÇı¶¯£¨TIM1£ºPA8=CH1£¬PA11=CH4£¬Õı·´×ª + µ÷ËÙ£©
+ * æ–‡ä»¶å   : motor.h
+ * èŠ¯ç‰‡     : CH32V307VCT6
+ * è¯´æ˜     : ç›´æµç”µæœºé©±åŠ¨ï¼ˆTIM1ï¼šPA8=CH1ï¼ŒPA11=CH4ï¼Œæ­£åè½¬ + è°ƒé€Ÿï¼‰
  *
- * Ó²¼şËµÃ÷: CH1 Çı¶¯Ò»Â·¡¢CH4 Çı¶¯ÁíÒ»Â·£¬Á½Â·»¥²¹ÊµÏÖÕı·´×ª
- *           Õ¼¿Õ±ÈÔ½´ó×ªËÙÔ½¿ì£¬·ûºÅ±íÊ¾·½Ïò
+ * ç¡¬ä»¶è¯´æ˜: CH1 é©±åŠ¨ä¸€è·¯ã€CH4 é©±åŠ¨å¦ä¸€è·¯ï¼Œä¸¤è·¯äº’è¡¥å®ç°æ­£åè½¬
+ *           å ç©ºæ¯”è¶Šå¤§è½¬é€Ÿè¶Šå¿«ï¼Œç¬¦å·è¡¨ç¤ºæ–¹å‘
  *
- * Ê¹ÓÃÊ¾Àı:
+ * ä½¿ç”¨ç¤ºä¾‹:
  *     motor_init();
- *     motor_set_speed(60);     // Õı×ª 60%
- *     motor_set_speed(-30);    // ·´×ª 30%
+ *     motor_set_speed(60);     // æ­£è½¬ 60%
+ *     motor_set_speed(-30);    // åè½¬ 30%
  *     motor_stop();
  *
- * ·µ»ØÖµÔ¼¶¨: 0 = ³É¹¦£¬¸ºÊı = Ê§°Ü£¨-1 ²ÎÊı´íÎó£©
+ * è¿”å›å€¼çº¦å®š: 0 = æˆåŠŸï¼Œè´Ÿæ•° = å¤±è´¥ï¼ˆ-1 å‚æ•°é”™è¯¯ï¼‰
  ******************************************************************************/
 
 #ifndef __MOTOR_H
@@ -25,10 +25,10 @@ extern "C" {
 #include "ch32v30x_conf.h"
 
 /*********************************************************************
- * ¶¨Ê±Æ÷²ÎÊı
+ * å®šæ—¶å™¨å‚æ•°
  */
-#define MOTOR_PWM_TIM_CLOCK     1000000UL                           /* ¼ÆÊıÆµÂÊ 1MHz */
-#define MOTOR_PWM_FREQ_HZ       10000UL                             /* PWM ÆµÂÊ 10kHz */
+#define MOTOR_PWM_TIM_CLOCK     1000000UL                           /* è®¡æ•°é¢‘ç‡ 1MHz */
+#define MOTOR_PWM_FREQ_HZ       10000UL                             /* PWM é¢‘ç‡ 10kHz */
 #define MOTOR_PWM_PRESCALER     ((SystemCoreClock / MOTOR_PWM_TIM_CLOCK) - 1)
 #define MOTOR_PWM_PERIOD        ((MOTOR_PWM_TIM_CLOCK / MOTOR_PWM_FREQ_HZ) - 1)
 
@@ -37,48 +37,48 @@ extern "C" {
 #endif
 
 /*********************************************************************
- * È«¾Ö±äÁ¿
+ * å…¨å±€å˜é‡
  */
-extern int8_t motor_level;      /* µ±Ç°×ªËÙ°Ù·Ö±È£¬Õı=Õı×ª£¬¸º=·´×ª */
+extern int8_t motor_level;      /* å½“å‰è½¬é€Ÿç™¾åˆ†æ¯”ï¼Œæ­£=æ­£è½¬ï¼Œè´Ÿ=åè½¬ */
 
 /*********************************************************************
- * º¯Êı
+ * å‡½æ•°
  */
 
 /**
- * @brief  ³õÊ¼»¯µç»ú PWM£¨Ä¬ÈÏ 10kHz£¬ÉÏµçÍ£×ª£©
- * @return 0 ³É¹¦
+ * @brief  åˆå§‹åŒ–ç”µæœº PWMï¼ˆé»˜è®¤ 10kHzï¼Œä¸Šç”µåœè½¬ï¼‰
+ * @return 0 æˆåŠŸ
  */
 int motor_init(void);
 
 /**
- * @brief  ÉèÖÃ×ªËÙÓë·½Ïò
- * @param  percent  -100~100£¬ÕıÊıÕı×ª¡¢¸ºÊı·´×ª¡¢0 Í£Ö¹
- * @return 0 ³É¹¦£¬-1 ²ÎÊı´íÎó
+ * @brief  è®¾ç½®è½¬é€Ÿä¸æ–¹å‘
+ * @param  percent  -100~100ï¼Œæ­£æ•°æ­£è½¬ã€è´Ÿæ•°åè½¬ã€0 åœæ­¢
+ * @return 0 æˆåŠŸï¼Œ-1 å‚æ•°é”™è¯¯
  */
 int motor_set_speed(int16_t percent);
 
 /**
- * @brief  Í£Ö¹µç»ú
+ * @brief  åœæ­¢ç”µæœº
  */
 void motor_stop(void);
 
 /**
- * @brief  ¶ÁÈ¡µ±Ç°×ªËÙ°Ù·Ö±È
+ * @brief  è¯»å–å½“å‰è½¬é€Ÿç™¾åˆ†æ¯”
  * @return -100~100
  */
 int8_t motor_get_speed(void);
 
 /**
- * @brief  ÓÉ±àÂëÆ÷¼ÆÊı»»Ëã×ªËÙ£¨×ª/·Ö£©
- * @param  count     ²ÉÑùÖÜÆÚÄÚµÄ±àÂëÆ÷¼ÆÊı
- * @param  time_ms   ²ÉÑùÖÜÆÚ£¨ºÁÃë£©
- * @return ×ªËÙ rpm
+ * @brief  ç”±ç¼–ç å™¨è®¡æ•°æ¢ç®—è½¬é€Ÿï¼ˆè½¬/åˆ†ï¼‰
+ * @param  count     é‡‡æ ·å‘¨æœŸå†…çš„ç¼–ç å™¨è®¡æ•°
+ * @param  time_ms   é‡‡æ ·å‘¨æœŸï¼ˆæ¯«ç§’ï¼‰
+ * @return è½¬é€Ÿ rpm
  */
 float motor_speed_calculate(int16_t count, uint32_t time_ms);
 
 /*********************************************************************
- * ¾É½Ó¿Ú¼æÈİ
+ * æ—§æ¥å£å…¼å®¹
  */
 #define MOTOR_CONTROL_TIM_CLOCK         MOTOR_PWM_TIM_CLOCK
 #define MOTOR_CONTROL_TIM_PRESCALER     MOTOR_PWM_PRESCALER
@@ -87,20 +87,20 @@ float motor_speed_calculate(int16_t count, uint32_t time_ms);
 #define motor_pwm_control(period, per)  motor_set_speed((motor_level < 0) ? -(int16_t)(per) : (int16_t)(per))
 
 /*********************************************************************
- * ±¦±¦º¯Êı£¨²»ÓÃ¹ÜÕı¸ººÅ£©
+ * å®å®å‡½æ•°ï¼ˆä¸ç”¨ç®¡æ­£è´Ÿå·ï¼‰
  *********************************************************************/
 
 /**
- * @brief  Õı×ª
+ * @brief  æ­£è½¬
  * @param  percent  0~100
- * @return 0 ³É¹¦
+ * @return 0 æˆåŠŸ
  */
 int motor_forward(uint8_t percent);
 
 /**
- * @brief  ·´×ª
+ * @brief  åè½¬
  * @param  percent  0~100
- * @return 0 ³É¹¦
+ * @return 0 æˆåŠŸ
  */
 int motor_reverse(uint8_t percent);
 

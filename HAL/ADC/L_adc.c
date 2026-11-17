@@ -1,7 +1,7 @@
 /******************************************************************************
- * ÎÄ¼şÃû   : L_adc.c
- * Ğ¾Æ¬     : CH32V307VCT6
- * ËµÃ÷     : ADC1 ¶¨Ê±Æ÷´¥·¢²ÉÑù£¨TIM3 TRGO -> ADC Íâ²¿´¥·¢£¬¸üĞÂÖĞ¶ÏÈ¡Êı£©
+ * æ–‡ä»¶å   : L_adc.c
+ * èŠ¯ç‰‡     : CH32V307VCT6
+ * è¯´æ˜     : ADC1 å®šæ—¶å™¨è§¦å‘é‡‡æ ·ï¼ˆTIM3 TRGO -> ADC å¤–éƒ¨è§¦å‘ï¼Œæ›´æ–°ä¸­æ–­å–æ•°ï¼‰
  ******************************************************************************/
 
 #include "L_adc.h"
@@ -9,16 +9,16 @@
 #include "rthw.h"
 
 /**************************************************************************************************
- *                                        ÄÚ²¿±äÁ¿
+ *                                        å†…éƒ¨å˜é‡
  **************************************************************************************************/
-static volatile uint16_t s_adc_value = 0;       /* ×î½üÒ»´Î²ÉÑùÖµ */
-static adc_timer_cb_t    s_adc_cb    = NULL;    /* ÓÃ»§»Øµ÷ */
+static volatile uint16_t s_adc_value = 0;       /* æœ€è¿‘ä¸€æ¬¡é‡‡æ ·å€¼ */
+static adc_timer_cb_t    s_adc_cb    = NULL;    /* ç”¨æˆ·å›è°ƒ */
 
 /**************************************************************************************************
- *                                        ¶ÔÍâº¯Êı
+ *                                        å¯¹å¤–å‡½æ•°
  **************************************************************************************************/
 /**
- * @brief  ×¢²á²ÉÑù»Øµ÷
+ * @brief  æ³¨å†Œé‡‡æ ·å›è°ƒ
  */
 void adc_timer_callback_set(adc_timer_cb_t cb)
 {
@@ -26,7 +26,7 @@ void adc_timer_callback_set(adc_timer_cb_t cb)
 }
 
 /**
- * @brief  Æô¶¯¶¨Ê±Æ÷´¥·¢²ÉÑù
+ * @brief  å¯åŠ¨å®šæ—¶å™¨è§¦å‘é‡‡æ ·
  */
 int adc_timer_start(uint8_t channel, uint32_t sample_rate_hz)
 {
@@ -42,17 +42,17 @@ int adc_timer_start(uint8_t channel, uint32_t sample_rate_hz)
 
     arr = (uint16_t)(ADC_TIMER_CLOCK / sample_rate_hz - 1);
 
-    /* 1. ÏÈ°´¶¨Ê±Æ÷´¥·¢Ä£Ê½ÖØĞÂÅäÖÃ ADC1 */
+    /* 1. å…ˆæŒ‰å®šæ—¶å™¨è§¦å‘æ¨¡å¼é‡æ–°é…ç½® ADC1 */
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
 
-    /* PCLK2 = 72MHz£¨APB2 ¶ş·ÖÆµ£©£¬ADC /8 = 9MHz£¬µÍÓÚ 14MHz ÉÏÏŞ */
+    /* PCLK2 = 72MHzï¼ˆAPB2 äºŒåˆ†é¢‘ï¼‰ï¼ŒADC /8 = 9MHzï¼Œä½äº 14MHz ä¸Šé™ */
     RCC_ADCCLKConfig(RCC_PCLK2_Div8);
 
     ADC_DeInit(ADC1);
     ADC_InitStructure.ADC_Mode               = ADC_Mode_Independent;
     ADC_InitStructure.ADC_ScanConvMode       = DISABLE;
-    ADC_InitStructure.ADC_ContinuousConvMode = DISABLE;                     /* µ¥´Î×ª»»£ºÒ»´Î´¥·¢Ò»´Î×ª»» */
+    ADC_InitStructure.ADC_ContinuousConvMode = DISABLE;                     /* å•æ¬¡è½¬æ¢ï¼šä¸€æ¬¡è§¦å‘ä¸€æ¬¡è½¬æ¢ */
     ADC_InitStructure.ADC_ExternalTrigConv   = ADC_ExternalTrigConv_T3_TRGO;
     ADC_InitStructure.ADC_DataAlign          = ADC_DataAlign_Right;
     ADC_InitStructure.ADC_NbrOfChannel       = 1;
@@ -67,17 +67,17 @@ int adc_timer_start(uint8_t channel, uint32_t sample_rate_hz)
     ADC_ResetCalibration(ADC1);
     while(ADC_GetResetCalibrationStatus(ADC1))
     {
-        /* µÈ´ı¸´Î»Ğ£×¼Íê³É */
+        /* ç­‰å¾…å¤ä½æ ¡å‡†å®Œæˆ */
     }
     ADC_StartCalibration(ADC1);
     while(ADC_GetCalibrationStatus(ADC1))
     {
-        /* µÈ´ıĞ£×¼Íê³É */
+        /* ç­‰å¾…æ ¡å‡†å®Œæˆ */
     }
 
     ADC_ExternalTrigConvCmd(ADC1, ENABLE);
 
-    /* 2. ÅäÖÃ TIM3£º1MHz ¼ÆÊı£¬¸üĞÂÊÂ¼ş×÷Îª ADC ´¥·¢Ô´ */
+    /* 2. é…ç½® TIM3ï¼š1MHz è®¡æ•°ï¼Œæ›´æ–°äº‹ä»¶ä½œä¸º ADC è§¦å‘æº */
     TIM_TimeBaseInitStructure.TIM_Period        = arr;
     TIM_TimeBaseInitStructure.TIM_Prescaler     = ADC_TIMER_PRESCALER;
     TIM_TimeBaseInitStructure.TIM_ClockDivision = TIM_CKD_DIV1;
@@ -101,7 +101,7 @@ int adc_timer_start(uint8_t channel, uint32_t sample_rate_hz)
 }
 
 /**
- * @brief  Í£Ö¹²ÉÑù
+ * @brief  åœæ­¢é‡‡æ ·
  */
 void adc_timer_stop(void)
 {
@@ -115,7 +115,7 @@ void adc_timer_stop(void)
 }
 
 /**
- * @brief  ¶ÁÈ¡×î½üÒ»´Î²ÉÑùÖµ
+ * @brief  è¯»å–æœ€è¿‘ä¸€æ¬¡é‡‡æ ·å€¼
  */
 uint16_t adc_timer_value_get(void)
 {
@@ -123,9 +123,9 @@ uint16_t adc_timer_value_get(void)
 }
 
 /**************************************************************************************************
- *                                        ÖĞ¶Ï·şÎñ
+ *                                        ä¸­æ–­æœåŠ¡
  **************************************************************************************************/
-/* TIM3 ¸üĞÂÖĞ¶Ï£ºÃ¿´Î´¥·¢Ò»´Î ADC ×ª»»£¬°Ñ½á¹û½»¸øÉÏ²ã */
+/* TIM3 æ›´æ–°ä¸­æ–­ï¼šæ¯æ¬¡è§¦å‘ä¸€æ¬¡ ADC è½¬æ¢ï¼ŒæŠŠç»“æœäº¤ç»™ä¸Šå±‚ */
 void TIM3_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void TIM3_IRQHandler(void)
 {

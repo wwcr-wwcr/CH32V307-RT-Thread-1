@@ -1,5 +1,5 @@
 /******************************************************************************
-                                                                                                                È«¾ÖÊÓ¾õ³£Á¿
+                                                                                                                å…¨å±€è§†è§‰å¸¸é‡
  ******************************************************************************/
 
 #ifndef __UI_THEME_H
@@ -8,29 +8,29 @@
 #include "lvgl/lvgl.h"
 
 /*********************************************************************
- * ÑÕÉ«
+ * é¢œè‰²
  *********************************************************************/
-#define UI_C_BG          lv_color_hex(0xFFF5F9)     /* Ò³Ãæµ×É«£¨¶¥²¿ÄÌÓÍ·Û£© */
-#define UI_C_BG_BOTTOM   lv_color_hex(0xE7F3FF)     /* Ò³Ãæµ×É«£¨µ×²¿µ­À¶£¬×İÏò½¥±ä£© */
-#define UI_C_CARD        lv_color_hex(0xFFFFFF)     /* ¿¨Æ¬£º´¿°× */
-#define UI_C_BORDER      lv_color_hex(0xFFD9E8)     /* Ãè±ß£ºµ­²İİ® */
-#define UI_C_TITLE       lv_color_hex(0xFF7AA8)     /* ±êÌâÀ¸£º²İİ®·Û */
-#define UI_C_TEXT        lv_color_hex(0x3A2E39)     /* Ö÷ÎÄ×Ö£ºÉî¿É¿É */
-#define UI_C_TEXT_DIM    lv_color_hex(0x9A8C98)     /* ´ÎÒªÎÄ×Ö£º»Ò×Ï */
-#define UI_C_VALUE       lv_color_hex(0xFF4F8B)     /* ÊıÖµ£ºÁÁ²İİ® */
-#define UI_C_ACCENT      lv_color_hex(0x3FC8B4)     /* Ç¿µ÷£º±¡ºÉÂÌ */
-#define UI_C_HINT        lv_color_hex(0xFFE6F1)     /* µ×²¿ÌáÊ¾Ìõ */
+#define UI_C_BG          lv_color_hex(0xFFF5F9)     /* é¡µé¢åº•è‰²ï¼ˆé¡¶éƒ¨å¥¶æ²¹ç²‰ï¼‰ */
+#define UI_C_BG_BOTTOM   lv_color_hex(0xE7F3FF)     /* é¡µé¢åº•è‰²ï¼ˆåº•éƒ¨æ·¡è“ï¼Œçºµå‘æ¸å˜ï¼‰ */
+#define UI_C_CARD        lv_color_hex(0xFFFFFF)     /* å¡ç‰‡ï¼šçº¯ç™½ */
+#define UI_C_BORDER      lv_color_hex(0xFFD9E8)     /* æè¾¹ï¼šæ·¡è‰è“ */
+#define UI_C_TITLE       lv_color_hex(0xFF7AA8)     /* æ ‡é¢˜æ ï¼šè‰è“ç²‰ */
+#define UI_C_TEXT        lv_color_hex(0x3A2E39)     /* ä¸»æ–‡å­—ï¼šæ·±å¯å¯ */
+#define UI_C_TEXT_DIM    lv_color_hex(0x9A8C98)     /* æ¬¡è¦æ–‡å­—ï¼šç°ç´« */
+#define UI_C_VALUE       lv_color_hex(0xFF4F8B)     /* æ•°å€¼ï¼šäº®è‰è“ */
+#define UI_C_ACCENT      lv_color_hex(0x3FC8B4)     /* å¼ºè°ƒï¼šè–„è·ç»¿ */
+#define UI_C_HINT        lv_color_hex(0xFFE6F1)     /* åº•éƒ¨æç¤ºæ¡ */
 
 /*********************************************************************
- * ĞÎ×´ / ×ÖÌå
+ * å½¢çŠ¶ / å­—ä½“
  *********************************************************************/
-#define UI_RADIUS        22                         /* ¿¨Æ¬Ô²½Ç£¬Ô½´óÔ½"Èí" */
+#define UI_RADIUS        22                         /* å¡ç‰‡åœ†è§’ï¼Œè¶Šå¤§è¶Š"è½¯" */
 #define UI_FONT_SMALL    (&lv_font_montserrat_14)
 #define UI_FONT_NORMAL   (&lv_font_montserrat_14)
 #define UI_FONT_BIG      (&lv_font_montserrat_14)
 #define UI_FONT_HUGE     (&lv_font_montserrat_14)
 /*********************************************************************
- * ³ß´ç
+ * å°ºå¯¸
  *********************************************************************/
 #define UI_W             320
 #define UI_H             480

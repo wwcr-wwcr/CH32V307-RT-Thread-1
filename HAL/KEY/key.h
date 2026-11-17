@@ -1,22 +1,22 @@
 /******************************************************************************
- * ÎÄ¼şÃû   : key.h
- * Ğ¾Æ¬     : CH32V307VCT6
- * ËµÃ÷     : 4 ¸ö°åÔØ°´¼üÇı¶¯£¨PE2~PE5£¬ÉÏÀ­ÊäÈë£¬°´ÏÂÎªµÍ£©
+ * æ–‡ä»¶å   : key.h
+ * èŠ¯ç‰‡     : CH32V307VCT6
+ * è¯´æ˜     : 4 ä¸ªæ¿è½½æŒ‰é”®é©±åŠ¨ï¼ˆPE2~PE5ï¼Œä¸Šæ‹‰è¾“å…¥ï¼ŒæŒ‰ä¸‹ä¸ºä½ï¼‰
  *
- * ±¾Çı¶¯×Ô¼º¹ÜÒ»¸öÏß³Ì£¬ºÍÔ­À´µÄÂÖÑ¯°æ±¾ÍêÈ«²»Í¬£º
+ * æœ¬é©±åŠ¨è‡ªå·±ç®¡ä¸€ä¸ªçº¿ç¨‹ï¼Œå’ŒåŸæ¥çš„è½®è¯¢ç‰ˆæœ¬å®Œå…¨ä¸åŒï¼š
  *
- *     GPIO µçÆ½±ä»¯ ©¤©¤EXTI ÖĞ¶Ï©¤©¤> ÊÍ·ÅĞÅºÅÁ¿ ©¤©¤> key Ïß³Ì
- *                                                    | 15ms Ïû¶¶
- *                                                    | ÓëÉÏ´ÎÎÈ¶¨Öµ±È½Ï
+ *     GPIO ç”µå¹³å˜åŒ– â”€â”€EXTI ä¸­æ–­â”€â”€> é‡Šæ”¾ä¿¡å·é‡ â”€â”€> key çº¿ç¨‹
+ *                                                    | 15ms æ¶ˆæŠ–
+ *                                                    | ä¸ä¸Šæ¬¡ç¨³å®šå€¼æ¯”è¾ƒ
  *                                                    v
- *                                            »Øµ÷ key_event_cb_t
+ *                                            å›è°ƒ key_event_cb_t
  *
- * ÉÏ²ãÓÃ·¨Ö»ÓĞÈı²½£º
- *     key_init();                          // ³õÊ¼»¯£¨ÖĞ¶Ï + ½¨Ïß³Ì£¬²»Æô¶¯£©
- *     key_event_register(my_key_cb);       // ×¢²á»Øµ÷
- *     key_start();                         // Æô¶¯°´¼üÏß³Ì
+ * ä¸Šå±‚ç”¨æ³•åªæœ‰ä¸‰æ­¥ï¼š
+ *     key_init();                          // åˆå§‹åŒ–ï¼ˆä¸­æ–­ + å»ºçº¿ç¨‹ï¼Œä¸å¯åŠ¨ï¼‰
+ *     key_event_register(my_key_cb);       // æ³¨å†Œå›è°ƒ
+ *     key_start();                         // å¯åŠ¨æŒ‰é”®çº¿ç¨‹
  *
- * »Øµ÷ÔÚ key Ïß³ÌÉÏÏÂÎÄÖ´ĞĞ£¬ÀïÃæ²»Òª×öºÄÊ±²Ù×÷¡£
+ * å›è°ƒåœ¨ key çº¿ç¨‹ä¸Šä¸‹æ–‡æ‰§è¡Œï¼Œé‡Œé¢ä¸è¦åšè€—æ—¶æ“ä½œã€‚
  ******************************************************************************/
 
 #ifndef __KEY_H
@@ -29,7 +29,7 @@ extern "C" {
 #include "ch32v30x_conf.h"
 
 /*********************************************************************
- * Òı½Å¶¨Òå
+ * å¼•è„šå®šä¹‰
  */
 #define KEY1_GPIO           GPIOE
 #define KEY2_GPIO           GPIOE
@@ -42,14 +42,14 @@ extern "C" {
 #define KEY_GPIO            GPIOE
 #define KEY_PIN_ALL         (KEY1_PIN | KEY2_PIN | KEY3_PIN | KEY4_PIN)
 
-/* RT-Thread Òı½Å±àºÅ£¨¶ÔÓ¦ drivers/drv_gpio.c µÄ pins[] ±í£º1=PE2 2=PE3 3=PE4 4=PE5£© */
+/* RT-Thread å¼•è„šç¼–å·ï¼ˆå¯¹åº” drivers/drv_gpio.c çš„ pins[] è¡¨ï¼š1=PE2 2=PE3 3=PE4 4=PE5ï¼‰ */
 #define KEY_RT_PIN_1        1
 #define KEY_RT_PIN_2        2
 #define KEY_RT_PIN_3        3
 #define KEY_RT_PIN_4        4
 
 /*********************************************************************
- * ÀàĞÍ¶¨Òå
+ * ç±»å‹å®šä¹‰
  */
 typedef enum
 {
@@ -57,11 +57,11 @@ typedef enum
     KEY_ID_2,           /* KEY2 / PE3 */
     KEY_ID_3,           /* KEY3 / PE4 */
     KEY_ID_4,           /* KEY4 / PE5 */
-    KEY_ID_NONE,        /* Ã»ÓĞ°´¼ü */
+    KEY_ID_NONE,        /* æ²¡æœ‰æŒ‰é”® */
     KEY_ID_MAX = KEY_ID_NONE
 } key_id_t;
 
-/* Î»ÑÚÂë£¬±ãÓÚÒ»´ÎÅĞ¶Ï¶à¸ö°´¼ü */
+/* ä½æ©ç ï¼Œä¾¿äºä¸€æ¬¡åˆ¤æ–­å¤šä¸ªæŒ‰é”® */
 #define KEY_BIT(id)         ((uint8_t)(1 << (id)))
 #define KEY_BUTTON_1        KEY_BIT(KEY_ID_1)
 #define KEY_BUTTON_2        KEY_BIT(KEY_ID_2)
@@ -69,50 +69,50 @@ typedef enum
 #define KEY_BUTTON_4        KEY_BIT(KEY_ID_4)
 #define KEY_BUTTON_ALL      (KEY_BUTTON_1 | KEY_BUTTON_2 | KEY_BUTTON_3 | KEY_BUTTON_4)
 
-/* µ¥¸ö°´¼üÊÇ·ñ°´ÏÂ£¨Ô­Ê¼µçÆ½£¬Î´Ïû¶¶£© */
+/* å•ä¸ªæŒ‰é”®æ˜¯å¦æŒ‰ä¸‹ï¼ˆåŸå§‹ç”µå¹³ï¼Œæœªæ¶ˆæŠ–ï¼‰ */
 #define KEY_PUSH_BUTTON_1() (GPIO_ReadInputDataBit(KEY1_GPIO, KEY1_PIN) == Bit_RESET)
 #define KEY_PUSH_BUTTON_2() (GPIO_ReadInputDataBit(KEY2_GPIO, KEY2_PIN) == Bit_RESET)
 #define KEY_PUSH_BUTTON_3() (GPIO_ReadInputDataBit(KEY3_GPIO, KEY3_PIN) == Bit_RESET)
 #define KEY_PUSH_BUTTON_4() (GPIO_ReadInputDataBit(KEY4_GPIO, KEY4_PIN) == Bit_RESET)
 
 /**
- * @brief °´¼ü°´ÏÂÊÂ¼ş»Øµ÷£¨ÔÚ key Ïß³ÌÀï±»µ÷ÓÃ£©
- * @param key ±»°´ÏÂµÄ°´¼ü
+ * @brief æŒ‰é”®æŒ‰ä¸‹äº‹ä»¶å›è°ƒï¼ˆåœ¨ key çº¿ç¨‹é‡Œè¢«è°ƒç”¨ï¼‰
+ * @param key è¢«æŒ‰ä¸‹çš„æŒ‰é”®
  */
 typedef void (*key_event_cb_t)(key_id_t key);
 
 /*********************************************************************
- * º¯Êı
+ * å‡½æ•°
  */
 
 /**
- * @brief  ³õÊ¼»¯°´¼ü£ºÉÏÀ­ÊäÈë + Ë«±ßÑØ EXTI + ĞÅºÅÁ¿ + ´´½¨°´¼üÏß³Ì
- * @return 0 ³É¹¦£¬-1 Ê§°Ü
- * @note   Ö»´´½¨Ïß³Ì²»Æô¶¯£¬×¢²á»Øµ÷ºóÔÙµ÷ key_start()
+ * @brief  åˆå§‹åŒ–æŒ‰é”®ï¼šä¸Šæ‹‰è¾“å…¥ + åŒè¾¹æ²¿ EXTI + ä¿¡å·é‡ + åˆ›å»ºæŒ‰é”®çº¿ç¨‹
+ * @return 0 æˆåŠŸï¼Œ-1 å¤±è´¥
+ * @note   åªåˆ›å»ºçº¿ç¨‹ä¸å¯åŠ¨ï¼Œæ³¨å†Œå›è°ƒåå†è°ƒ key_start()
  */
 int key_init(void);
 
 /**
- * @brief  Æô¶¯°´¼üÏß³Ì
- * @return 0 ³É¹¦£¬-1 Î´³õÊ¼»¯
+ * @brief  å¯åŠ¨æŒ‰é”®çº¿ç¨‹
+ * @return 0 æˆåŠŸï¼Œ-1 æœªåˆå§‹åŒ–
  */
 int key_start(void);
 
 /**
- * @brief  ×¢²á°´¼üÊÂ¼ş»Øµ÷
- * @param  cb  »Øµ÷º¯Êı£¬´« NULL ±íÊ¾²»´¦Àí
+ * @brief  æ³¨å†ŒæŒ‰é”®äº‹ä»¶å›è°ƒ
+ * @param  cb  å›è°ƒå‡½æ•°ï¼Œä¼  NULL è¡¨ç¤ºä¸å¤„ç†
  */
 void key_event_register(key_event_cb_t cb);
 
 /**
- * @brief  ¶ÁÈ¡µ±Ç°°´¼üµçÆ½£¨Î´Ïû¶¶£¬Î»ÑÚÂë£©
- * @return KEY_BUTTON_x ×éºÏ
+ * @brief  è¯»å–å½“å‰æŒ‰é”®ç”µå¹³ï¼ˆæœªæ¶ˆæŠ–ï¼Œä½æ©ç ï¼‰
+ * @return KEY_BUTTON_x ç»„åˆ
  */
 uint8_t key_state_get(void);
 
 /**
- * @brief  Ä³¸ö°´¼üµ±Ç°ÊÇ·ñ°´ÏÂ£¨ÒÑÏû¶¶£©
- * @return 1 °´ÏÂ£¬0 Î´°´ÏÂ
+ * @brief  æŸä¸ªæŒ‰é”®å½“å‰æ˜¯å¦æŒ‰ä¸‹ï¼ˆå·²æ¶ˆæŠ–ï¼‰
+ * @return 1 æŒ‰ä¸‹ï¼Œ0 æœªæŒ‰ä¸‹
  */
 uint8_t key_is_pressed(key_id_t id);
 

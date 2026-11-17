@@ -1,15 +1,15 @@
 /******************************************************************************
- * ÎÄ¼şÃû   : tim.h
- * Ğ¾Æ¬     : CH32V307VCT6
- * ËµÃ÷     : Í¨ÓÃ PWM Êä³ö£¨TIM2£ºPA0=CH1£¬PA2=CH3£¬PA3=CH4£©
+ * æ–‡ä»¶å   : tim.h
+ * èŠ¯ç‰‡     : CH32V307VCT6
+ * è¯´æ˜     : é€šç”¨ PWM è¾“å‡ºï¼ˆTIM2ï¼šPA0=CH1ï¼ŒPA2=CH3ï¼ŒPA3=CH4ï¼‰
  *
- * Ê¹ÓÃÊ¾Àı:
- *     tim2_pwm_init();                 // Ä¬ÈÏ 1kHz
- *     tim2_pwm_set(TIM2_CH1, 50);      // Í¨µÀ 1 Êä³ö 50% Õ¼¿Õ±È
- *     tim2_pwm_freq_set(20000);        // ¸Ä³É 20kHz
- *     tim2_pwm_stop();                 // ËùÓĞÍ¨µÀÊä³ö 0
+ * ä½¿ç”¨ç¤ºä¾‹:
+ *     tim2_pwm_init();                 // é»˜è®¤ 1kHz
+ *     tim2_pwm_set(TIM2_CH1, 50);      // é€šé“ 1 è¾“å‡º 50% å ç©ºæ¯”
+ *     tim2_pwm_freq_set(20000);        // æ”¹æˆ 20kHz
+ *     tim2_pwm_stop();                 // æ‰€æœ‰é€šé“è¾“å‡º 0
  *
- * ·µ»ØÖµÔ¼¶¨: 0 = ³É¹¦£¬¸ºÊı = Ê§°Ü£¨-1 ²ÎÊı´íÎó£©
+ * è¿”å›å€¼çº¦å®š: 0 = æˆåŠŸï¼Œè´Ÿæ•° = å¤±è´¥ï¼ˆ-1 å‚æ•°é”™è¯¯ï¼‰
  ******************************************************************************/
 
 #ifndef __TIM_H
@@ -22,15 +22,15 @@ extern "C" {
 #include "ch32v30x_conf.h"
 
 /*********************************************************************
- * ¶¨Ê±Æ÷²ÎÊı
+ * å®šæ—¶å™¨å‚æ•°
  */
-#define TIM2_PWM_TIM_CLOCK      1000000UL                                   /* ¼ÆÊıÆµÂÊ 1MHz */
+#define TIM2_PWM_TIM_CLOCK      1000000UL                                   /* è®¡æ•°é¢‘ç‡ 1MHz */
 #define TIM2_PWM_PRESCALER      ((SystemCoreClock / TIM2_PWM_TIM_CLOCK) - 1)
-#define TIM2_PWM_DEFAULT_FREQ   1000UL                                      /* Ä¬ÈÏ 1kHz */
+#define TIM2_PWM_DEFAULT_FREQ   1000UL                                      /* é»˜è®¤ 1kHz */
 #define TIM2_PWM_PERIOD         ((TIM2_PWM_TIM_CLOCK / TIM2_PWM_DEFAULT_FREQ) - 1)
 
 /*********************************************************************
- * ÀàĞÍ¶¨Òå
+ * ç±»å‹å®šä¹‰
  */
 typedef enum
 {
@@ -40,37 +40,37 @@ typedef enum
 } tim2_ch_t;
 
 /*********************************************************************
- * º¯Êı
+ * å‡½æ•°
  */
 
 /**
- * @brief  ³õÊ¼»¯ TIM2 µÄÈı¸ö PWM Í¨µÀ£¨Ä¬ÈÏ 1kHz£¬Õ¼¿Õ±È 0£©
- * @return 0 ³É¹¦
+ * @brief  åˆå§‹åŒ– TIM2 çš„ä¸‰ä¸ª PWM é€šé“ï¼ˆé»˜è®¤ 1kHzï¼Œå ç©ºæ¯” 0ï¼‰
+ * @return 0 æˆåŠŸ
  */
 int tim2_pwm_init(void);
 
 /**
- * @brief  ĞŞ¸Ä PWM ÆµÂÊ£¨Èı¸öÍ¨µÀÍ¬Ê±ÉúĞ§£©
+ * @brief  ä¿®æ”¹ PWM é¢‘ç‡ï¼ˆä¸‰ä¸ªé€šé“åŒæ—¶ç”Ÿæ•ˆï¼‰
  * @param  freq_hz  1~100000 Hz
- * @return 0 ³É¹¦£¬-1 ÆµÂÊ³¬³ö·¶Î§
+ * @return 0 æˆåŠŸï¼Œ-1 é¢‘ç‡è¶…å‡ºèŒƒå›´
  */
 int tim2_pwm_freq_set(uint32_t freq_hz);
 
 /**
- * @brief  ÉèÖÃÄ³¸öÍ¨µÀµÄÕ¼¿Õ±È
+ * @brief  è®¾ç½®æŸä¸ªé€šé“çš„å ç©ºæ¯”
  * @param  ch       TIM2_CH1 / TIM2_CH3 / TIM2_CH4
  * @param  percent  0~100
- * @return 0 ³É¹¦£¬-1 ²ÎÊı´íÎó
+ * @return 0 æˆåŠŸï¼Œ-1 å‚æ•°é”™è¯¯
  */
 int tim2_pwm_set(tim2_ch_t ch, uint8_t percent);
 
 /**
- * @brief  Èı¸öÍ¨µÀÈ«²¿Êä³ö 0
+ * @brief  ä¸‰ä¸ªé€šé“å…¨éƒ¨è¾“å‡º 0
  */
 void tim2_pwm_stop(void);
 
 /*********************************************************************
- * ¾É½Ó¿Ú¼æÈİ
+ * æ—§æ¥å£å…¼å®¹
  */
 #define DEFAULT_CONTROL_TIM_CLOCK       TIM2_PWM_TIM_CLOCK
 #define DEFAULT_CONTROL_TIM_PRESCALER   TIM2_PWM_PRESCALER

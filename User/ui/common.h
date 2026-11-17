@@ -1,9 +1,9 @@
 /******************************************************************************
- * ÎÄ¼şÃû   : common.h
- * ËµÃ÷     : Í¨ÓÃ¿Ø¼ş·â×°
+ * æ–‡ä»¶å   : common.h
+ * è¯´æ˜     : é€šç”¨æ§ä»¶å°è£…
  *
- * Ö»¸ø ui/ Ä¿Â¼ÏÂµÄ *_ui.c ÓÃ¡£Âß¼­²ã£¨menu.c / task_x.c£©²»ÒªÖ±½Óµ÷ÕâÀïµÄº¯Êı¡£
- * ÀıÍâ£ºui_plot_push() / ui_plot_clear() Ö»Ğ´Êı×Ö²»Åö lv_£¬ÈÎÎñÏß³Ì¿ÉÒÔµ÷¡£
+ * åªç»™ ui/ ç›®å½•ä¸‹çš„ *_ui.c ç”¨ã€‚é€»è¾‘å±‚ï¼ˆmenu.c / task_x.cï¼‰ä¸è¦ç›´æ¥è°ƒè¿™é‡Œçš„å‡½æ•°ã€‚
+ * ä¾‹å¤–ï¼šui_plot_push() / ui_plot_clear() åªå†™æ•°å­—ä¸ç¢° lv_ï¼Œä»»åŠ¡çº¿ç¨‹å¯ä»¥è°ƒã€‚
  ******************************************************************************/
 
 #ifndef __UI_COMMON_H
@@ -12,154 +12,154 @@
 #include "lvgl/lvgl.h"
 #include "theme.h"
 /**
- * @brief  ´´½¨Ò»¸ö¶ÀÁ¢Ò³Ãæ£¨LVGL screen£©£¬´øÍ³Ò»±³¾°É«
- * @note   Ã¿¸ö½çÃæÓÃ×Ô¼ºµÄÒ»Ò³£¬ÇĞ»»Ê±»¥²»¸ÉÈÅ
+ * @brief  åˆ›å»ºä¸€ä¸ªç‹¬ç«‹é¡µé¢ï¼ˆLVGL screenï¼‰ï¼Œå¸¦ç»Ÿä¸€èƒŒæ™¯è‰²
+ * @note   æ¯ä¸ªç•Œé¢ç”¨è‡ªå·±çš„ä¸€é¡µï¼Œåˆ‡æ¢æ—¶äº’ä¸å¹²æ‰°
  */
 lv_obj_t *ui_page_create(void);
 
 /**
- * @brief  ÇĞ»»µ½Ä³¸öÒ³Ãæ
+ * @brief  åˆ‡æ¢åˆ°æŸä¸ªé¡µé¢
  */
 void ui_page_load(lv_obj_t *page);
 
 /**
- * @brief  Ïú»ÙÒ»¸öÒ³Ãæ²¢¹é»¹ LVGL ¶Ñ
- * @param  page Ò³ÃæÖ¸ÕëµÄµØÖ·£¬É¾Íê»áÖÃ NULL
- * @note   UI Ïß³Ì×¨ÓÃ¡£µ÷ÓÃÇ°ÏÈ load ±ğµÄÒ³Ãæ£¬²»ÒªÉ¾µ±Ç°ÏÔÊ¾µÄ screen¡£
+ * @brief  é”€æ¯ä¸€ä¸ªé¡µé¢å¹¶å½’è¿˜ LVGL å †
+ * @param  page é¡µé¢æŒ‡é’ˆçš„åœ°å€ï¼Œåˆ å®Œä¼šç½® NULL
+ * @note   UI çº¿ç¨‹ä¸“ç”¨ã€‚è°ƒç”¨å‰å…ˆ load åˆ«çš„é¡µé¢ï¼Œä¸è¦åˆ å½“å‰æ˜¾ç¤ºçš„ screenã€‚
  */
 void ui_page_destroy(lv_obj_t **page);
 
 /**
- * @brief  Õâ¸öÒ³Ãæµ±Ç°ÊÇ²»ÊÇÕıÔÚÏÔÊ¾
- * @return 1 ÊÇ£¬0 ²»ÊÇ
+ * @brief  è¿™ä¸ªé¡µé¢å½“å‰æ˜¯ä¸æ˜¯æ­£åœ¨æ˜¾ç¤º
+ * @return 1 æ˜¯ï¼Œ0 ä¸æ˜¯
  */
 int ui_page_is_active(lv_obj_t *page);
 
 /**
- * @brief  È¡µ±Ç°»î¶¯ÆÁÄ»
+ * @brief  å–å½“å‰æ´»åŠ¨å±å¹•
  */
 lv_obj_t *ui_root(void);
 
 /**
- * @brief  ¶¥²¿±êÌâÀ¸£º×ó±ß±êÌâ£¬ÓÒ±ßÒ³Âë
- * @param  title  ×ó²à±êÌâ£¨Ò»°ã¹Ì¶¨²»±ä£©
- * @param  right  ÓÒ²àÎÄ×Ö£¬ÀıÈç "1/3"
- * @return ÓÒ²àµÄ label£¬·½±ãºóĞø¸üĞÂÒ³Âë
+ * @brief  é¡¶éƒ¨æ ‡é¢˜æ ï¼šå·¦è¾¹æ ‡é¢˜ï¼Œå³è¾¹é¡µç 
+ * @param  title  å·¦ä¾§æ ‡é¢˜ï¼ˆä¸€èˆ¬å›ºå®šä¸å˜ï¼‰
+ * @param  right  å³ä¾§æ–‡å­—ï¼Œä¾‹å¦‚ "1/3"
+ * @return å³ä¾§çš„ labelï¼Œæ–¹ä¾¿åç»­æ›´æ–°é¡µç 
  */
 lv_obj_t *ui_title_bar(lv_obj_t *root, const char *title, const char *right);
 
 /**
- * @brief  µ×²¿ÌáÊ¾Ìõ
- * @return ÖĞ¼äµÄ label
+ * @brief  åº•éƒ¨æç¤ºæ¡
+ * @return ä¸­é—´çš„ label
  */
 lv_obj_t *ui_hint_bar(lv_obj_t *root, const char *text);
 
 /**
- * @brief  ÎŞ±ß¿ò¡¢ÎŞ¹ö¶¯µÄÔ²½ÇÈİÆ÷
+ * @brief  æ— è¾¹æ¡†ã€æ— æ»šåŠ¨çš„åœ†è§’å®¹å™¨
  */
 lv_obj_t *ui_panel(lv_obj_t *parent, lv_coord_t x, lv_coord_t y,
                    lv_coord_t w, lv_coord_t h, lv_color_t bg);
 
 /**
- * @brief  Ò»¶ÎÎÄ×Ö£¬Ä¬ÈÏÍ¸Ã÷µ×¡¢ÎŞ±ß¿ò
+ * @brief  ä¸€æ®µæ–‡å­—ï¼Œé»˜è®¤é€æ˜åº•ã€æ— è¾¹æ¡†
  */
 lv_obj_t *ui_text(lv_obj_t *parent, const lv_font_t *font, lv_color_t color);
 
 /**
- * @brief  ÉèÖÃÎÄ×ÖÄÚÈİ£¨NULL ÏÔÊ¾¿Õ´®£©
+ * @brief  è®¾ç½®æ–‡å­—å†…å®¹ï¼ˆNULL æ˜¾ç¤ºç©ºä¸²ï¼‰
  */
 void ui_text_set(lv_obj_t *label, const char *text);
 
 /**
- * @brief  Ò»ĞĞ"±êÇ© + ÊıÖµ"£¬·µ»ØÓÒ²àµÄÊıÖµ label
- * @param  parent     ¸¸ÈİÆ÷
- * @param  y          ÕâÒ»ĞĞµÄ y ×ø±ê
- * @param  label_text ×ó²à±êÇ©ÎÄ×Ö
+ * @brief  ä¸€è¡Œ"æ ‡ç­¾ + æ•°å€¼"ï¼Œè¿”å›å³ä¾§çš„æ•°å€¼ label
+ * @param  parent     çˆ¶å®¹å™¨
+ * @param  y          è¿™ä¸€è¡Œçš„ y åæ ‡
+ * @param  label_text å·¦ä¾§æ ‡ç­¾æ–‡å­—
  */
 lv_obj_t *ui_row(lv_obj_t *parent, lv_coord_t y, const char *label_text);
 
 /**
- * @brief  Ïà¶Ô¸¸¶ÔÏó¶ÔÆë
+ * @brief  ç›¸å¯¹çˆ¶å¯¹è±¡å¯¹é½
  */
 void ui_text_align(lv_obj_t *label, lv_align_t align, lv_coord_t x, lv_coord_t y);
 
 /*********************************************************************
- * ÊıÖµÏÔÊ¾£¨Ê¡µÃÃ¿´Î¶¼×Ô¼º×¼±¸ char »º³å + snprintf£©
+ * æ•°å€¼æ˜¾ç¤ºï¼ˆçœå¾—æ¯æ¬¡éƒ½è‡ªå·±å‡†å¤‡ char ç¼“å†² + snprintfï¼‰
  *
- * ÄÚ²¿ÓÃ 16~24 ×Ö½ÚÕ»»º³å£¬¿ÉÔÚÈÎºÎÈÎÎñÀïµ÷ÓÃ£¬²»Òª´« NULL label¡£
- * ¹Ì¶¨²»±äµÄÎÄ×ÖÈÔÈ»Ö±½ÓÓÃ ui_text_set()¡£
+ * å†…éƒ¨ç”¨ 16~24 å­—èŠ‚æ ˆç¼“å†²ï¼Œå¯åœ¨ä»»ä½•ä»»åŠ¡é‡Œè°ƒç”¨ï¼Œä¸è¦ä¼  NULL labelã€‚
+ * å›ºå®šä¸å˜çš„æ–‡å­—ä»ç„¶ç›´æ¥ç”¨ ui_text_set()ã€‚
  *********************************************************************/
 
 /**
- * @brief  ÏÔÊ¾ÕûÊı£¬ÀıÈç -25 / 1234
+ * @brief  æ˜¾ç¤ºæ•´æ•°ï¼Œä¾‹å¦‚ -25 / 1234
  */
 void ui_text_int(lv_obj_t *label, int32_t value);
 
 /**
- * @brief  ÏÔÊ¾"ÕûÊı + µ¥Î»"£¬ÀıÈç 1234 -> "1234 lux"
- * @param  unit  µ¥Î»£¬´« NULL ±íÊ¾²»´ø
+ * @brief  æ˜¾ç¤º"æ•´æ•° + å•ä½"ï¼Œä¾‹å¦‚ 1234 -> "1234 lux"
+ * @param  unit  å•ä½ï¼Œä¼  NULL è¡¨ç¤ºä¸å¸¦
  */
 void ui_text_num(lv_obj_t *label, int32_t value, const char *unit);
 
 /**
- * @brief  ÏÔÊ¾Ò»Î»Ğ¡Êı£¨´«·Å´ó 10 ±¶ºóµÄÕûÊı£©£¬ÀıÈç 253 -> "25.3"
- * @param  value_x10  ·Å´ó 10 ±¶µÄÕûÊı£¨ntc_temperature_x10_get() ÕıºÃÊÇÕâ¸ö¸ñÊ½£©
- * @param  unit       µ¥Î»£¬´« NULL ±íÊ¾²»´ø
+ * @brief  æ˜¾ç¤ºä¸€ä½å°æ•°ï¼ˆä¼ æ”¾å¤§ 10 å€åçš„æ•´æ•°ï¼‰ï¼Œä¾‹å¦‚ 253 -> "25.3"
+ * @param  value_x10  æ”¾å¤§ 10 å€çš„æ•´æ•°ï¼ˆntc_temperature_x10_get() æ­£å¥½æ˜¯è¿™ä¸ªæ ¼å¼ï¼‰
+ * @param  unit       å•ä½ï¼Œä¼  NULL è¡¨ç¤ºä¸å¸¦
  */
 void ui_text_x10(lv_obj_t *label, int32_t value_x10, const char *unit);
 
 /**
- * @brief  ÏÔÊ¾°Ù·Ö±È£¬ÀıÈç 60 -> "60%"
+ * @brief  æ˜¾ç¤ºç™¾åˆ†æ¯”ï¼Œä¾‹å¦‚ 60 -> "60%"
  */
 void ui_text_pct(lv_obj_t *label, uint8_t percent);
 
 
 /*********************************************************************
- * ½»»¥¿Ø¼ş£¨ÄÚ²¿ÒÑ¾­¹ÒºÃÊÂ¼ş£¬Ò³Ãæ´úÂëÖ»ĞèÒ»ĞĞ£©
+ * äº¤äº’æ§ä»¶ï¼ˆå†…éƒ¨å·²ç»æŒ‚å¥½äº‹ä»¶ï¼Œé¡µé¢ä»£ç åªéœ€ä¸€è¡Œï¼‰
  *
- * ÊÂ¼ş±àºÅ ev_id »áÍ¨¹ı ui_task_event(id, value) ËÍµ½ÈÎÎñÏß³Ì£¬
- * ÈÎÎñÔÚ on_set(id, value) Àï°´ id Çø·ÖÊÇÄÄ¸ö¿Ø¼ş¡£
+ * äº‹ä»¶ç¼–å· ev_id ä¼šé€šè¿‡ ui_task_event(id, value) é€åˆ°ä»»åŠ¡çº¿ç¨‹ï¼Œ
+ * ä»»åŠ¡åœ¨ on_set(id, value) é‡ŒæŒ‰ id åŒºåˆ†æ˜¯å“ªä¸ªæ§ä»¶ã€‚
  *********************************************************************/
 
 /**
- * @brief  ´øÍ³Ò»ÅäÉ«µÄ»¬Ìõ£¬ÍÏ¶¯Ê±×Ô¶¯·¢ VALUE_CHANGED ÊÂ¼ş
- * @param  ev_id  ÊÂ¼ş±àºÅ£¨0~255£¬ÈÎÎñ²à×Ô¶¨Òå£©
- * @return »¬Ìõ¶ÔÏó£¬±ãÓÚºóĞø lv_slider_set_value
+ * @brief  å¸¦ç»Ÿä¸€é…è‰²çš„æ»‘æ¡ï¼Œæ‹–åŠ¨æ—¶è‡ªåŠ¨å‘ VALUE_CHANGED äº‹ä»¶
+ * @param  ev_id  äº‹ä»¶ç¼–å·ï¼ˆ0~255ï¼Œä»»åŠ¡ä¾§è‡ªå®šä¹‰ï¼‰
+ * @return æ»‘æ¡å¯¹è±¡ï¼Œä¾¿äºåç»­ lv_slider_set_value
  */
 lv_obj_t *ui_slider(lv_obj_t *parent, lv_coord_t x, lv_coord_t y, lv_coord_t w,
                     int32_t min, int32_t max, int32_t value, uint8_t ev_id);
 
 /**
- * @brief  Ô²½Ç°´Å¥£º°×µ× + Ï¸±ß¿ò + ¾ÓÖĞÎÄ×Ö£¬µãÒ»ÏÂ·¢ÊÂ¼ş£¬°´ÏÂ´ø»Øµ¯
- * @param  ev_id  µã»÷ÊÂ¼ş±àºÅ
- * @return °´Å¥¶ÔÏó
+ * @brief  åœ†è§’æŒ‰é’®ï¼šç™½åº• + ç»†è¾¹æ¡† + å±…ä¸­æ–‡å­—ï¼Œç‚¹ä¸€ä¸‹å‘äº‹ä»¶ï¼ŒæŒ‰ä¸‹å¸¦å›å¼¹
+ * @param  ev_id  ç‚¹å‡»äº‹ä»¶ç¼–å·
+ * @return æŒ‰é’®å¯¹è±¡
  */
 lv_obj_t *ui_button(lv_obj_t *parent, lv_coord_t x, lv_coord_t y,
                     lv_coord_t w, lv_coord_t h, const char *text, uint8_t ev_id);
 
 /**
- * @brief  ½ºÄÒĞÎ½ø¶ÈÌõ£¨0~100£©
- * @param  fg  ÒÑÍê³É²¿·ÖµÄÑÕÉ«£¨½¨Òé UI_C_ACCENT£©
+ * @brief  èƒ¶å›Šå½¢è¿›åº¦æ¡ï¼ˆ0~100ï¼‰
+ * @param  fg  å·²å®Œæˆéƒ¨åˆ†çš„é¢œè‰²ï¼ˆå»ºè®® UI_C_ACCENTï¼‰
  */
 lv_obj_t *ui_bar(lv_obj_t *parent, lv_coord_t x, lv_coord_t y,
                  lv_coord_t w, lv_coord_t h, uint8_t value, lv_color_t fg);
 
 /**
- * @brief  1px ·Ö¸ôÏß
+ * @brief  1px åˆ†éš”çº¿
  */
 lv_obj_t *ui_divider(lv_obj_t *parent, lv_coord_t x, lv_coord_t y,
                      lv_coord_t w, lv_color_t color);
 
 /**
- * @brief  Ô²ĞÎÉ«¿é£¨×ö×´Ì¬µÆ¡¢Í¼±êµ×£©
- * @param  d  Ö±¾¶
+ * @brief  åœ†å½¢è‰²å—ï¼ˆåšçŠ¶æ€ç¯ã€å›¾æ ‡åº•ï¼‰
+ * @param  d  ç›´å¾„
  */
 lv_obj_t *ui_dot(lv_obj_t *parent, lv_coord_t x, lv_coord_t y,
                  lv_coord_t d, lv_color_t color);
 
 /**
- * @brief  Êı¾İ¿¨Æ¬£º×óÉÏĞ¡±êÌâ + ×óÏÂ´óÊıÖµ
- * @return ÊıÖµ label£¬render ÀïÖ±½Ó ui_text_set ¸üĞÂ
+ * @brief  æ•°æ®å¡ç‰‡ï¼šå·¦ä¸Šå°æ ‡é¢˜ + å·¦ä¸‹å¤§æ•°å€¼
+ * @return æ•°å€¼ labelï¼Œrender é‡Œç›´æ¥ ui_text_set æ›´æ–°
  */
 lv_obj_t *ui_card(lv_obj_t *parent, lv_coord_t x, lv_coord_t y,
                   lv_coord_t w, lv_coord_t h, const char *title, const char *value);
@@ -167,46 +167,46 @@ lv_obj_t *ui_card(lv_obj_t *parent, lv_coord_t x, lv_coord_t y,
 
 
 /*********************************************************************
- * ÇúÏßÍ¼£¨×ø±êÖá + ÕÛÏß£¬ĞéÏß / ÊµÏß / ÑÕÉ«¿ÉÑ¡£©
+ * æ›²çº¿å›¾ï¼ˆåæ ‡è½´ + æŠ˜çº¿ï¼Œè™šçº¿ / å®çº¿ / é¢œè‰²å¯é€‰ï¼‰
  *
- * ÕâÊÇ common ÀïÎ¨Ò»ÔÊĞí¡¾Âß¼­²ã¡¿µ÷ÓÃµÄÁ½¸öº¯Êı£º
- *     ui_plot_push() / ui_plot_clear()  ¡ª¡ª Ö»Ğ´Êı×Ö£¬Ò»¸ö lv_ ¶¼²»Åö
- * ÆäÓà£¨create / axis / line / refresh / delete£©ÈÔÈ»Ö»ÄÜÔÚ render Á´Â·Àïµ÷¡£
+ * è¿™æ˜¯ common é‡Œå”¯ä¸€å…è®¸ã€é€»è¾‘å±‚ã€‘è°ƒç”¨çš„ä¸¤ä¸ªå‡½æ•°ï¼š
+ *     ui_plot_push() / ui_plot_clear()  â€”â€” åªå†™æ•°å­—ï¼Œä¸€ä¸ª lv_ éƒ½ä¸ç¢°
+ * å…¶ä½™ï¼ˆcreate / axis / line / refresh / deleteï¼‰ä»ç„¶åªèƒ½åœ¨ render é“¾è·¯é‡Œè°ƒã€‚
  *
- * ÓÃ·¨£º
+ * ç”¨æ³•ï¼š
  *     ui_plot_t *p = ui_plot_create(page, 48, 78, 256, 120);
- *     ui_plot_axis(p, 4, 5, 0xE8DEE6);                 // 4 ĞĞ 5 ÁĞÍø¸ñ
+ *     ui_plot_axis(p, 4, 5, 0xE8DEE6);                 // 4 è¡Œ 5 åˆ—ç½‘æ ¼
  *     ui_plot_line(p, 0, &(ui_plot_line_t){
  *             .color = 0x00A0C8, .width = 2,
  *             .style = UI_LINE_DASH, .dash = 4, .gap = 3,
  *             .vmin  = 0, .vmax = 100 });
  *
- *     ui_plot_push(p, 0, value);   // ÈÎÎñÏß³Ì
- *     ui_plot_refresh(p);          // UI Ïß³Ì£¨render Àï£©
+ *     ui_plot_push(p, 0, value);   // ä»»åŠ¡çº¿ç¨‹
+ *     ui_plot_refresh(p);          // UI çº¿ç¨‹ï¼ˆrender é‡Œï¼‰
  *
- * ×¢Òâ£ºui_plot_line_t Ã»Ğ´µÄ×Ö¶Î»á±»ÇåÁã£¬ËùÒÔ"ÏÔÊ¾"ÓÃ hidden ·´×Å±ê£¬
- *       ÍüÁËĞ´Ä³¸ö×Ö¶ÎÏßÒ²ÕÕÑù»­µÃ³öÀ´¡£
+ * æ³¨æ„ï¼šui_plot_line_t æ²¡å†™çš„å­—æ®µä¼šè¢«æ¸…é›¶ï¼Œæ‰€ä»¥"æ˜¾ç¤º"ç”¨ hidden åç€æ ‡ï¼Œ
+ *       å¿˜äº†å†™æŸä¸ªå­—æ®µçº¿ä¹Ÿç…§æ ·ç”»å¾—å‡ºæ¥ã€‚
  *********************************************************************/
-#define UI_PLOT_CH_MAX      2       /* Ò»¿é»­²¼×î¶à¼¸ÌõÇúÏß */
-#define UI_PLOT_POINT_MAX   64      /* Ã¿ÌõÇúÏß´æ¶àÉÙ¸öµã£¨¹ö¶¯´°¿Ú£© */
+#define UI_PLOT_CH_MAX      2       /* ä¸€å—ç”»å¸ƒæœ€å¤šå‡ æ¡æ›²çº¿ */
+#define UI_PLOT_POINT_MAX   64      /* æ¯æ¡æ›²çº¿å­˜å¤šå°‘ä¸ªç‚¹ï¼ˆæ»šåŠ¨çª—å£ï¼‰ */
 
 typedef enum
 {
-    UI_LINE_SOLID = 0,              /* ÊµÏß */
-    UI_LINE_DASH,                   /* ĞéÏß */
+    UI_LINE_SOLID = 0,              /* å®çº¿ */
+    UI_LINE_DASH,                   /* è™šçº¿ */
 } ui_line_style_t;
 
 typedef struct
 {
-    uint32_t color;                 /* 0xRRGGBB£¬×¢ÒâÊÇ 32 Î»£¬0x00A0C8 Èû²»½ø 16 Î» */
-    int32_t  vmin;                  /* Á¿³ÌÏÂÏŞ£¬Ó³Éäµ½»­²¼µ×±ß */
-    int32_t  vmax;                  /* Á¿³ÌÉÏÏŞ£¬Ó³Éäµ½»­²¼¶¥±ß */
-    uint8_t  width;                 /* Ïß¿í 1~3£¬0 µ± 1 */
+    uint32_t color;                 /* 0xRRGGBBï¼Œæ³¨æ„æ˜¯ 32 ä½ï¼Œ0x00A0C8 å¡ä¸è¿› 16 ä½ */
+    int32_t  vmin;                  /* é‡ç¨‹ä¸‹é™ï¼Œæ˜ å°„åˆ°ç”»å¸ƒåº•è¾¹ */
+    int32_t  vmax;                  /* é‡ç¨‹ä¸Šé™ï¼Œæ˜ å°„åˆ°ç”»å¸ƒé¡¶è¾¹ */
+    uint8_t  width;                 /* çº¿å®½ 1~3ï¼Œ0 å½“ 1 */
     uint8_t  style;                 /* ui_line_style_t */
-    uint8_t  dash;                  /* ĞéÏß£ºÊµÏß¶Î³¤ px£¬0 ÓÃÄ¬ÈÏ 4 */
-    uint8_t  gap;                   /* ĞéÏß£º¼ä¸ô³¤ px£¬0 ÓÃÄ¬ÈÏ 3 */
-    uint8_t  dot;                   /* 1 = Ã¿¸ö²ÉÑùµãÔÙ»­ 3x3 ·½¿é */
-    uint8_t  hidden;                /* 1 = ²»»­ÕâÌõ */
+    uint8_t  dash;                  /* è™šçº¿ï¼šå®çº¿æ®µé•¿ pxï¼Œ0 ç”¨é»˜è®¤ 4 */
+    uint8_t  gap;                   /* è™šçº¿ï¼šé—´éš”é•¿ pxï¼Œ0 ç”¨é»˜è®¤ 3 */
+    uint8_t  dot;                   /* 1 = æ¯ä¸ªé‡‡æ ·ç‚¹å†ç”» 3x3 æ–¹å— */
+    uint8_t  hidden;                /* 1 = ä¸ç”»è¿™æ¡ */
 } ui_plot_line_t;
 
 typedef struct ui_plot ui_plot_t;

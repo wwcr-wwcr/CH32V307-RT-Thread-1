@@ -729,7 +729,7 @@ static void SetSysClockTo144_HSE(void)
     /* HCLK = SYSCLK */
     RCC->CFGR0 |= (uint32_t)RCC_HPRE_DIV1;
     /* PCLK2 = HCLK */
-    RCC->CFGR0 |= (uint32_t)RCC_PPRE2_DIV2;   /* APB2=72MHz£º¸ø ADC Áô 9MHz µÄÓàÁ¿ */
+    RCC->CFGR0 |= (uint32_t)RCC_PPRE2_DIV2;   /* APB2=72MHzï¼šç»™ ADC ç•™ 9MHz çš„ä½™é‡ */
     /* PCLK1 = HCLK */
     RCC->CFGR0 |= (uint32_t)RCC_PPRE1_DIV2;
 

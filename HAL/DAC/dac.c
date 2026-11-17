@@ -1,26 +1,26 @@
 /******************************************************************************
- * ÎÄ¼şÃû   : dac.c
- * Ğ¾Æ¬     : CH32V307VCT6
- * ËµÃ÷     : DAC£¨CH1/CH2 ÔËĞĞÊ±¿ÉÇĞ£¬Ä¬ÈÏ PA4£©+ DMA2 + TIM4 ²¨ĞÎ·¢ÉúÆ÷
+ * æ–‡ä»¶å   : dac.c
+ * èŠ¯ç‰‡     : CH32V307VCT6
+ * è¯´æ˜     : DACï¼ˆCH1/CH2 è¿è¡Œæ—¶å¯åˆ‡ï¼Œé»˜è®¤ PA4ï¼‰+ DMA2 + TIM4 æ³¢å½¢å‘ç”Ÿå™¨
  *
- * ÎªÊ²Ã´ÓÃ DMA£º
- *     10kHz Êä³ö¡¢Ã¿ÖÜÆÚ 100 µã£¬ÒâÎ¶×Å DAC ÒªÃ¿ 1us »»Ò»¸öÂë¡£
- *     ¿¿ÖĞ¶Ï»òÈí¼şĞ´£¬CPU ¹âÎ¹Êı¾İ¾ÍÃ¦ËÀÁË£»DMA Ñ­»·°áÔË£¬
- *     CPU Ö»ÔÚÆô¶¯Ê±ÌîÒ»´Î±í£¬Ö®ºóÒ»´Î¶¼²»½ø¡£
+ * ä¸ºä»€ä¹ˆç”¨ DMAï¼š
+ *     10kHz è¾“å‡ºã€æ¯å‘¨æœŸ 100 ç‚¹ï¼Œæ„å‘³ç€ DAC è¦æ¯ 1us æ¢ä¸€ä¸ªç ã€‚
+ *     é ä¸­æ–­æˆ–è½¯ä»¶å†™ï¼ŒCPU å…‰å–‚æ•°æ®å°±å¿™æ­»äº†ï¼›DMA å¾ªç¯æ¬è¿ï¼Œ
+ *     CPU åªåœ¨å¯åŠ¨æ—¶å¡«ä¸€æ¬¡è¡¨ï¼Œä¹‹åä¸€æ¬¡éƒ½ä¸è¿›ã€‚
  *
- * ÎªÊ²Ã´ÓÃÂë±í£º
- *     ÕıÏÒÈç¹ûÃ¿´ÎÆô¶¯¶¼µ÷ sinf ÏÖËã 100~512 ¸öµã£¬¼ÈÂı£¬ÓÖ»á°Ñ libm µÄ
- *     Èı½Çº¯ÊıÕûÌ×ÍÏ½ø Flash¡£ÕâÀï¸Ä³É Flash ÀïÒ»ÕÅ 256 µã const Âë±í£¬
- *     Æô¶¯Ê±Ö»×öÕûĞÍÓ³Éä£¬È«³ÌÃ»ÓĞ¸¡µã¡¢Ò²²»ÒÀÀµ math.h¡£
+ * ä¸ºä»€ä¹ˆç”¨ç è¡¨ï¼š
+ *     æ­£å¼¦å¦‚æœæ¯æ¬¡å¯åŠ¨éƒ½è°ƒ sinf ç°ç®— 100~512 ä¸ªç‚¹ï¼Œæ—¢æ…¢ï¼Œåˆä¼šæŠŠ libm çš„
+ *     ä¸‰è§’å‡½æ•°æ•´å¥—æ‹–è¿› Flashã€‚è¿™é‡Œæ”¹æˆ Flash é‡Œä¸€å¼  256 ç‚¹ const ç è¡¨ï¼Œ
+ *     å¯åŠ¨æ—¶åªåšæ•´å‹æ˜ å°„ï¼Œå…¨ç¨‹æ²¡æœ‰æµ®ç‚¹ã€ä¹Ÿä¸ä¾èµ– math.hã€‚
  *
- * ÎªÊ²Ã´ÓÃ TIM4£º
- *     TIM2 ±»·äÃùÆ÷(CH3/PA2)¡¢·çÉÈ(CH1/PA0)¡¢¼ÓÈÈÆ¬(CH4/PA3) ºÍÍ¨ÓÃ PWM Õ¼×Å£¬
- *     TIM1 ¸øÁËµç»ú£¬TIM3 ¸øÁË ADC¡£TIM4 ÔÚ encoder.c ¸Ä³ÉÈí¼ş¼ÆÊıºó¾Í¿Õ³öÀ´ÁË¡£
+ * ä¸ºä»€ä¹ˆç”¨ TIM4ï¼š
+ *     TIM2 è¢«èœ‚é¸£å™¨(CH3/PA2)ã€é£æ‰‡(CH1/PA0)ã€åŠ çƒ­ç‰‡(CH4/PA3) å’Œé€šç”¨ PWM å ç€ï¼Œ
+ *     TIM1 ç»™äº†ç”µæœºï¼ŒTIM3 ç»™äº† ADCã€‚TIM4 åœ¨ encoder.c æ”¹æˆè½¯ä»¶è®¡æ•°åå°±ç©ºå‡ºæ¥äº†ã€‚
  *
- * ÎªÊ²Ã´ÊÇ DMA2£º
- *     CH32V307 µÄ DAC ¹ÒÔÚ DMA2 ÉÏ£¨DAC1 -> DMA2_Channel3£¬DAC2 -> DMA2_Channel4£©¡£
- *     Ğ´³É DMA1_Channel4 ±àÒëÁ´½Ó¶¼Õı³££¬DAC Ò²ÔÚÕı³£´¥·¢£¬µ«Ã»ÓĞÍ¨µÀÓ¦´ğ DMA ÇëÇó£¬
- *     ÏÖÏó¾ÍÊÇÊä³öÍ£ÔÚÖ±Á÷µçÆ½¡¢Ê¾²¨Æ÷ÉÏ¿´²»µ½²¨ĞÎ¡£
+ * ä¸ºä»€ä¹ˆæ˜¯ DMA2ï¼š
+ *     CH32V307 çš„ DAC æŒ‚åœ¨ DMA2 ä¸Šï¼ˆDAC1 -> DMA2_Channel3ï¼ŒDAC2 -> DMA2_Channel4ï¼‰ã€‚
+ *     å†™æˆ DMA1_Channel4 ç¼–è¯‘é“¾æ¥éƒ½æ­£å¸¸ï¼ŒDAC ä¹Ÿåœ¨æ­£å¸¸è§¦å‘ï¼Œä½†æ²¡æœ‰é€šé“åº”ç­” DMA è¯·æ±‚ï¼Œ
+ *     ç°è±¡å°±æ˜¯è¾“å‡ºåœåœ¨ç›´æµç”µå¹³ã€ç¤ºæ³¢å™¨ä¸Šçœ‹ä¸åˆ°æ³¢å½¢ã€‚
  *
  ******************************************************************************/
 
@@ -28,45 +28,45 @@
 
 
 /**************************************************************************************************
- *                                    Êä³öÍ¨µÀÑ¡Ôñ
+ *                                    è¾“å‡ºé€šé“é€‰æ‹©
  *
- * CH32V307 ÓĞÁ½Â· DAC£¬Òı½ÅºÍ×ÊÔ´¶¼²»Í¬£º
+ * CH32V307 æœ‰ä¸¤è·¯ DACï¼Œå¼•è„šå’Œèµ„æºéƒ½ä¸åŒï¼š
  *
- *   Í¨µÀ 1  ->  PA4 / DAC_Channel_1 / DMA2_Channel3 / Êı¾İ¼Ä´æÆ÷ R12BDHR1  £¨ÑïÉùÆ÷£©
- *   Í¨µÀ 2  ->  PA5 / DAC_Channel_2 / DMA2_Channel4 / Êı¾İ¼Ä´æÆ÷ R12BDHR2  £¨DAC ²âÁ¿£©
+ *   é€šé“ 1  ->  PA4 / DAC_Channel_1 / DMA2_Channel3 / æ•°æ®å¯„å­˜å™¨ R12BDHR1  ï¼ˆæ‰¬å£°å™¨ï¼‰
+ *   é€šé“ 2  ->  PA5 / DAC_Channel_2 / DMA2_Channel4 / æ•°æ®å¯„å­˜å™¨ R12BDHR2  ï¼ˆDAC æµ‹é‡ï¼‰
  *
- * Á½Â· DAC ¶¼¹ÒÔÚ DMA2 ÉÏ£¬ÕâµãºÍ STM32 ²»Ò»Ñù£¨DAC1 Ò²ÊÇ DMA2_Channel3£©¡£
- * Òı½ÅÔÚ dac_init() ÀïÒ»´ÎÅäºÃÁ½Â·£¬ÔËĞĞÊ±ÓÃ dac_channel_set(ch)
- * Ö»»» DMA Ä¿±êºÍÊı¾İ¼Ä´æÆ÷£¬²»ĞèÒªÖØĞÂ³õÊ¼»¯¡£
+ * ä¸¤è·¯ DAC éƒ½æŒ‚åœ¨ DMA2 ä¸Šï¼Œè¿™ç‚¹å’Œ STM32 ä¸ä¸€æ ·ï¼ˆDAC1 ä¹Ÿæ˜¯ DMA2_Channel3ï¼‰ã€‚
+ * å¼•è„šåœ¨ dac_init() é‡Œä¸€æ¬¡é…å¥½ä¸¤è·¯ï¼Œè¿è¡Œæ—¶ç”¨ dac_channel_set(ch)
+ * åªæ¢ DMA ç›®æ ‡å’Œæ•°æ®å¯„å­˜å™¨ï¼Œä¸éœ€è¦é‡æ–°åˆå§‹åŒ–ã€‚
  *
- *     dac_channel_set(1);   ->  PA4£¬ÑïÉùÆ÷Ïì£¨Ä¬ÈÏ£©
- *     dac_channel_set(2);   ->  PA5£¬DAC ²âÁ¿Êä³ö
+ *     dac_channel_set(1);   ->  PA4ï¼Œæ‰¬å£°å™¨å“ï¼ˆé»˜è®¤ï¼‰
+ *     dac_channel_set(2);   ->  PA5ï¼ŒDAC æµ‹é‡è¾“å‡º
  *
- * °å×ÓÊµ²â£ºPA4 ÊÇÑïÉùÆ÷£¨Ö»ÄÜÓÉ DAC1 Çı¶¯£©£¬PA5 ÊÇ DAC2 Êä³ö¡£
- * Ò»´ÎÖ»ÄÜÊä³öÒ»Â·£¬ÒòÎªÖ»ÓĞÒ»×é s_buf ºÍÒ»¸ö TIM4¡£
+ * æ¿å­å®æµ‹ï¼šPA4 æ˜¯æ‰¬å£°å™¨ï¼ˆåªèƒ½ç”± DAC1 é©±åŠ¨ï¼‰ï¼ŒPA5 æ˜¯ DAC2 è¾“å‡ºã€‚
+ * ä¸€æ¬¡åªèƒ½è¾“å‡ºä¸€è·¯ï¼Œå› ä¸ºåªæœ‰ä¸€ç»„ s_buf å’Œä¸€ä¸ª TIM4ã€‚
  **************************************************************************************************/
-/* Ä¬ÈÏÍ¨µÀ£º1 = PA4£¨DAC1£¬½ÓÑïÉùÆ÷£©£¬2 = PA5£¨DAC2£©*/
+/* é»˜è®¤é€šé“ï¼š1 = PA4ï¼ˆDAC1ï¼Œæ¥æ‰¬å£°å™¨ï¼‰ï¼Œ2 = PA5ï¼ˆDAC2ï¼‰*/
 #define DAC_DEFAULT_CH      1
 
-/* µ±Ç°Ê¹ÓÃµÄÍ¨µÀ£¬¿ÉÓÃ dac_channel_set() ÔÚÔËĞĞÊ±ÇĞ»» */
+/* å½“å‰ä½¿ç”¨çš„é€šé“ï¼Œå¯ç”¨ dac_channel_set() åœ¨è¿è¡Œæ—¶åˆ‡æ¢ */
 static uint8_t s_ch = DAC_DEFAULT_CH;
 
-/* 1 = ÕıÔÚ×ö"Á÷Ê½²¥·Å"£¨ÒôÆµ£©£¬´ËÊ± s_buf ²»²ÎÓë£¬DMA Ö±½Ó°áÍâ²¿»º³å */
+/* 1 = æ­£åœ¨åš"æµå¼æ’­æ”¾"ï¼ˆéŸ³é¢‘ï¼‰ï¼Œæ­¤æ—¶ s_buf ä¸å‚ä¸ï¼ŒDMA ç›´æ¥æ¬å¤–éƒ¨ç¼“å†² */
 static uint8_t s_streaming = 0;
 
-/* µ±Ç°Í¨µÀ¶ÔÓ¦µÄ DAC Í¨µÀºÅ */
+/* å½“å‰é€šé“å¯¹åº”çš„ DAC é€šé“å· */
 static uint32_t dac_chan(void)
 {
     return (s_ch == 1u) ? DAC_Channel_1 : DAC_Channel_2;
 }
 
-/* µ±Ç°Í¨µÀµÄÊı¾İ¼Ä´æÆ÷µØÖ·£¨DMA µÄ°áÔËÄ¿±ê£©*/
+/* å½“å‰é€šé“çš„æ•°æ®å¯„å­˜å™¨åœ°å€ï¼ˆDMA çš„æ¬è¿ç›®æ ‡ï¼‰*/
 static uint32_t dac_dreg_addr(void)
 {
     return (s_ch == 1u) ? (uint32_t)(&DAC->R12BDHR1) : (uint32_t)(&DAC->R12BDHR2);
 }
 
-/* Íùµ±Ç°Í¨µÀĞ´Ò»¸ö 12 Î»Öµ */
+/* å¾€å½“å‰é€šé“å†™ä¸€ä¸ª 12 ä½å€¼ */
 static void dac_set_val(uint16_t v)
 {
     v = (uint16_t)(v & 0x0FFFu);
@@ -81,18 +81,18 @@ static void dac_set_val(uint16_t v)
     }
 }
 
-/* µ±Ç°Í¨µÀ¶ÔÓ¦µÄ DMA Í¨µÀ£¨CH32V307 Á½Â· DAC ¶¼¹ÒÔÚ DMA2 ÉÏ£©*/
+/* å½“å‰é€šé“å¯¹åº”çš„ DMA é€šé“ï¼ˆCH32V307 ä¸¤è·¯ DAC éƒ½æŒ‚åœ¨ DMA2 ä¸Šï¼‰*/
 static DMA_Channel_TypeDef *dac_dma_ch(void)
 {
     return (s_ch == 1u) ? DMA2_Channel3 : DMA2_Channel4;
 }
 
 /**************************************************************************************************
- *                                  ÕıÏÒÂë±í£¨Flash£¬512 ×Ö½Ú£©
+ *                                  æ­£å¼¦ç è¡¨ï¼ˆFlashï¼Œ512 å­—èŠ‚ï¼‰
  **************************************************************************************************/
 #define DAC_SINE_TAB_LEN        256
 
-/* 2048 + 2047 * sin(2*pi*i/256)£¬ËÄÉáÎåÈë£¬·¶Î§ 0~4095 */
+/* 2048 + 2047 * sin(2*pi*i/256)ï¼Œå››èˆäº”å…¥ï¼ŒèŒƒå›´ 0~4095 */
 static const uint16_t s_sine_tab[DAC_SINE_TAB_LEN] =
 {
     0x800, 0x832, 0x864, 0x897, 0x8C9, 0x8FB, 0x92C, 0x95E,
@@ -130,33 +130,33 @@ static const uint16_t s_sine_tab[DAC_SINE_TAB_LEN] =
 };
 
 /**************************************************************************************************
- *                                        ÄÚ²¿±äÁ¿
+ *                                        å†…éƒ¨å˜é‡
  **************************************************************************************************/
-/* ÕæÕı¸ø DMA Ñ­»·°áÔËµÄ±í£ºÕûĞÍÓ³ÉäºóµÄ×îÖÕÂë */
+/* çœŸæ­£ç»™ DMA å¾ªç¯æ¬è¿çš„è¡¨ï¼šæ•´å‹æ˜ å°„åçš„æœ€ç»ˆç  */
 static uint16_t   s_buf[DAC_WAVE_MAX_POINTS];
 
 static dac_wave_t s_type   = DAC_WAVE_SINE;
-static uint32_t   s_freq   = 1000;                      /* Éè¶¨ÆµÂÊ */
-static uint32_t   s_rate   = 1000000;                   /* Êµ¼Ê²ÉÑùÂÊ */
-static uint16_t   s_points = 100;                       /* Ã¿ÖÜÆÚµãÊı */
-static uint16_t   s_hi_mv  = DAC_DEFAULT_HIGH_MV;       /* ²¨ĞÎ×î¸ßµçÆ½ */
-static uint16_t   s_lo_mv  = DAC_DEFAULT_LOW_MV;        /* ²¨ĞÎ×îµÍµçÆ½ */
+static uint32_t   s_freq   = 1000;                      /* è®¾å®šé¢‘ç‡ */
+static uint32_t   s_rate   = 1000000;                   /* å®é™…é‡‡æ ·ç‡ */
+static uint16_t   s_points = 100;                       /* æ¯å‘¨æœŸç‚¹æ•° */
+static uint16_t   s_hi_mv  = DAC_DEFAULT_HIGH_MV;       /* æ³¢å½¢æœ€é«˜ç”µå¹³ */
+static uint16_t   s_lo_mv  = DAC_DEFAULT_LOW_MV;        /* æ³¢å½¢æœ€ä½ç”µå¹³ */
 
-/* Âë±í»º´æ±ê¼Ç£º²¨ĞÎ/µçÑ¹/µãÊı¶¼Ã»±ä¾Í²»ÔÙÖØÌî */
+/* ç è¡¨ç¼“å­˜æ ‡è®°ï¼šæ³¢å½¢/ç”µå‹/ç‚¹æ•°éƒ½æ²¡å˜å°±ä¸å†é‡å¡« */
 static uint8_t    s_tab_type = 0xFF;
 static uint16_t   s_tab_hi   = 0;
 static uint16_t   s_tab_lo   = 0;
 static uint16_t   s_tab_pts  = 0;
 
 static uint8_t    s_running = 0;
-static uint32_t   s_tab_seq = 0;                /* Âë±í°æ±¾ºÅ£¬UI ¿¿ËüÅĞ¶ÏÒª²»ÒªÖØ»­Ô¤ÀÀ */
+static uint32_t   s_tab_seq = 0;                /* ç è¡¨ç‰ˆæœ¬å·ï¼ŒUI é å®ƒåˆ¤æ–­è¦ä¸è¦é‡ç”»é¢„è§ˆ */
 static uint8_t    s_inited  = 0;
 
 /**************************************************************************************************
- *                                        ÄÚ²¿º¯Êı
+ *                                        å†…éƒ¨å‡½æ•°
  **************************************************************************************************/
-/* TIM4 µÄ¼ÆÊıÊ±ÖÓ£ºAPB1 ·ÖÆµ²»Îª 1 Ê±µÈÓÚ PCLK1 µÄÁ½±¶£¬·ñÔòµÈÓÚ PCLK1¡£
- * ±¾¹¤³Ì SYSCLK=144MHz¡¢APB1=HCLK/2=72MHz£¬ËùÒÔ TIM4 Ê±ÖÓ = 144MHz = SystemCoreClock¡£ */
+/* TIM4 çš„è®¡æ•°æ—¶é’Ÿï¼šAPB1 åˆ†é¢‘ä¸ä¸º 1 æ—¶ç­‰äº PCLK1 çš„ä¸¤å€ï¼Œå¦åˆ™ç­‰äº PCLK1ã€‚
+ * æœ¬å·¥ç¨‹ SYSCLK=144MHzã€APB1=HCLK/2=72MHzï¼Œæ‰€ä»¥ TIM4 æ—¶é’Ÿ = 144MHz = SystemCoreClockã€‚ */
 static uint32_t tim4_clock_hz(void)
 {
     uint32_t ppre1 = (RCC->CFGR0 >> 8) & 0x07u;
@@ -169,7 +169,7 @@ static uint32_t tim4_clock_hz(void)
     return SystemCoreClock;
 }
 
-/* ºÁ·ü -> 12 Î»Âë£¬ËÄÉáÎåÈë */
+/* æ¯«ä¼ -> 12 ä½ç ï¼Œå››èˆäº”å…¥ */
 static uint16_t mv_to_code(uint16_t mv)
 {
     uint32_t code;
@@ -184,13 +184,13 @@ static uint16_t mv_to_code(uint16_t mv)
     return (uint16_t)((code > 4095U) ? 4095U : code);
 }
 
-/* ¹éÒ»»¯Âë(0~4095) -> [lo, lo+span]£¬´¿ÕûĞÍ£¬ÓÃ >>12 ´úÌæ³ı·¨ */
+/* å½’ä¸€åŒ–ç (0~4095) -> [lo, lo+span]ï¼Œçº¯æ•´å‹ï¼Œç”¨ >>12 ä»£æ›¿é™¤æ³• */
 static uint16_t code_map(uint16_t base, uint16_t lo, uint16_t span)
 {
     return (uint16_t)(lo + (((uint32_t)span * base) >> 12));
 }
 
-/* °´²¨ĞÎºÍµçÑ¹·¶Î§Ìî°áÔË±í£ºÖ»×öÕûÊıÔËËã£¬²»µ÷ÈÎºÎÊıÑ§¿â */
+/* æŒ‰æ³¢å½¢å’Œç”µå‹èŒƒå›´å¡«æ¬è¿è¡¨ï¼šåªåšæ•´æ•°è¿ç®—ï¼Œä¸è°ƒä»»ä½•æ•°å­¦åº“ */
 static void table_fill(dac_wave_t type, uint16_t points, uint16_t lo, uint16_t hi)
 {
     uint16_t span = (uint16_t)(hi - lo);
@@ -224,11 +224,11 @@ static void table_fill(dac_wave_t type, uint16_t points, uint16_t lo, uint16_t h
         default:
             if(i < half)
             {
-                base = (uint16_t)(((uint32_t)i * 4095U) / half);            /* µÍ -> ¸ß */
+                base = (uint16_t)(((uint32_t)i * 4095U) / half);            /* ä½ -> é«˜ */
             }
             else
             {
-                base = (uint16_t)(((uint32_t)(points - i) * 4095U) / half); /* ¸ß -> µÍ */
+                base = (uint16_t)(((uint32_t)(points - i) * 4095U) / half); /* é«˜ -> ä½ */
             }
             break;
         }
@@ -243,7 +243,7 @@ static void table_fill(dac_wave_t type, uint16_t points, uint16_t lo, uint16_t h
     s_tab_seq++;
 }
 
-/* DMA£º°Ñ s_buf Ñ­»·°á½ø DAC µÄ 12 Î»ÓÒ¶ÔÆëÊı¾İ¼Ä´æÆ÷ */
+/* DMAï¼šæŠŠ s_buf å¾ªç¯æ¬è¿› DAC çš„ 12 ä½å³å¯¹é½æ•°æ®å¯„å­˜å™¨ */
 static void dma_setup(uint16_t points)
 {
     DMA_InitTypeDef d = {0};
@@ -267,7 +267,7 @@ static void dma_setup(uint16_t points)
     DMA_Init(ch, &d);
 }
 
-/* ÌôÒ»×é (PSC, ARR) ÈÃ TIM4 µÄ¸üĞÂÆµÂÊ×î½Ó½ü sample_hz£¬·µ»ØÊµ¼Ê²ÉÑùÂÊ */
+/* æŒ‘ä¸€ç»„ (PSC, ARR) è®© TIM4 çš„æ›´æ–°é¢‘ç‡æœ€æ¥è¿‘ sample_hzï¼Œè¿”å›å®é™…é‡‡æ ·ç‡ */
 static uint32_t tim4_apply(uint32_t sample_hz)
 {
     uint32_t clk       = tim4_clock_hz();
@@ -277,7 +277,7 @@ static uint32_t tim4_apply(uint32_t sample_hz)
     uint32_t best_rate = sample_hz;
     uint32_t div_a;
 
-    /* ARR+1 ´Ó 2 ¿ªÊ¼£ºARR=0 Ê±Ã¿¸ö¼ÆÊı¶¼²úÉú¸üĞÂÊÂ¼ş£¬»áÊ§¿Ø */
+    /* ARR+1 ä» 2 å¼€å§‹ï¼šARR=0 æ—¶æ¯ä¸ªè®¡æ•°éƒ½äº§ç”Ÿæ›´æ–°äº‹ä»¶ï¼Œä¼šå¤±æ§ */
     for(div_a = 2; div_a <= 1024u; div_a++)
     {
         uint32_t want = sample_hz * div_a;
@@ -290,7 +290,7 @@ static uint32_t tim4_apply(uint32_t sample_hz)
             continue;
         }
 
-        div_p = (clk + want / 2u) / want;           /* ËÄÉáÎåÈëµ½×î½üµÄ·ÖÆµ±È */
+        div_p = (clk + want / 2u) / want;           /* å››èˆäº”å…¥åˆ°æœ€è¿‘çš„åˆ†é¢‘æ¯” */
 
         if(div_p < 1u)      { div_p = 1u; }
         if(div_p > 65536u)  { continue; }
@@ -321,7 +321,7 @@ static uint32_t tim4_apply(uint32_t sample_hz)
         t.TIM_CounterMode   = TIM_CounterMode_Up;
         TIM_TimeBaseInit(TIM4, &t);
 
-        /* ¸üĞÂÊÂ¼ş×÷Îª TRGO ËÍ¸ø DAC£¨TIM_TimeBaseInit »áÇåµô£¬±ØĞëÖØÉè£© */
+        /* æ›´æ–°äº‹ä»¶ä½œä¸º TRGO é€ç»™ DACï¼ˆTIM_TimeBaseInit ä¼šæ¸…æ‰ï¼Œå¿…é¡»é‡è®¾ï¼‰ */
         TIM_SelectOutputTrigger(TIM4, TIM_TRGOSource_Update);
         TIM_ARRPreloadConfig(TIM4, ENABLE);
     }
@@ -330,10 +330,10 @@ static uint32_t tim4_apply(uint32_t sample_hz)
 }
 
 /**************************************************************************************************
- *                                        ¶ÔÍâº¯Êı
+ *                                        å¯¹å¤–å‡½æ•°
  **************************************************************************************************/
 /**
- * @brief  ³õÊ¼»¯
+ * @brief  åˆå§‹åŒ–
  */
 int dac_init(void)
 {
@@ -346,14 +346,14 @@ int dac_init(void)
         return DAC_OK;
     }
 
-    /* 1. Êä³ö½ÅÅä³ÉÄ£ÄâÊäÈë£¨PA4=DAC1 / PA5=DAC2£©*/
+    /* 1. è¾“å‡ºè„šé…æˆæ¨¡æ‹Ÿè¾“å…¥ï¼ˆPA4=DAC1 / PA5=DAC2ï¼‰*/
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-    g.GPIO_Pin   = GPIO_Pin_4 | GPIO_Pin_5;   /* Á½Â· DAC Òı½Å¶¼Åä³ÉÄ£Äâ */
+    g.GPIO_Pin   = GPIO_Pin_4 | GPIO_Pin_5;   /* ä¸¤è·¯ DAC å¼•è„šéƒ½é…æˆæ¨¡æ‹Ÿ */
     g.GPIO_Mode  = GPIO_Mode_AIN;
     g.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOA, &g);
 
-    /* 2. TIM4£ºÖ»³ö TRGO£¬²»¿ªÈÎºÎÖĞ¶Ï£¬²»Õ¼ÖĞ¶ÏÏòÁ¿ */
+    /* 2. TIM4ï¼šåªå‡º TRGOï¼Œä¸å¼€ä»»ä½•ä¸­æ–­ï¼Œä¸å ä¸­æ–­å‘é‡ */
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
     t.TIM_Prescaler     = 0;
     t.TIM_Period        = 99;
@@ -364,11 +364,11 @@ int dac_init(void)
     TIM_ARRPreloadConfig(TIM4, ENABLE);
     TIM_Cmd(TIM4, DISABLE);
 
-    /* 3. DMA2 Í¨µÀ£ºDAC1 ÓÃ Channel3£¬DAC2 ÓÃ Channel4 */
+    /* 3. DMA2 é€šé“ï¼šDAC1 ç”¨ Channel3ï¼ŒDAC2 ç”¨ Channel4 */
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA2, ENABLE);
     dma_setup(100);
 
-    /* 4. DAC£ºÍâ²¿´¥·¢£¨TIM4 TRGO£©£¬²»¿ªÄÚ²¿²¨ĞÎ·¢ÉúÆ÷£¬Êı¾İÈ«ÓÉ DMA Î¹ */
+    /* 4. DACï¼šå¤–éƒ¨è§¦å‘ï¼ˆTIM4 TRGOï¼‰ï¼Œä¸å¼€å†…éƒ¨æ³¢å½¢å‘ç”Ÿå™¨ï¼Œæ•°æ®å…¨ç”± DMA å–‚ */
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_DAC, ENABLE);
     DAC_DeInit();
     DAC_StructInit(&d);
@@ -384,7 +384,7 @@ int dac_init(void)
     DAC_Init(DAC_Channel_1, &d);
     DAC_Init(DAC_Channel_2, &d);
 
-    /* ÏÈÍ£ÔÚÖĞµã£¬±ÜÃâÉÏµçÌø±ä */
+    /* å…ˆåœåœ¨ä¸­ç‚¹ï¼Œé¿å…ä¸Šç”µè·³å˜ */
     dac_set_val((uint16_t)((mv_to_code(s_lo_mv) + mv_to_code(s_hi_mv)) / 2U));
     DAC_Cmd(DAC_Channel_1, ENABLE);
     DAC_Cmd(DAC_Channel_2, ENABLE);
@@ -395,13 +395,13 @@ int dac_init(void)
 }
 
 /**
- * @brief  Éú³É²¨ĞÎ²¢¿ªÊ¼Êä³ö
+ * @brief  ç”Ÿæˆæ³¢å½¢å¹¶å¼€å§‹è¾“å‡º
  */
 int dac_wave_start(dac_wave_t type, uint32_t freq_hz,
                    uint16_t high_mv, uint16_t low_mv)
 {
 
-    s_streaming = 0;            /* ÉÏÒ»´ÎÈç¹ûÊÇÒôÆµÁ÷£¬ÕâÀï½ÓÊÖ */
+    s_streaming = 0;            /* ä¸Šä¸€æ¬¡å¦‚æœæ˜¯éŸ³é¢‘æµï¼Œè¿™é‡Œæ¥æ‰‹ */
     uint32_t points;
     uint16_t tmp;
     uint16_t lo_code;
@@ -416,7 +416,7 @@ int dac_wave_start(dac_wave_t type, uint32_t freq_hz,
         return DAC_ERR_PARAM;
     }
 
-    /* ÏŞ·ùµ½ 0 ~ 3300mV£»Ë³Ğò´«·´ÁË×Ô¶¯¾ÀÕı */
+    /* é™å¹…åˆ° 0 ~ 3300mVï¼›é¡ºåºä¼ åäº†è‡ªåŠ¨çº æ­£ */
     if(high_mv > DAC_VREF_MV)   { high_mv = DAC_VREF_MV; }
     if(low_mv  > DAC_VREF_MV)   { low_mv  = DAC_VREF_MV; }
 
@@ -426,7 +426,7 @@ int dac_wave_start(dac_wave_t type, uint32_t freq_hz,
         high_mv = low_mv;
         low_mv  = tmp;
     }
-    if(high_mv == low_mv)       /* ¸ßµÍÒ»Ñù¾ÍÊÇÒ»ÌõÖ±Á÷ */
+    if(high_mv == low_mv)       /* é«˜ä½ä¸€æ ·å°±æ˜¯ä¸€æ¡ç›´æµ */
     {
         return DAC_ERR_PARAM;
     }
@@ -441,7 +441,7 @@ int dac_wave_start(dac_wave_t type, uint32_t freq_hz,
 
     dac_stop();
 
-    /* 1. Ò»¸öÖÜÆÚµÄµãÊı£º±£Ö¤²ÉÑùÂÊ²»³¬¹ı 1MHz£¬Í¬Ê±²»³¬¹ı±í³¤ */
+    /* 1. ä¸€ä¸ªå‘¨æœŸçš„ç‚¹æ•°ï¼šä¿è¯é‡‡æ ·ç‡ä¸è¶…è¿‡ 1MHzï¼ŒåŒæ—¶ä¸è¶…è¿‡è¡¨é•¿ */
     points = DAC_MAX_SAMPLE_HZ / freq_hz;
     if(points < 8u)                     { points = 8u; }
     if(points > DAC_WAVE_MAX_POINTS)    { points = DAC_WAVE_MAX_POINTS; }
@@ -455,7 +455,7 @@ int dac_wave_start(dac_wave_t type, uint32_t freq_hz,
     lo_code = mv_to_code(s_lo_mv);
     hi_code = mv_to_code(s_hi_mv);
 
-    /* 2. Ö»ÓĞ²¨ĞÎ/µçÑ¹/µãÊı±äÁË²ÅÖØÌîÂë±í£¬´¿¸ÄÆµÂÊ²»¶¯±í */
+    /* 2. åªæœ‰æ³¢å½¢/ç”µå‹/ç‚¹æ•°å˜äº†æ‰é‡å¡«ç è¡¨ï¼Œçº¯æ”¹é¢‘ç‡ä¸åŠ¨è¡¨ */
     if((s_tab_type != (uint8_t)type) ||
        (s_tab_hi   != hi_code)       ||
        (s_tab_lo   != lo_code)       ||
@@ -466,10 +466,10 @@ int dac_wave_start(dac_wave_t type, uint32_t freq_hz,
 
     dma_setup(s_points);
 
-    /* 3. ²ÉÑùÂÊ = Êä³öÆµÂÊ x Ã¿ÖÜÆÚµãÊı£¬½»¸ø TIM4 È¥²úÉú */
+    /* 3. é‡‡æ ·ç‡ = è¾“å‡ºé¢‘ç‡ x æ¯å‘¨æœŸç‚¹æ•°ï¼Œäº¤ç»™ TIM4 å»äº§ç”Ÿ */
     s_rate = tim4_apply(freq_hz * (uint32_t)s_points);
 
-    /* 4. Æô¶¯Ë³Ğò£ºDAC ÏÈ¾ÍĞ÷ -> ¿ª DMA ÇëÇó -> ¿ª DMA Í¨µÀ -> ×îºó¿ª¶¨Ê±Æ÷ */
+    /* 4. å¯åŠ¨é¡ºåºï¼šDAC å…ˆå°±ç»ª -> å¼€ DMA è¯·æ±‚ -> å¼€ DMA é€šé“ -> æœ€åå¼€å®šæ—¶å™¨ */
     dac_set_val(lo_code);
     DAC_Cmd(dac_chan(), ENABLE);
     DAC_DMACmd(dac_chan(), ENABLE);
@@ -482,7 +482,7 @@ int dac_wave_start(dac_wave_t type, uint32_t freq_hz,
 }
 
 /**
- * @brief  Í£Ö¹Êä³ö
+ * @brief  åœæ­¢è¾“å‡º
  */
 void dac_stop(void)
 {
@@ -495,7 +495,7 @@ void dac_stop(void)
     DMA_Cmd(dac_dma_ch(), DISABLE);
     DAC_DMACmd(dac_chan(), DISABLE);
 
-    /* Í£ÔÚµçÑ¹ÖĞµã£¬²»ÒªÍ»È»µôµ½×îµÍµçÆ½ */
+    /* åœåœ¨ç”µå‹ä¸­ç‚¹ï¼Œä¸è¦çªç„¶æ‰åˆ°æœ€ä½ç”µå¹³ */
     dac_set_val((uint16_t)((mv_to_code(s_lo_mv) + mv_to_code(s_hi_mv)) / 2U));
 
     s_running   = 0;
@@ -503,12 +503,12 @@ void dac_stop(void)
 }
 
 /**
- * @brief  Á÷Ê½²¥·Å£¨ÒôÆµÓÃ£©£ºTIM4 °´ sample_hz ´¥·¢£¬DMA Ñ­»·°á buf
- * @param  sample_hz  ²ÉÑùÂÊ£¨µäĞÍ 8000£©
- * @param  len        buf ÀïÓĞ¶àÉÙ¸ö 12 Î»ÂëÖµ
- * @note   1. buf ±ØĞëÊÇ"ÓÀ¾Ã"µÄ£¨²»ÄÜÊÇÕ»ÉÏµÄÁÙÊ±Êı×é£©£¬DMA Ò»Ö±ÔÚ¶ÁËü£»
- *         2. Óë dac_wave_start() »¥³â£¨¶¼Õ¼ TIM4 + DMA£©£»
- *         3. Õâ¸öº¯ÊıÖ»¸ºÔğ"°Ñ»º´æÑ­»·²¥³öÈ¥"£¬ÍùÀïÃæÌîÊı¾İÊÇµ÷ÓÃ·½µÄÊÂ¡£
+ * @brief  æµå¼æ’­æ”¾ï¼ˆéŸ³é¢‘ç”¨ï¼‰ï¼šTIM4 æŒ‰ sample_hz è§¦å‘ï¼ŒDMA å¾ªç¯æ¬ buf
+ * @param  sample_hz  é‡‡æ ·ç‡ï¼ˆå…¸å‹ 8000ï¼‰
+ * @param  len        buf é‡Œæœ‰å¤šå°‘ä¸ª 12 ä½ç å€¼
+ * @note   1. buf å¿…é¡»æ˜¯"æ°¸ä¹…"çš„ï¼ˆä¸èƒ½æ˜¯æ ˆä¸Šçš„ä¸´æ—¶æ•°ç»„ï¼‰ï¼ŒDMA ä¸€ç›´åœ¨è¯»å®ƒï¼›
+ *         2. ä¸ dac_wave_start() äº’æ–¥ï¼ˆéƒ½å  TIM4 + DMAï¼‰ï¼›
+ *         3. è¿™ä¸ªå‡½æ•°åªè´Ÿè´£"æŠŠç¼“å­˜å¾ªç¯æ’­å‡ºå»"ï¼Œå¾€é‡Œé¢å¡«æ•°æ®æ˜¯è°ƒç”¨æ–¹çš„äº‹ã€‚
  */
 uint16_t *dac_stream_buf(uint16_t *len)
 {
@@ -537,7 +537,7 @@ int dac_stream_start(uint32_t sample_hz, const uint16_t *buf, uint16_t len)
 
     dac_stop();
 
-    /* TIM4 °´²ÉÑùÂÊ×ß */
+    /* TIM4 æŒ‰é‡‡æ ·ç‡èµ° */
     s_rate = tim4_apply(sample_hz);
 
     ch = dac_dma_ch();
@@ -545,7 +545,7 @@ int dac_stream_start(uint32_t sample_hz, const uint16_t *buf, uint16_t len)
     DMA_DeInit(ch);
 
     d.DMA_PeripheralBaseAddr = dac_dreg_addr();
-    d.DMA_MemoryBaseAddr     = (uint32_t)buf;      /* Ö±½Ó°áÍâ²¿»º´æ */
+    d.DMA_MemoryBaseAddr     = (uint32_t)buf;      /* ç›´æ¥æ¬å¤–éƒ¨ç¼“å­˜ */
     d.DMA_DIR                = DMA_DIR_PeripheralDST;
     d.DMA_BufferSize         = len;
     d.DMA_PeripheralInc      = DMA_PeripheralInc_Disable;
@@ -570,7 +570,7 @@ int dac_stream_start(uint32_t sample_hz, const uint16_t *buf, uint16_t len)
 }
 
 /**
- * @brief  Í£Ö¹Á÷Ê½²¥·Å
+ * @brief  åœæ­¢æµå¼æ’­æ”¾
  */
 void dac_stream_stop(void)
 {
@@ -584,7 +584,7 @@ void dac_stream_stop(void)
 }
 
 /**
- * @brief  µ±Ç°ÊÇ·ñÔÚÁ÷Ê½²¥·Å
+ * @brief  å½“å‰æ˜¯å¦åœ¨æµå¼æ’­æ”¾
  */
 uint8_t dac_is_streaming(void)
 {
@@ -592,10 +592,10 @@ uint8_t dac_is_streaming(void)
 }
 
 /**
- * @brief  ÔËĞĞÊ±ÇĞ»»Êä³öÍ¨µÀ
- * @param  ch  1 = PA4£¨DAC1£¬ÑïÉùÆ÷£©£»2 = PA5£¨DAC2£©
- * @return DAC_OK ³É¹¦£»DAC_ERR_PARAM ²ÎÊı´í
- * @note   ÇĞ»»Ç°»áÏÈÍ£²¨ĞÎ£»DMA µÄÄ¿±ê¼Ä´æÆ÷²»Í¬£¬ËùÒÔ±ØĞëÖØÅä DMA
+ * @brief  è¿è¡Œæ—¶åˆ‡æ¢è¾“å‡ºé€šé“
+ * @param  ch  1 = PA4ï¼ˆDAC1ï¼Œæ‰¬å£°å™¨ï¼‰ï¼›2 = PA5ï¼ˆDAC2ï¼‰
+ * @return DAC_OK æˆåŠŸï¼›DAC_ERR_PARAM å‚æ•°é”™
+ * @note   åˆ‡æ¢å‰ä¼šå…ˆåœæ³¢å½¢ï¼›DMA çš„ç›®æ ‡å¯„å­˜å™¨ä¸åŒï¼Œæ‰€ä»¥å¿…é¡»é‡é… DMA
  */
 int dac_channel_set(uint8_t ch)
 {
@@ -623,7 +623,7 @@ int dac_channel_set(uint8_t ch)
 }
 
 /**
- * @brief  µ±Ç°ÓÃµÄÊÇÄÄ¸öÍ¨µÀ
+ * @brief  å½“å‰ç”¨çš„æ˜¯å“ªä¸ªé€šé“
  */
 uint8_t dac_channel_get(void)
 {
@@ -631,7 +631,7 @@ uint8_t dac_channel_get(void)
 }
 
 /**
- * @brief  ¸ÄÆµÂÊ
+ * @brief  æ”¹é¢‘ç‡
  */
 int dac_set_freq(uint32_t freq_hz)
 {
@@ -639,7 +639,7 @@ int dac_set_freq(uint32_t freq_hz)
 }
 
 /**
- * @brief  ¸Ä²¨ĞÎ
+ * @brief  æ”¹æ³¢å½¢
  */
 int dac_set_wave(dac_wave_t type)
 {
@@ -647,7 +647,7 @@ int dac_set_wave(dac_wave_t type)
 }
 
 /**
- * @brief  Êµ¼ÊÊä³öÆµÂÊ
+ * @brief  å®é™…è¾“å‡ºé¢‘ç‡
  */
 uint32_t dac_freq_get(void)
 {
@@ -660,7 +660,7 @@ uint32_t dac_freq_get(void)
 }
 
 /**
- * @brief  µ±Ç°²ÉÑùÂÊ
+ * @brief  å½“å‰é‡‡æ ·ç‡
  */
 uint32_t dac_rate_get(void)
 {
@@ -668,7 +668,7 @@ uint32_t dac_rate_get(void)
 }
 
 /**
- * @brief  Ã¿ÖÜÆÚµãÊı
+ * @brief  æ¯å‘¨æœŸç‚¹æ•°
  */
 uint16_t dac_points_get(void)
 {
@@ -676,7 +676,7 @@ uint16_t dac_points_get(void)
 }
 
 /**
- * @brief  È¡µ±Ç°µçÑ¹·¶Î§
+ * @brief  å–å½“å‰ç”µå‹èŒƒå›´
  */
 void dac_level_get(uint16_t *high_mv, uint16_t *low_mv)
 {
@@ -691,14 +691,14 @@ void dac_level_get(uint16_t *high_mv, uint16_t *low_mv)
 }
 
 /**
- * @brief  ÊÇ·ñÕıÔÚÊä³ö
+ * @brief  æ˜¯å¦æ­£åœ¨è¾“å‡º
  */
 int dac_is_running(void)
 {
     return s_running ? 1 : 0;
 }
 /**
- * @brief  È¡³öµ±Ç°Âë±í£¨UI »­²¨ĞÎÔ¤ÀÀÓÃ£©
+ * @brief  å–å‡ºå½“å‰ç è¡¨ï¼ˆUI ç”»æ³¢å½¢é¢„è§ˆç”¨ï¼‰
  */
 const uint16_t *dac_wave_table(uint16_t *len)
 {
@@ -711,7 +711,7 @@ const uint16_t *dac_wave_table(uint16_t *len)
 }
 
 /**
- * @brief  Âë±í°æ±¾ºÅ
+ * @brief  ç è¡¨ç‰ˆæœ¬å·
  */
 uint32_t dac_wave_table_seq(void)
 {
@@ -721,9 +721,9 @@ uint32_t dac_wave_table_seq(void)
 
 void dac_deinit(void)
 {
-    dac_stop();                                     /* Í£ TIM4 + DMA£¬Êä³ö»ØÖĞµã */
+    dac_stop();                                     /* åœ TIM4 + DMAï¼Œè¾“å‡ºå›ä¸­ç‚¹ */
     DAC_Cmd(DAC_Channel_1, DISABLE);
     DAC_Cmd(DAC_Channel_2, DISABLE);
-    s_ch = 1;                                       /* Í¨µÀ»¹»Ø PA4£¬¸ø SPEAKER */
+    s_ch = 1;                                       /* é€šé“è¿˜å› PA4ï¼Œç»™ SPEAKER */
     s_inited = 0;
 }
