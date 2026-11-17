@@ -1,0 +1,10 @@
+# 本工程源码是 GBK + CRLF，禁止 git 做换行/编码归一化，
+# 否则 diff 会整文件变红，MounRiver 里打开还会乱码。
+# 末尾的 diff 属性让 git 仍按文本显示差异（否则改一个字符就显示 "Bin 5093 -> 6378 bytes"）。
+* -text diff
+
+# 二进制文件（合并没有意义）
+*.ttf binary
+*.png binary
+*.jpg binary
+*.ico binary

@@ -34,9 +34,47 @@ static uint32_t _SysTick_Config(rt_uint32_t ticks)
     return 0;
 }
 
+void rt_hw_us_delay(rt_uint32_t us)
+{
+    rt_uint32_t ticks;
+    rt_uint32_t told, tnow, tcnt = 0;
+    rt_uint32_t reload = SysTick->CMP;
+
+    /* 获得延时经过的 tick 数 */
+    ticks = us * reload / (1000000 / RT_TICK_PER_SECOND);
+    /* 获得当前时间 */
+    told = SysTick->CNT;
+    while (1)
+    {
+        /* 循环获得当前时间，直到达到指定的时间后退出循环 */
+        tnow = SysTick->CNT;
+        if (tnow != told)
+        {
+            if (tnow < told)
+            {
+                // 取决于 SysTick->CNT 递增或递减，这里是递增的
+                // 通过一个 tcnt 变量将当前计数值 tnow 与上一时刻的计数值 told 的差值进行累加（注意 SysTick->VAL 为递减还是递增计数器）
+                // ，当累加值 tcnt≥延时节拍 ticks 时跳出循环，而 tcnt 最大值为 0xffff ffff，不可能出现死循环的情况
+//                tcnt += told - tnow;
+                tcnt += reload - told + tnow;
+            }
+            else
+            {
+//                tcnt += reload - tnow + told;
+                tcnt += tnow - told;
+            }
+            told = tnow;
+            if (tcnt >= ticks)
+            {
+                break;
+            }
+        }
+    }
+}
+
 #if defined(RT_USING_USER_MAIN) && defined(RT_USING_HEAP)
-#define RT_HEAP_SIZE (3072)
-static uint32_t rt_heap[RT_HEAP_SIZE];     // heap size: 12K(3072 * 4)
+#define RT_HEAP_SIZE (1024 * RT_HEAP_SIZE_NUMBER)
+static uint32_t rt_heap[RT_HEAP_SIZE];     // heap default size: 4K(1024 * 4)
 RT_WEAK void *rt_heap_begin_get(void)
 {
     return rt_heap;

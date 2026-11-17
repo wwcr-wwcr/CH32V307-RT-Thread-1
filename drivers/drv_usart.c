@@ -26,6 +26,22 @@
 #include <rtdevice.h>
 #include <drv_usart.h>
 
+/* 串口流模式开关（见 uart_stream.h）：1 = uart1 专供二进制流 */
+static volatile uint8_t s_uart1_stream = 0;
+
+/* uart_stream.c 里的弱符号兜底：没链接那个模块也不会报错 */
+RT_WEAK void ustream_on_idle(void) { }
+
+void ch32_uart1_stream_set(uint8_t on)
+{
+    s_uart1_stream = on;
+}
+
+uint8_t ch32_uart1_stream_get(void)
+{
+    return s_uart1_stream;
+}
+
 /*  uart driver */
 struct ch32_uart
 {
@@ -105,6 +121,24 @@ static rt_err_t ch32_configure(struct rt_serial_device *serial, struct serial_co
         USART_Init(uart->USARTx,&uart->huart);
         USART_Cmd(uart->USARTx, ENABLE);
     }
+    if(uart->USARTx == UART6)
+    {
+        GPIO_InitTypeDef GPIO_InitStructure;
+        RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
+        RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART6, ENABLE);
+
+//        uart->irq=USART1_IRQn;
+        GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
+        GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+        GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+        GPIO_Init(GPIOC, &GPIO_InitStructure);
+        GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
+        GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+        GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+        GPIO_Init(GPIOC, &GPIO_InitStructure);
+        USART_Init(uart->USARTx,&uart->huart);
+        USART_Cmd(uart->USARTx, ENABLE);
+    }
 
     return RT_EOK;
 }
@@ -139,6 +173,13 @@ static int ch32_putc(struct rt_serial_device *serial, char c)
     struct ch32_uart *uart;
     RT_ASSERT(serial != RT_NULL);
     uart = (struct ch32_uart *)serial->parent.user_data;
+
+    /* 流模式：控制台输出直接丢掉，绝不能插进画面数据里，也绝不能在这里死等 */
+    if(s_uart1_stream && (uart->USARTx == USART1))
+    {
+        return 1;
+    }
+
 //    while (__HAL_UART_GET_FLAG(&uart->huart, UART_FLAG_TXE) == RESET);
     while (USART_GetFlagStatus(uart->USARTx, USART_FLAG_TC) == RESET);
     uart->USARTx->DATAR = c;
@@ -153,7 +194,9 @@ static int ch32_getc(struct rt_serial_device *serial)
     uart = (struct ch32_uart *)serial->parent.user_data;
     ch = -1;
     if (USART_GetFlagStatus(uart->USARTx, USART_FLAG_RXNE) != RESET)
+    {
         ch = uart->USARTx->DATAR & 0xff;
+    }
     return ch;
 }
 
@@ -176,7 +219,7 @@ static void uart_isr(struct rt_serial_device *serial)
     if (USART_GetITStatus(uart->USARTx, USART_IT_RXNE) != RESET)
     {
         rt_hw_serial_isr(serial, RT_SERIAL_EVENT_RX_IND);
-        /* DATAR reads already clear RXNE; do not clear a newly arrived byte here. */
+        USART_ClearITPendingBit(uart->USARTx, USART_IT_RXNE);
     }
 }
 
@@ -194,8 +237,6 @@ static const struct rt_uart_ops ch32_uart_ops =
 struct ch32_uart uart1;
 struct rt_serial_device serial1;
 
-
-
 void USART1_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void USART1_IRQHandler(void)
 {
@@ -203,7 +244,23 @@ void USART1_IRQHandler(void)
     /* enter interrupt */
     rt_interrupt_enter();
 //    printf("int_SP:%08x\n",__get_SP());
-    uart_isr(&serial1);
+
+    if(s_uart1_stream)
+    {
+        /* 流模式：DATAR 归 DMA 读，这里只负责清 IDLE 标志 + 把已到的字节搬走。
+         * 清 IDLE 必须"先读 STATR 再读 DATAR"；此刻 RXNE 一般已经是 0，
+         * 这一次多读的 DATAR 不会抢走 DMA 的字节。 */
+        if(USART_GetFlagStatus(USART1, USART_FLAG_IDLE) != RESET)
+        {
+            (void)USART1->STATR;
+            (void)USART1->DATAR;
+            ustream_on_idle();
+        }
+    }
+    else
+    {
+        uart_isr(&serial1);
+    }
     /* leave interrupt */
     rt_interrupt_leave();
 
@@ -211,7 +268,25 @@ void USART1_IRQHandler(void)
 }
 #endif /* RT_USING_UART1 */
 
+#if defined(RT_USING_UART6)
+/* UART6 device driver structure */
+struct ch32_uart uart6;
+struct rt_serial_device serial6;
 
+void UART6_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+void UART6_IRQHandler(void)
+{
+    GET_INT_SP();
+    /* enter interrupt */
+    rt_interrupt_enter();
+    //printf("int_SP:%08x\n",__get_SP());
+    uart_isr(&serial6);
+    /* leave interrupt */
+    rt_interrupt_leave();
+
+    FREE_INT_SP();
+}
+#endif /* RT_USING_UART6 */
 
 
 int rt_hw_usart_init(void)
@@ -266,7 +341,49 @@ int rt_hw_usart_init(void)
                           uart);
 #endif /* RT_USING_UART1 */
 
+#if defined(RT_USING_UART6)
+    uart=&uart6;
+    uart->irq=UART6_IRQn;
+    uart->USARTx=UART6;
+
+    config.baud_rate = BAUD_RATE_115200;
+    serial6.ops      =  &ch32_uart_ops;
+    serial6.config   =  config;
+
+
+    uart->huart.USART_BaudRate             = 115200;
+    uart->huart.USART_HardwareFlowControl  = USART_HardwareFlowControl_None;
+    uart->huart.USART_Mode                 = USART_Mode_Rx|USART_Mode_Tx;
+    uart->huart.USART_WordLength           = USART_WordLength_8b;
+    uart->huart.USART_StopBits             = USART_StopBits_1;
+    uart->huart.USART_Parity               = USART_Parity_No;
+
+    if(uart->USARTx == UART6)
+    {
+            GPIO_InitTypeDef GPIO_InitStructure;
+            RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
+            RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART6, ENABLE);
+
+    //        uart->irq=UART6_IRQn;
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
+            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+            GPIO_Init(GPIOC, &GPIO_InitStructure);
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
+            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+            GPIO_Init(GPIOC, &GPIO_InitStructure);
+            USART_Init(uart->USARTx,&uart->huart);
+            USART_Cmd(uart->USARTx, ENABLE);
+   }
+
+    /* register UART6 device */
+    rt_hw_serial_register(&serial6, "uart6",
+                          RT_DEVICE_FLAG_RDWR | RT_DEVICE_FLAG_INT_RX,
+                          uart);
+#endif /* RT_USING_UART6 */
+
     return 0;
 }
-INIT_BOARD_EXPORT(rt_hw_usart_init);
 
+INIT_BOARD_EXPORT(rt_hw_usart_init);

@@ -20,8 +20,14 @@
 #include "ch32v30x.h"
 #define CH32V30X_PIN_NUMBERS   100
 /* board configuration */
-#define SRAM_SIZE  64
+#define SRAM_SIZE  256
 #define SRAM_END (0x20000000 + SRAM_SIZE * 1024)
+
+
+//LJL -- board.c  75行    
+//要在rtconfig.h  110行        定1给运行条件
+//自添加量RT_HEAP_SIZE_NUMBER  为系数即 total memory 1024 * RT_HEAP_SIZE_NUMBER
+#define RT_HEAP_SIZE_NUMBER 2
 
 extern int _ebss;
 #define HEAP_BEGIN  ((void *)&_ebss)

@@ -1,49 +1,43 @@
-ï»¿/********************************** (C) COPYRIGHT *******************************
-
+/********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
+* Description        : Ó¦ÓÃÈë¿Ú
+*
+* Ö»×öÁ½¼şÊÂ£º
+*     1. ³õÊ¼»¯°å¼¶ÍâÉè£¨ÆÁÄ» / I2C ×ÜÏß / RTC / °´¼üÖĞ¶Ï£©
+*     2. Æô¶¯²Ëµ¥£¬È»ºóÍË³ö
+*
+* Ïß³Ì·Ö¹¤£º
+*     key    ³£×¤   ÖĞ¶ÏÇı¶¯£¬Ïû¶¶ºó»Øµ÷           HAL/KEY/key.c
+*     menu   ³£×¤   ¹Ü²Ëµ¥£ºÇĞ½çÃæ¡¢½¨/É¾ÈÎÎñÏß³Ì   menu.c
+*     task   ¶¯Ì¬   µ±Ç°½çÃæ×Ô¼ºÒ»¸öÏß³Ì£¬ÍË³ö¼´É¾  task_x.c
+*
+* ½çÃæºÍÒµÎñÒ»ÂÉ²»Ğ´ÔÚÕâÀï¡£
+*********************************************************************************/
 
-* Author             : WCH
-
-* Version            : V1.0.0
-
-* Date               : 2020/04/30
-  ä½œè€…:zhangruim
-* Description        : Main program body.
-
-*********************************************************************************
-
-* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-
-* Attention: This software (modified or not) and binary are used for 
-
-* microcontroller manufactured by Nanjing Qinheng Microelectronics.
-
-*******************************************************************************/
-
-#include "ch32v30x.h"
-#include <rtthread.h>
-#include <rthw.h>
-#include "drivers/pin.h"
-#include "app_rgb.h"
-#include "app_segment.h"
-#include "app_key.h"
-#include "app_buzzer.h"
-#include "app_ntc.h"
-#include "app_light.h"
-#include "app_rtc.h"
-#include "app_speaker.h"
-#include "app_usbhs.h"
-#include "app_usb_audio.h"
-#include "app_mic.h"
-#include "app_ultrasonic.h"
-
+#include "rtthread.h"
+#include "lcd.h"
+#include "key.h"
+#include "i2c.h"
+#include "menu.h"
 
 int main(void)
 {
     SystemCoreClockUpdate();
-    while (1)
-    {
-        rt_thread_mdelay(100);
-    }
-}
 
+    /* 1. °å¼¶ÍâÉè£ºÊ§°ÜÒ²²»×èÈû£¬·½±ãµ¥¶ÀÅÅ²é */
+    if(lcd_init() != 0)
+    {
+        rt_kprintf("main: lcd init failed\r\n");
+    }
+
+    i2c_init(I2C_DEFAULT_SPEED);
+   // rtc_init();
+
+    /* 2. °´¼ü£ºÅäºÃÖĞ¶Ï²¢´´½¨Ïß³Ì£¬´ËÊ±ÏÈ²»Æô¶¯ */
+    key_init();
+
+    /* 3. ×¢²á°´¼ü»Øµ÷ -> Æô¶¯°´¼üÏß³Ì -> Æô¶¯²Ëµ¥Ïß³Ì£¬main µ½´Ë½áÊø */
+    menu_start();
+
+    return 0;
+}

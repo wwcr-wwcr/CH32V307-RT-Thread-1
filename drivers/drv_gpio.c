@@ -769,19 +769,17 @@ void EXTI9_5_IRQHandler(void)
 {
     GET_INT_SP();
     rt_interrupt_enter();
-    if( (EXTI_GetITStatus(EXTI_Line5)!=RESET)|| \
-        (EXTI_GetITStatus(EXTI_Line6)!=RESET)|| \
-        (EXTI_GetITStatus(EXTI_Line7)!=RESET)|| \
-        (EXTI_GetITStatus(EXTI_Line8)!=RESET)|| \
-        (EXTI_GetITStatus(EXTI_Line9)!=RESET) )
+
+    /* only dispatch the line(s) that really triggered, avoid spurious callbacks */
+    for(uint32_t line = EXTI_Line5; line <= EXTI_Line9; line <<= 1)
     {
-    HAL_GPIO_EXTI_Callback(GPIO_Pin_5);
-    HAL_GPIO_EXTI_Callback(GPIO_Pin_6);
-    HAL_GPIO_EXTI_Callback(GPIO_Pin_7);
-    HAL_GPIO_EXTI_Callback(GPIO_Pin_8);
-    HAL_GPIO_EXTI_Callback(GPIO_Pin_9);
-    EXTI_ClearITPendingBit(EXTI_Line5|EXTI_Line6|EXTI_Line7|EXTI_Line8|EXTI_Line9);
+        if(EXTI_GetITStatus(line) != RESET)
+        {
+            HAL_GPIO_EXTI_Callback((uint16_t)line);
+            EXTI_ClearITPendingBit(line);
+        }
     }
+
     rt_interrupt_leave();
     FREE_INT_SP();
 }

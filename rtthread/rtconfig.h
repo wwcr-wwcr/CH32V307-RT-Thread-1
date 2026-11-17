@@ -35,7 +35,7 @@
 
 // <o>the stack size of main thread<1-4086>
 //  <i>Default: 512
-#define RT_MAIN_THREAD_STACK_SIZE     1024
+#define RT_MAIN_THREAD_STACK_SIZE     4096
 
 // </h>
 
@@ -89,11 +89,11 @@
 // </c>
 // <c1>Using Event
 //  <i>Using Event
-#define RT_USING_EVENT
+#define RT_USING_EVENT  
 // </c>
 // <c1>Using MailBox
 //  <i>Using MailBox
-#define RT_USING_MAILBOX
+// #define RT_USING_MAILBOX
 // </c>
 // <c1>Using Message Queue
 //  <i>Using Message Queue
@@ -105,10 +105,10 @@
 // <h>Memory Management Configuration
 // <c1>Dynamic Heap Management
 //  <i>Dynamic Heap Management
-#define RT_USING_MEMPOOL
-#define RT_USING_MEMHEAP
-#define RT_USING_SMALL_MEM
-#define RT_USING_HEAP
+//#define RT_USING_MEMPOOL
+//#define RT_USING_MEMHEAP
+#define RT_USING_SMALL_MEM 1
+#define RT_USING_HEAP 1
 
 
 // </c>
@@ -153,7 +153,10 @@
 
 #define RT_USING_SERIAL
 #define RT_USING_PIN
+
 #define RT_USING_UART1
+#define RT_USING_UART6  1
+
 #define RT_USING_DEVICE_IPC
 
 #endif
