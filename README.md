@@ -68,16 +68,19 @@ CH32V307VCT6（RISC-V 青稞 V4F，144MHz，224KB Flash / 96KB RAM）上的菜�
 | `ui/task_example_ui.c` | 示例任务的界面 | 是 |
 | `ui/ui_event.h` | 触摸事件唯一入口 `ui_post_event(id, value)` | — |
 
-### menu_core.c 分两层
+### menu_core.c 分两块
 
-改东西前先看该改哪一层，别串层：
+改东西前先看该改哪一块，别串层：
 
-| 层 | 内容 | 什么时候改 |
+| 块 | 内容 | 什么时候改 |
 | --- | --- | --- |
-| **核心**（`menu_core.c` 上半部分） | 只有四个动作：`menu_draw_list` 重绘、`menu_select(step)` 选任务、`menu_enter(index)` 进任务、`menu_exit()` 退任务。这一段不认识按键、触摸、命令。 | 改选中规则、改进入流程、改列表长什么样 |
-| **外围**（下半部分） | 把输入翻译成核心动作：`menu_key` 按键语义、`menu_handle` 命令分发、`menu_post`/`ui_post_event` 通道、`ui_entry` 线程 | 换交互方式：点选换滑动、加旋钮、加遥控、加串口帧 |
+| **核心** `menu_state(op, arg)` | 菜单状态机，**唯一**改 `s_page` / `s_cursor` 的函数。进入、退出、选择全在里面。`op`：0=上一个 1=下一个 2=进入第 arg 个 3=退出 | 改选中规则、改进入流程、改退出要做什么 |
+| **功能函数** `menu_draw_list()` | 按当前状态重绘列表页，纯输出，不改状态 | 改列表怎么画（实际在 `ui/menu_ui.c`） |
+| **外围** | `menu_key` 按键语义、`menu_handle` 命令分发、`menu_post`/`ui_post_event` 通道、`ui_entry` 线程 | 换交互方式：点选换滑动、加旋钮、加遥控、加串口帧 |
 
-举例：要做「滑动选择任务」，只需在外围加一个 `menu_swipe(int dx)` 去调 `menu_select(dx > 0 ? 1 : -1)`，核心一行都不用动。
+四个动作都自己判断「当前页面该不该做」，外围调用时不用写 `s_page` 守卫。
+
+举例：要做「滑动选择任务」，只需在外围加一个 `menu_swipe(int dx)` 去调 `menu_state(dx > 0 ? 1 : 0, 0)`，核心一行都不用动。
 
 ### 触摸只有一个入口
 
@@ -213,7 +216,7 @@ static void xxx_on_key(key_id_t key)
 
 1. **`lv_*` 只能出现在 `render` 和 `ui/` 目录里**，逻辑线程绝对不许碰。
 2. 任务文件只 include `task.h` 和自己的 `xxx_ui.h`，不许 include `menu.h`。
-3. 想控制菜单，只能 `menu_post()`，不许直接调 `menu_enter` 之类的内部函数。
+3. 想控制菜单，只能 `menu_post()`，不许碰 `menu_core.c` 里的内部函数。
 
 ## 7. MSH 命令
 

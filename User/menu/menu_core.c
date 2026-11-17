@@ -2,23 +2,20 @@
  * 文件名   : menu_core.c
  * 说明     : 菜单核心。全工程唯一碰 lv_ 的地方。
  *
- * 文件分两层，改东西先看清楚该改哪一层：
+ * 文件分两块，改东西先看清楚该改哪一块：
  *
- *   第一部分  核心 —— 菜单自己会做的事，只有四个：
- *                 menu_draw_list()          重绘列表页
- *                 menu_select(step)         选择上一个 / 下一个任务
- *                 menu_enter(index)         进入第 index 个任务
- *                 menu_exit()               离开任务，回列表页
- *             这一段不出现任何按键、触摸、命令的字眼。
- *             想改「怎么算选中」「选中后怎么显示」「进任务的流程」→ 只改这一段。
+ *   核心（menu_state）
+ *       菜单状态机，只有这一个函数改 s_page / s_cursor。
+ *       进入、退出、选择全在里面。
+ *       想改"怎么算选中""进任务的流程""退出要做什么"→ 只改这里。
  *
- *   第二部分  外围 —— 把各种输入翻译成上面四个动作：
- *                 按键   menu_key()        实体键、命令模拟键、触摸换算都汇到这里
- *                 命令   menu_handle()     MSH / 串口帧发来的 cmd
- *                 通道   menu_post() / ui_post_event()   只入队
- *                 线程   ui_entry() / menu_start()
- *             想换交互方式（点选 → 滑动、加旋钮、加遥控器）→ 只在这一段加一个
- *             适配函数去调核心动作，第一部分一行都不用动。
+ *   功能函数（menu_draw_list）
+ *       按当前状态重绘列表页，纯输出，不改任何状态。
+ *
+ *   外围（menu_post / ui_post_event / menu_key / menu_handle / 线程）
+ *       把按键、触摸、命令翻译成 menu_state 的四种操作。
+ *       想换交互方式（点选 → 滑动、加旋钮、加遥控）→ 只在这里加适配，
+ *       核心一行都不用动。
  *
  * 两条页面：
  *     0 = 列表页   选任务
@@ -63,11 +60,10 @@ static struct rt_thread s_ui_tid;
 static rt_uint8_t       s_ui_stack[UI_STACK_SIZE];
 
 /*==============================================================================
- *  第一部分：核心
- *  菜单自己的四个动作。这一段不认识按键、触摸、命令。
+ *  核心
  *============================================================================*/
 
-/* 按当前光标重绘列表页 */
+/* 功能函数：按当前状态重绘列表页。不改任何状态，所以放在核心前面 */
 static void menu_draw_list(void)
 {
     const app_task_t *task = task_runner_at(s_cursor);
@@ -81,78 +77,80 @@ static void menu_draw_list(void)
 }
 
 /**
- * @brief  选择任务：step = 1 下一个，-1 上一个（越界回绕）
- * @note   只在列表页生效。想改成"翻页"、"按分组跳"、"滑动选择"，
- *         都改这里，或者在这里加一个新函数。
+ * @brief  菜单状态机：全工程唯一改 s_page / s_cursor 的地方
+ *
+ * @param  op   0 = 光标上一个      1 = 光标下一个
+ *              2 = 进入第 arg 个任务（arg 传 s_cursor 就是"进光标所指"）
+ *              3 = 退出任务，回列表页
+ * @param  arg  op = 2 时有效，其余忽略
+ *
+ * @note   四个动作都自己判断"当前页面该不该做"，外围调用时不用再写 s_page
+ *         守卫，也就不会出现"某个入口忘了判断"。
  */
-static void menu_select(int8_t step)
+static void menu_state(uint8_t op, uint8_t arg)
 {
     uint8_t n = task_runner_count();
 
-    if((s_page != 0) || (n == 0))
+    /* ---- 0 / 1：选择上一个、下一个，只在列表页 ---- */
+    if(op <= 1)
     {
+        if((s_page != 0) || (n == 0))
+        {
+            return;
+        }
+
+        /* op=1 走 +1，op=0 走 +n-1，取模即回绕。两个方向就靠这一行 */
+        s_cursor = (uint8_t)((s_cursor + ((op == 1) ? 1u : (uint32_t)(n - 1))) % n);
+
+        menu_draw_list();
         return;
     }
 
-    if(step > 0)
+    /* ---- 2：进入第 arg 个任务，只在列表页 ---- */
+    if(op == 2)
     {
-        s_cursor = (uint8_t)((s_cursor + 1) % n);
-    }
-    else
-    {
-        s_cursor = (uint8_t)((s_cursor + n - 1) % n);
-    }
+        if(s_page != 0)
+        {
+            return;                     /* 已经在任务页，不重复进 */
+        }
 
-    menu_draw_list();
-}
+        if(task_runner_start(arg) != 0)
+        {
+            return;                     /* 越界或线程建失败，留在列表页 */
+        }
 
-/**
- * @brief  进入第 index 个任务
- * @note   所有"进任务"的路径最后都落到这里（光标进入 / 命令点名进入）
- */
-static void menu_enter(uint8_t index)
-{
-    if(s_page != 0)
-    {
-        return;                         /* 已经在任务页，不重复进 */
+        s_cursor = arg;                 /* 回来时光标还停在刚进的那个 */
+        s_page   = 1;
+        return;
     }
 
-    if(task_runner_start(index) != 0)
-    {
-        return;                         /* 越界或线程建失败，留在列表页 */
-    }
-
-    s_cursor = index;
-    s_page   = 1;                       /* 切到任务页 */
-}
-
-/**
- * @brief  离开当前任务，回列表页（常驻任务转后台，其余停线程）
- */
-static void menu_exit(void)
-{
-    const app_task_t *task = task_runner_current();
-
+    /* ---- 3：退出任务，回列表页，只在任务页 ---- */
     if(s_page != 1)
     {
         return;
     }
 
-    task_runner_leave();
-
-    s_page = 0;                         /* 切回列表页 */
-    menu_draw_list();
-
-    /* 删页面必须在 UI 线程做，这里正好是 */
-    if((task != RT_NULL) && (task->ui_destroy != RT_NULL))
     {
-        task->ui_destroy();
+        /* 先取任务指针：task_runner_leave() 之后 current 就查不到了，
+         * 但删页面还得用它 */
+        const app_task_t *task = task_runner_current();
+
+        task_runner_leave();            /* 常驻任务转后台，其余停线程 */
+        s_page = 0;
+
+        menu_draw_list();
+
+        /* 删页面必须在 UI 线程做，这里正好是 */
+        if((task != RT_NULL) && (task->ui_destroy != RT_NULL))
+        {
+            task->ui_destroy();
+        }
     }
 }
 
 /*==============================================================================
- *  第二部分：外围
- *  下面全是"把某种输入翻译成上面四个动作"，不写菜单业务。
+ *  外围
+ *  下面全是"把某种输入翻译成 menu_state"，不写菜单业务。
  *============================================================================*/
 
 /**************************************************************************************************
@@ -207,9 +205,9 @@ static void menu_key(key_id_t key)
     /* ---- 任务页 ---- */
     if(s_page == 1)
     {
-        if(key == KEY_ID_LONG_4)        /* 长按 K4 = 回列表页 */
+        if(key == KEY_ID_LONG_4)        /* 长按 K4 = 退出 */
         {
-            menu_exit();
+            menu_state(3, 0);           /* 3 = 退出 */
             return;
         }
 
@@ -220,15 +218,15 @@ static void menu_key(key_id_t key)
     /* ---- 列表页 ---- */
     if(key == KEY_ID_1)
     {
-        menu_select(-1);
+        menu_state(0, 0);               /* 0 = 上一个 */
     }
     else if(key == KEY_ID_2)
     {
-        menu_select(1);
+        menu_state(1, 0);               /* 1 = 下一个 */
     }
     else if(key == KEY_ID_3)
     {
-        menu_enter(s_cursor);           /* 进光标所指那个 */
+        menu_state(2, s_cursor);        /* 2 = 进入光标所指那个 */
     }
 }
 
@@ -244,19 +242,19 @@ static void menu_handle(const menu_msg_t *msg)
             break;
 
         case 1:     /* 光标上一个 */
-            menu_select(-1);
+            menu_state(0, 0);
             break;
 
         case 2:     /* 光标下一个 */
-            menu_select(1);
+            menu_state(1, 0);
             break;
 
-        case 3:     /* 点名进入第 id 个任务，不等价于按键 —— 跳过光标直接进 */
-            menu_enter(msg->id);
+        case 3:     /* 点名进入第 id 个，跳过光标 */
+            menu_state(2, msg->id);
             break;
 
-        case 4:     /* 回到列表页 */
-            menu_exit();
+        case 4:     /* 回列表页 */
+            menu_state(3, 0);
             break;
 
         case 5:     /* 触摸控件，id 是控件编号，value 是控件值 */
