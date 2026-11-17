@@ -68,6 +68,17 @@ CH32V307VCT6（RISC-V 青稞 V4F，144MHz，224KB Flash / 96KB RAM）上的菜�
 | `ui/task_example_ui.c` | 示例任务的界面 | 是 |
 | `ui/ui_event.h` | 触摸事件唯一入口 `ui_post_event(id, value)` | — |
 
+### menu_core.c 分两层
+
+改东西前先看该改哪一层，别串层：
+
+| 层 | 内容 | 什么时候改 |
+| --- | --- | --- |
+| **核心**（`menu_core.c` 上半部分） | 只有四个动作：`menu_draw_list` 重绘、`menu_select(step)` 选任务、`menu_enter(index)` 进任务、`menu_exit()` 退任务。这一段不认识按键、触摸、命令。 | 改选中规则、改进入流程、改列表长什么样 |
+| **外围**（下半部分） | 把输入翻译成核心动作：`menu_key` 按键语义、`menu_handle` 命令分发、`menu_post`/`ui_post_event` 通道、`ui_entry` 线程 | 换交互方式：点选换滑动、加旋钮、加遥控、加串口帧 |
+
+举例：要做「滑动选择任务」，只需在外围加一个 `menu_swipe(int dx)` 去调 `menu_select(dx > 0 ? 1 : -1)`，核心一行都不用动。
+
 ### 触摸只有一个入口
 
 列表页的箭头/卡片和任务页的按钮/滑条，回调里都只有一句 `ui_post_event(id, value)`，不需要知道自己在哪一页：
