@@ -265,7 +265,7 @@ static void on_slider(lv_event_t *e)
     lv_obj_t *sl = lv_event_get_target(e);
     uint8_t   id = (uint8_t)(uintptr_t)lv_event_get_user_data(e);
 
-    (void)menu_post(5, id, (int32_t)lv_slider_get_value(sl));   /* 5 = 任务页触摸控件 */
+    (void)menu_post(MENU_CMD_SET, id, (int32_t)lv_slider_get_value(sl));
 }
 
 /* 按钮：点一下 */
@@ -273,7 +273,7 @@ static void on_button(lv_event_t *e)
 {
     uint8_t id = (uint8_t)(uintptr_t)lv_event_get_user_data(e);
 
-    (void)menu_post(5, id, 0);
+    (void)menu_post(MENU_CMD_SET, id, 0);
 }
 
 lv_obj_t *ui_slider(lv_obj_t *parent, lv_coord_t x, lv_coord_t y, lv_coord_t w,

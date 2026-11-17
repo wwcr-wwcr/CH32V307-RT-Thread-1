@@ -57,42 +57,48 @@ CH32V307VCT6（RISC-V 青稞 V4F，144MHz，224KB Flash / 96KB RAM）上的菜�
 | 文件 | 职责 | 能碰 lv_？ |
 | --- | --- | --- |
 | `main.c` | 只做板级初始化然后调 `menu_start()` | 否 |
-| `menu/menu.h` | 对外唯一接口：`menu_start` / `menu_post` / `menu_dump` | — |
-| `menu/menu_core.c` | 页面状态机 + UI 线程主循环 | **是（唯一）** |
+| `menu/menu.h` | 对外唯一接口：命令号 + `menu_start` / `menu_post` / `menu_dump` | — |
+| `menu/menu.c` | 菜单全部逻辑：命令、状态机、线程、MSH、dump | **是（唯一）** |
 | `menu/task_runner.c` | 任务线程生命周期：创建 / 停止 / 转后台 / 投事件 | 否 |
-| `menu/menu_cmd.c` | MSH 命令，只做「字符串 → `menu_post`」的翻译 | 否 |
 | `task/task.h` | `app_task_t` 定义，任务回调契约 | — |
 | `task/task_example.c` | 示例任务（麦克风 / 光照 / 数码管 / 音乐 / 节拍器） | 否 |
 | `ui/common.c` | 通用控件封装（页面、卡片、按钮、滑条、曲线） | 是 |
-| `ui/menu_ui.c` | 列表页渲染 | 是 |
+| `ui/menu_ui.c` | 选择页（网格版）：排版、卡片、点击进入 | 是 |
 | `ui/task_example_ui.c` | 示例任务的界面 | 是 |
 
-### menu_core.c 分两块
+### 菜单核心只认一件事：有没有任务在跑
 
-改东西前先看该改哪一块，别串层：
+核心**不保存**页面状态和光标，全部从 `task_runner_current()` 派生：
 
-| 块 | 内容 | 什么时候改 |
+| | 任务页 | 选择页 |
 | --- | --- | --- |
-| **核心** `menu_state(op, arg)` | 菜单状态机，**唯一**改 `s_page` / `s_cursor` 的函数。进入、退出、选择全在里面。`op`：0=上一个 1=下一个 2=进入第 arg 个 3=退出 | 改选中规则、改进入流程、改退出要做什么 |
-| **功能函数** `menu_draw_list()` | 按当前状态重绘列表页，纯输出，不改状态 | 改列表怎么画（实际在 `ui/menu_ui.c`） |
-| **外围** | `menu_key` 按键语义、`menu_handle` 命令分发、`menu_post` 通道、`ui_entry` 线程 | 换交互方式：点选换滑动、加旋钮、加遥控、加串口帧 |
+| 判据 | `task_runner_current() != NULL` | `task_runner_current() == NULL` |
+| 收到 BACK | 核心处理（退出） | 转给 `menu_ui_list_cmd` |
+| 收到 KEY / SET | 转发给 `task_runner` | 转给 `menu_ui_list_cmd` |
+| 收到 PREV / NEXT | 忽略 | 转给 `menu_ui_list_cmd` |
+| 收到 ENTER | 忽略 | 核心处理（建线程进任务） |
 
-四个动作都自己判断「当前页面该不该做」，外围调用时不用写 `s_page` 守卫。
+「一屏显示几个任务、怎么排版、怎么选、有没有光标」**全部**在 `ui/menu_ui.c`，`menu.c` 完全不知道。
 
-举例：要做「滑动选择任务」，只需在外围加一个 `menu_swipe(int dx)` 去调 `menu_state(dx > 0 ? 1 : 0, 0)`，核心一行都不用动。
+### menu.c 分四块
 
-### 触摸不伪装成按键
+从上往下读一遍就能看完整条链路：
 
-回调里都是直接发命令，不伪造按键事件：
+| 块 | 内容 |
+| --- | --- |
+| 一、命令 | 消息结构 `menu_msg_t`、队列、线程句柄 |
+| 二、状态机 | `menu_enter()` / `menu_back()` / `menu_dispatch()` |
+| 三、线程 | `ui_entry()` 主循环、`menu_start()` |
+| 四、外围 | `menu_post()` / `on_key()` / MSH `menu` 命令 / `menu_dump()` |
+
+### 触摸统一发命令
 
 | 位置 | 回调里写 | 效果 |
 | --- | --- | --- |
-| 列表页 左箭头 | `menu_post(1, 0, 0)` | 和 MSH `menu prev` 同一条 |
-| 列表页 右箭头 | `menu_post(2, 0, 0)` | 和 MSH `menu next` 同一条 |
-| 列表页 卡片 | `menu_post(3, s_index, 0)` | 和 MSH `menu open N` 同一条 |
-| 任务页 按钮/滑条 | `menu_post(5, id, value)` | 转给当前任务的 `on_set` |
+| 选择页 卡片 | `menu_post(MENU_CMD_ENTER, i, 0)` | 进第 i 个任务 |
+| 任务页 按钮/滑条 | `menu_post(MENU_CMD_SET, id, value)` | 转给当前任务的 `on_set` |
 
-这样列表页的触摸和命令行走的是**同一批命令**，没有第二套语义；任务页的触摸带 `int32` 数值，所以单独用 cmd 5。
+不伪造按键事件，也没有第二套语义。
 
 ## 3. 线程
 
@@ -147,14 +153,16 @@ CH32V307VCT6（RISC-V 青稞 V4F，144MHz，224KB Flash / 96KB RAM）上的菜�
 rt_err_t menu_post(uint8_t cmd, uint8_t id, int32_t value);
 ```
 
-| cmd | 含义 | id / value |
+| 命令 | 含义 | id / value |
 | --- | --- | --- |
-| 0 | 按键事件，**只有按键线程发** | `id` = `key_id_t`：短按 1~4 / 长按 5~8 / 双击 9~12 |
-| 1 | 光标上一个 | — |
-| 2 | 光标下一个 | — |
-| 3 | 进入第 N 个任务 | `id` = 任务序号，从 0 开始 |
-| 4 | 回到列表页（等同长按 K4） | — |
-| 5 | 任务页的触摸控件 | `id` = 控件编号，`value` = 控件数值 |
+| `MENU_CMD_KEY` | 按键事件，**只有按键线程发** | `id` = `key_id_t`：短按 1~4 / 长按 5~8 / 双击 9~12 |
+| `MENU_CMD_PREV` | 上一个 | — |
+| `MENU_CMD_NEXT` | 下一个 | — |
+| `MENU_CMD_ENTER` | 进入第 N 个任务 | `id` = 任务序号，从 0 开始 |
+| `MENU_CMD_BACK` | 退出当前任务（等同长按 K4） | — |
+| `MENU_CMD_SET` | 任务页的触摸控件 | `id` = 控件编号，`value` = 控件数值 |
+
+命令号定义在 `menu.h`，代码里**不出现裸数字**。列表页收到 PREV/NEXT/KEY 时怎么处理由 `menu_ui_list_cmd()` 决定（网格版是空实现）。
 
 返回值：`RT_EOK` 成功；`-RT_EFULL` 队列满（命令被丢弃，调用方要能感知）；`-RT_EINVAL` 命令号非法；`-RT_ERROR` 菜单还没启动。
 
@@ -216,7 +224,7 @@ static void xxx_on_key(key_id_t key)
 
 1. **`lv_*` 只能出现在 `render` 和 `ui/` 目录里**，逻辑线程绝对不许碰。
 2. 任务文件只 include `task.h` 和自己的 `xxx_ui.h`，不许 include `menu.h`。
-3. 想控制菜单，只能 `menu_post()`，不许碰 `menu_core.c` 里的内部函数。
+3. 想控制菜单，只能 `menu_post()`，不许碰 `menu.c` 里的内部函数。
 
 ## 7. MSH 命令
 

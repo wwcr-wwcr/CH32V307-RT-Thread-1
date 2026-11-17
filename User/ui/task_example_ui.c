@@ -32,7 +32,7 @@
 /**************************************************************************************************
  *                                       页面状态
  **************************************************************************************************/
-static lv_obj_t  *s_page = NULL;
+static lv_obj_t  *s_scr = NULL;
 static lv_obj_t  *s_mic  = NULL;        /* 卡片里的数值 label */
 static lv_obj_t  *s_lux  = NULL;
 static lv_obj_t  *s_cnt  = NULL;
@@ -57,17 +57,17 @@ static void page_build(void)
 {
     uint8_t i;
 
-    s_page = ui_page_create();
+    s_scr = ui_page_create();
 
-    ui_title_bar(s_page, "MIC / LUX", "6.4s");
+    ui_title_bar(s_scr, "MIC / LUX", "6.4s");
 
     /* 一行三张卡：麦克风、照度、数码管当前值 */
-    s_mic = ui_card(s_page,  12, 64, 96, 88, "MIC",  "--");
-    s_lux = ui_card(s_page, 112, 64, 96, 88, "LUX",  "--");
-    s_cnt = ui_card(s_page, 212, 64, 96, 88, "7SEG", "9999");
+    s_mic = ui_card(s_scr,  12, 64, 96, 88, "MIC",  "--");
+    s_lux = ui_card(s_scr, 112, 64, 96, 88, "LUX",  "--");
+    s_cnt = ui_card(s_scr, 212, 64, 96, 88, "7SEG", "9999");
 
     /* 曲线：两条线量程各自独立，MIC 用 ADC 满量程，LUX 用 0~1000 */
-    s_plot = ui_plot_create(s_page, 20, 162, 280, 146);
+    s_plot = ui_plot_create(s_scr, 20, 162, 280, 146);
     ui_plot_axis(s_plot, 4, 4, 0xE8DEE6);
     ui_plot_line(s_plot, 0, &(ui_plot_line_t){
             .color = UI_C_MIC_LINE, .width = 2,
@@ -81,7 +81,7 @@ static void page_build(void)
     /* 横轴刻度（时间） */
     for(i = 0; i < 5; i++)
     {
-        lv_obj_t *t = ui_text(s_page, UI_FONT_SMALL, UI_C_TEXT_DIM);
+        lv_obj_t *t = ui_text(s_scr, UI_FONT_SMALL, UI_C_TEXT_DIM);
 
         ui_text_set(t, s_tick_txt[i]);
         ui_text_align(t, LV_ALIGN_TOP_MID, s_tick_x[i], 312);
@@ -89,22 +89,22 @@ static void page_build(void)
 
     /* 图例：左边麦克风，右边照度 */
     {
-        lv_obj_t *lg = ui_text(s_page, UI_FONT_SMALL, lv_color_hex(UI_C_MIC_LINE));
+        lv_obj_t *lg = ui_text(s_scr, UI_FONT_SMALL, lv_color_hex(UI_C_MIC_LINE));
 
         ui_text_set(lg, "MIC 0-4095");
         ui_text_align(lg, LV_ALIGN_TOP_LEFT, 24, 334);
 
-        lg = ui_text(s_page, UI_FONT_SMALL, lv_color_hex(UI_C_LUX_LINE));
+        lg = ui_text(s_scr, UI_FONT_SMALL, lv_color_hex(UI_C_LUX_LINE));
         ui_text_set(lg, "LUX 0-1000");
         ui_text_align(lg, LV_ALIGN_TOP_RIGHT, -24, 334);
     }
 
     /* 触摸按钮，和 K1/K2/K3 一一对应 */
-    (void)ui_button(s_page,  14, 364, 92, 46, "PAUSE", UI_ID_PAUSE);
-    (void)ui_button(s_page, 114, 364, 92, 46, "MUSIC", UI_ID_MUSIC);
-    (void)ui_button(s_page, 214, 364, 92, 46, "BEAT",  UI_ID_BEAT);
+    (void)ui_button(s_scr,  14, 364, 92, 46, "PAUSE", UI_ID_PAUSE);
+    (void)ui_button(s_scr, 114, 364, 92, 46, "MUSIC", UI_ID_MUSIC);
+    (void)ui_button(s_scr, 214, 364, 92, 46, "BEAT",  UI_ID_BEAT);
 
-    s_hint = ui_hint_bar(s_page, "RUN  MUS ON  BEA ON");
+    s_hint = ui_hint_bar(s_scr, "RUN  MUS ON  BEA ON");
 }
 
 /**************************************************************************************************
@@ -119,14 +119,14 @@ void example_ui_render(uint16_t mic, uint16_t lux, uint16_t count,
 {
     char buf[32];
 
-    if(s_page == NULL)
+    if(s_scr == NULL)
     {
         page_build();
     }
 
-    if(!ui_page_is_active(s_page))
+    if(!ui_page_is_active(s_scr))
     {
-        ui_page_load(s_page);
+        ui_page_load(s_scr);
     }
 
     /* ---- 数值卡 ---- */
@@ -160,7 +160,7 @@ void example_ui_destroy(void)
 {
     ui_plot_delete(s_plot);
 
-    ui_page_destroy(&s_page);
+    ui_page_destroy(&s_scr);
 
     s_mic  = NULL;
     s_lux  = NULL;

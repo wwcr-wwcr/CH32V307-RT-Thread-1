@@ -1,110 +1,144 @@
 /******************************************************************************
  * 文件名   : menu_ui.c
- * 说明     : 选择页界面：一屏一个 TASK n，左右切换
+ * 说明     : 选择页 —— 网格版：一屏铺开全部任务，2 列 × N 行卡片，点哪张进哪个。
  *
- * 触摸支持：
- *     左右两个箭头和卡片本身都能点。回调直接发菜单命令（1/2/3），
- *     和 MSH 的 menu prev/next/open 走同一条路，不再伪装成按键。
+ * 这个文件拥有"列表长什么样、有几个、怎么选"的全部决定权。
+ * menu.c 只知道三件事：画出来、处理本页命令、回收。它不知道有几个任务。
+ *
+ * 【换成翻页版要改哪几行】只动本文件，menu.c 一行都不用改：
+ *     1) 文件头加 static uint8_t s_cur;            ← 当前第几个
+ *     2) menu_ui_list_draw() 里 for 循环改成只画 s_cur 那一张，
+ *        标题栏右侧改成 "s_cur+1 / n"
+ *     3) menu_ui_list_cmd() 里补上 MENU_CMD_PREV / MENU_CMD_NEXT 改 s_cur，
+ *        以及 MENU_CMD_KEY 的 K1/K2/K3（KEY_ID_1/2/3）→ 上 / 下 / 进入
+ *     4) menu_ui_list_free() 不动（还是整页销毁）
+ *   之所以不用改 menu.c：菜单核心只发 MENU_CMD_ENTER(id)，id 从哪来是本页的事。
  ******************************************************************************/
 
 #include "menu_ui.h"
 #include "common.h"
 #include "menu/menu.h"
+#include "menu/task_runner.h"
+
 #include <stdio.h>
+
+/**************************************************************************************************
+ *                                        布局参数
+ **************************************************************************************************/
+#define LIST_COLS       2                                   /* 列数 */
+#define LIST_GAP        12                                  /* 卡片间距 */
+#define LIST_X0         UI_PAD                              /* 左边距 */
+#define LIST_Y0         (UI_TITLE_H + UI_PAD)               /* 标题栏下面 */
+#define LIST_BOTTOM     (UI_H - UI_HINT_H - UI_PAD)         /* 提示条上面 */
+#define LIST_ROWS_MIN   3                                   /* 任务少也按 3 行排，卡片不会撑成一块 */
 
 /**************************************************************************************************
  *                                        内部变量
  **************************************************************************************************/
-/* 当前显示的任务序号，卡片点击时用它决定进哪个，0xFF 表示还没画过 */
-static uint8_t s_index = 0xFF;
+static lv_obj_t *s_page = NULL;                             /* 选择页，NULL = 还没建 */
 
 /**************************************************************************************************
  *                                        内部函数
  **************************************************************************************************/
-static void on_prev(lv_event_t *e)  { (void)e; (void)menu_post(1, 0, 0); }        /* 1 = 上一个 */
-static void on_next(lv_event_t *e)  { (void)e; (void)menu_post(2, 0, 0); }        /* 2 = 下一个 */
-static void on_enter(lv_event_t *e) { (void)e; (void)menu_post(3, s_index, 0); }  /* 3 = 进第 s_index 个 */
-
-/* 造一个方形触摸按钮：深色卡片 + 边框 + 居中箭头 */
-static lv_obj_t *make_btn(lv_obj_t *parent, lv_coord_t x, const char *text, lv_event_cb_t cb)
+/* 点卡片 → 发"进入第 idx 个"命令。idx 在注册回调时塞进 user_data */
+static void on_pick(lv_event_t *e)
 {
-    lv_obj_t *btn = ui_panel(parent, x, 335, 56, 56, UI_C_CARD);
-    lv_obj_t *lbl;
+    uint8_t idx = (uint8_t)(uintptr_t)lv_event_get_user_data(e);
 
-    lv_obj_set_style_border_width(btn, 2, 0);
-    lv_obj_set_style_border_color(btn, UI_C_BORDER, 0);
-    lv_obj_add_flag(btn, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(btn, cb, LV_EVENT_CLICKED, NULL);
-
-    lbl = ui_text(btn, UI_FONT_HUGE, UI_C_TEXT);
-    ui_text_set(lbl, text);
-    ui_text_align(lbl, LV_ALIGN_CENTER, 0, 0);
-
-    return btn;
+    (void)menu_post(MENU_CMD_ENTER, idx, 0);
 }
 
 /**************************************************************************************************
  *                                        对外函数
  **************************************************************************************************/
-void menu_ui_render(uint8_t index, uint8_t total, const char *name)
+void menu_ui_list_draw(void)
 {
-    static lv_obj_t *s_page    = NULL;
-    static lv_obj_t *s_pagebar = NULL;
-    static lv_obj_t *s_card    = NULL;
-    static lv_obj_t *s_task    = NULL;
-    static lv_obj_t *s_name    = NULL;
+    lv_obj_t  *pagebar;
+    lv_coord_t cw;
+    lv_coord_t ch;
+    lv_coord_t area_h;
+    uint8_t    n;
+    uint8_t    rows;
+    uint8_t    rows_use;
+    uint8_t    i;
+    char       buf[16];
 
-    char   buf[24];
-
-    /* 1. 首次进入：搭界面 */
-    if(s_card == NULL)
+    /* 1. 幂等：已经建过就只切回来，不重建 */
+    if(s_page != NULL)
     {
-        lv_obj_t *root;
-
-        s_page = ui_page_create();
-        root = s_page;
-
-        s_pagebar = ui_title_bar(root, "SELECT", "1/1");
-
-        /* 卡片：点一下 = 进入当前任务 */
-        s_card = ui_panel(root, 30, 165, (lv_coord_t)(UI_W - 60), 150, UI_C_CARD);
-        lv_obj_set_style_border_width(s_card, 2, 0);
-        lv_obj_set_style_border_color(s_card, UI_C_BORDER, 0);
-        lv_obj_add_flag(s_card, LV_OBJ_FLAG_CLICKABLE);
-        lv_obj_add_event_cb(s_card, on_enter, LV_EVENT_CLICKED, NULL);
-
-        s_task = ui_text(s_card, UI_FONT_HUGE, UI_C_TEXT);
-        ui_text_align(s_task, LV_ALIGN_TOP_MID, 0, 26);
-
-        s_name = ui_text(s_card, UI_FONT_BIG, UI_C_ACCENT);
-        ui_text_align(s_name, LV_ALIGN_BOTTOM_MID, 0, -26);
-
-        /* 左右箭头：点一下 = 上一个 / 下一个 */
-        make_btn(root, 24, "<", on_prev);
-        make_btn(root, (lv_coord_t)(UI_W - 24 - 56), ">", on_next);
-
-        ui_hint_bar(root, "TAP CARD TO ENTER");
-    }
-
-    /* 从别的页面切回来：重新激活本页 */
-    if(!ui_page_is_active(s_page))
-    {
-        ui_page_load(s_page);
-    }
-
-    /* 2. 没变化就不动，省一次重绘 */
-    if(index == s_index)
-    {
+        if(!ui_page_is_active(s_page))
+        {
+            ui_page_load(s_page);
+        }
         return;
     }
 
-    /* 3. 更新文字 */
-    snprintf(buf, sizeof(buf), "TASK %d", index + 1);
-    ui_text_set(s_task, buf);
-    ui_text_set(s_name, name);
+    /* 2. 搭页面骨架 */
+    s_page  = ui_page_create();
+    pagebar = ui_title_bar(s_page, "SELECT", "");
+    ui_hint_bar(s_page, "TAP A CARD TO ENTER");
 
-    snprintf(buf, sizeof(buf), "%d/%d", index + 1, total);
-    ui_text_set(s_pagebar, buf);
+    n = task_runner_count();
 
-    s_index = index;
+    snprintf(buf, sizeof(buf), "%d", (int)n);
+    ui_text_set(pagebar, buf);
+
+    if(n == 0)                          /* 一个任务都没登记，画个提示就完事 */
+    {
+        lv_obj_t *tip = ui_text(s_page, UI_FONT_BIG, UI_C_TEXT_DIM);
+
+        ui_text_set(tip, "NO TASK");
+        ui_text_align(tip, LV_ALIGN_CENTER, 0, 0);
+        ui_page_load(s_page);
+        return;
+    }
+
+    /* 3. 算格子。行数按任务数动态来；任务少时按 3 行排，卡片高度才稳定 */
+    area_h   = (lv_coord_t)(LIST_BOTTOM - LIST_Y0);
+    cw       = (lv_coord_t)((UI_W - 2 * UI_PAD - (LIST_COLS - 1) * LIST_GAP) / LIST_COLS);
+    rows     = (uint8_t)((n + LIST_COLS - 1) / LIST_COLS);
+    rows_use = (rows < LIST_ROWS_MIN) ? LIST_ROWS_MIN : rows;
+    ch       = (lv_coord_t)((area_h - (rows_use - 1) * LIST_GAP) / rows_use);
+
+    /* 4. 逐个建卡片 */
+    for(i = 0; i < n; i++)
+    {
+        const app_task_t *task = task_runner_at(i);
+        lv_coord_t        x    = (lv_coord_t)(LIST_X0 + (i % LIST_COLS) * (cw + LIST_GAP));
+        lv_coord_t        y    = (lv_coord_t)(LIST_Y0 + (i / LIST_COLS) * (ch + LIST_GAP));
+        lv_obj_t         *card = ui_panel(s_page, x, y, cw, ch, UI_C_CARD);
+        lv_obj_t         *num;
+        lv_obj_t         *name;
+
+        lv_obj_set_style_border_width(card, 2, 0);
+        lv_obj_set_style_border_color(card, UI_C_BORDER, 0);
+        lv_obj_add_flag(card, LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_add_event_cb(card, on_pick, LV_EVENT_CLICKED, (void *)(uintptr_t)i);
+
+        snprintf(buf, sizeof(buf), "TASK %d", i + 1);
+        num = ui_text(card, UI_FONT_SMALL, UI_C_TEXT_DIM);
+        ui_text_set(num, buf);
+        ui_text_align(num, LV_ALIGN_TOP_MID, 0, 12);
+
+        name = ui_text(card, UI_FONT_BIG, UI_C_TEXT);
+        ui_text_set(name, (task != NULL) ? task->name : "?");
+        ui_text_align(name, LV_ALIGN_BOTTOM_MID, 0, -12);
+    }
+
+    ui_page_load(s_page);
+}
+
+void menu_ui_list_cmd(uint8_t cmd, uint8_t id, int32_t value)
+{
+    /* 网格版没有"光标"：所有任务都摊在屏幕上，点哪张进哪张。
+     * 所以 PREV / NEXT / KEY 在本布局下无事可做，这里空实现。
+     * 以后要做翻页版或加高亮，在这里改（见文件头的四步说明）。 */
+    (void)cmd;
+    (void)id;
+    (void)value;
+}
+
+void menu_ui_list_free(void)
+{
+    ui_page_destroy(&s_page);           /* 内部判空，删完置 NULL */
 }
