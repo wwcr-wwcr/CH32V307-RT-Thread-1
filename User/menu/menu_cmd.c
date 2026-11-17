@@ -33,10 +33,10 @@ static void menu_usage(void)
     rt_kprintf("  menu next/prev   move cursor on list page\r\n");
 }
 
-/* 投递命令并统一处理失败原因 */
-static int menu_send(uint8_t cmd, uint8_t arg)
+/* 投递命令并统一处理失败原因。命令都不带 value，固定传 0 */
+static int menu_send(uint8_t cmd, uint8_t id)
 {
-    rt_err_t err = menu_post(cmd, arg);
+    rt_err_t err = menu_post(cmd, id, 0);
 
     if(err == RT_EOK)
     {

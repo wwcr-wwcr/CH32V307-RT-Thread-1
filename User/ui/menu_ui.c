@@ -3,25 +3,27 @@
  * 说明     : 选择页界面：一屏一个 TASK n，左右切换
  *
  * 触摸支持：
- *     左右两个箭头按钮 + 卡片本身都可以点。回调只做"合成按键事件"，
- *     和实体按键 K1/K2/K3 走完全相同的路径，菜单逻辑一行都不用改。
+ *     左右两个箭头和卡片本身都能点。回调直接发菜单命令（1/2/3），
+ *     和 MSH 的 menu prev/next/open 走同一条路，不再伪装成按键。
  ******************************************************************************/
 
 #include "menu_ui.h"
 #include "common.h"
-#include "ui_event.h"
+#include "menu/menu.h"
 #include <stdio.h>
 
 /**************************************************************************************************
- *                                        内部函数
- *
- * 触摸只走 ui_post_event() 一个入口，和任务页的按钮/滑条完全一样。
- * 列表页用到的三个控件编号由 menu_core.c 解释：
- *     1 = 上一个   2 = 下一个   3 = 进入当前任务
+ *                                        内部变量
  **************************************************************************************************/
-static void on_prev(lv_event_t *e)  { (void)e; ui_post_event(1, 0); }
-static void on_next(lv_event_t *e)  { (void)e; ui_post_event(2, 0); }
-static void on_enter(lv_event_t *e) { (void)e; ui_post_event(3, 0); }
+/* 当前显示的任务序号，卡片点击时用它决定进哪个，0xFF 表示还没画过 */
+static uint8_t s_index = 0xFF;
+
+/**************************************************************************************************
+ *                                        内部函数
+ **************************************************************************************************/
+static void on_prev(lv_event_t *e)  { (void)e; (void)menu_post(1, 0, 0); }        /* 1 = 上一个 */
+static void on_next(lv_event_t *e)  { (void)e; (void)menu_post(2, 0, 0); }        /* 2 = 下一个 */
+static void on_enter(lv_event_t *e) { (void)e; (void)menu_post(3, s_index, 0); }  /* 3 = 进第 s_index 个 */
 
 /* 造一个方形触摸按钮：深色卡片 + 边框 + 居中箭头 */
 static lv_obj_t *make_btn(lv_obj_t *parent, lv_coord_t x, const char *text, lv_event_cb_t cb)
@@ -51,7 +53,6 @@ void menu_ui_render(uint8_t index, uint8_t total, const char *name)
     static lv_obj_t *s_card    = NULL;
     static lv_obj_t *s_task    = NULL;
     static lv_obj_t *s_name    = NULL;
-    static uint8_t   s_last    = 0xFF;
 
     char   buf[24];
 
@@ -92,7 +93,7 @@ void menu_ui_render(uint8_t index, uint8_t total, const char *name)
     }
 
     /* 2. 没变化就不动，省一次重绘 */
-    if(index == s_last)
+    if(index == s_index)
     {
         return;
     }
@@ -105,5 +106,5 @@ void menu_ui_render(uint8_t index, uint8_t total, const char *name)
     snprintf(buf, sizeof(buf), "%d/%d", index + 1, total);
     ui_text_set(s_pagebar, buf);
 
-    s_last = index;
+    s_index = index;
 }

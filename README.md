@@ -66,7 +66,6 @@ CH32V307VCT6（RISC-V 青稞 V4F，144MHz，224KB Flash / 96KB RAM）上的菜�
 | `ui/common.c` | 通用控件封装（页面、卡片、按钮、滑条、曲线） | 是 |
 | `ui/menu_ui.c` | 列表页渲染 | 是 |
 | `ui/task_example_ui.c` | 示例任务的界面 | 是 |
-| `ui/ui_event.h` | 触摸事件唯一入口 `ui_post_event(id, value)` | — |
 
 ### menu_core.c 分两块
 
@@ -76,23 +75,24 @@ CH32V307VCT6（RISC-V 青稞 V4F，144MHz，224KB Flash / 96KB RAM）上的菜�
 | --- | --- | --- |
 | **核心** `menu_state(op, arg)` | 菜单状态机，**唯一**改 `s_page` / `s_cursor` 的函数。进入、退出、选择全在里面。`op`：0=上一个 1=下一个 2=进入第 arg 个 3=退出 | 改选中规则、改进入流程、改退出要做什么 |
 | **功能函数** `menu_draw_list()` | 按当前状态重绘列表页，纯输出，不改状态 | 改列表怎么画（实际在 `ui/menu_ui.c`） |
-| **外围** | `menu_key` 按键语义、`menu_handle` 命令分发、`menu_post`/`ui_post_event` 通道、`ui_entry` 线程 | 换交互方式：点选换滑动、加旋钮、加遥控、加串口帧 |
+| **外围** | `menu_key` 按键语义、`menu_handle` 命令分发、`menu_post` 通道、`ui_entry` 线程 | 换交互方式：点选换滑动、加旋钮、加遥控、加串口帧 |
 
 四个动作都自己判断「当前页面该不该做」，外围调用时不用写 `s_page` 守卫。
 
 举例：要做「滑动选择任务」，只需在外围加一个 `menu_swipe(int dx)` 去调 `menu_state(dx > 0 ? 1 : 0, 0)`，核心一行都不用动。
 
-### 触摸只有一个入口
+### 触摸不伪装成按键
 
-列表页的箭头/卡片和任务页的按钮/滑条，回调里都只有一句 `ui_post_event(id, value)`，不需要知道自己在哪一页：
+回调里都是直接发命令，不伪造按键事件：
 
-```
-控件回调 ──ui_post_event──▶ 菜单命令队列(cmd=5) ──▶ UI 线程按页面分发
-                                                     ├ 任务页：转给 on_set(id, value)
-                                                     └ 列表页：1=上一个 2=下一个 3=进入
-```
+| 位置 | 回调里写 | 效果 |
+| --- | --- | --- |
+| 列表页 左箭头 | `menu_post(1, 0, 0)` | 和 MSH `menu prev` 同一条 |
+| 列表页 右箭头 | `menu_post(2, 0, 0)` | 和 MSH `menu next` 同一条 |
+| 列表页 卡片 | `menu_post(3, s_index, 0)` | 和 MSH `menu open N` 同一条 |
+| 任务页 按钮/滑条 | `menu_post(5, id, value)` | 转给当前任务的 `on_set` |
 
-控件编号由各页面自己定，同一编号在两页含义不同没关系——两页不会同时存在，由 UI 线程按当前页面解释。
+这样列表页的触摸和命令行走的是**同一批命令**，没有第二套语义；任务页的触摸带 `int32` 数值，所以单独用 cmd 5。
 
 ## 3. 线程
 
@@ -144,17 +144,17 @@ CH32V307VCT6（RISC-V 青稞 V4F，144MHz，224KB Flash / 96KB RAM）上的菜�
 所有输入源（按键、触摸、MSH、以后接的 UART 帧）都只调这一个函数：
 
 ```c
-rt_err_t menu_post(uint8_t cmd, uint8_t arg);
+rt_err_t menu_post(uint8_t cmd, uint8_t id, int32_t value);
 ```
 
-| cmd | 含义 | arg |
+| cmd | 含义 | id / value |
 | --- | --- | --- |
-| 0 | 模拟一次按键 | `key_id_t`：短按 1~4 / 长按 5~8 / 双击 9~12 |
-| 1 | 光标上一个（仅列表页） | — |
-| 2 | 光标下一个（仅列表页） | — |
-| 3 | 打开第 N 个任务 | 任务序号，从 0 开始 |
+| 0 | 按键事件，**只有按键线程发** | `id` = `key_id_t`：短按 1~4 / 长按 5~8 / 双击 9~12 |
+| 1 | 光标上一个 | — |
+| 2 | 光标下一个 | — |
+| 3 | 进入第 N 个任务 | `id` = 任务序号，从 0 开始 |
 | 4 | 回到列表页（等同长按 K4） | — |
-| 5 | 触摸控件 | 控件编号；要带 `int32` 数值，请用 `ui_post_event(id, value)` 而不是直接发 5 |
+| 5 | 任务页的触摸控件 | `id` = 控件编号，`value` = 控件数值 |
 
 返回值：`RT_EOK` 成功；`-RT_EFULL` 队列满（命令被丢弃，调用方要能感知）；`-RT_EINVAL` 命令号非法；`-RT_ERROR` 菜单还没启动。
 

@@ -12,7 +12,7 @@
  *   功能函数（menu_draw_list）
  *       按当前状态重绘列表页，纯输出，不改任何状态。
  *
- *   外围（menu_post / ui_post_event / menu_key / menu_handle / 线程）
+ *   外围（menu_post / menu_key / menu_handle / 线程）
  *       把按键、触摸、命令翻译成 menu_state 的四种操作。
  *       想换交互方式（点选 → 滑动、加旋钮、加遥控）→ 只在这里加适配，
  *       核心一行都不用动。
@@ -30,7 +30,6 @@
 #include "key.h"
 #include "rtthread.h"
 #include "ui/menu_ui.h"
-#include "ui/ui_event.h"
 #include "lv_port_disp_template.h"
 #include "lv_port_indev_template.h"
 
@@ -147,17 +146,10 @@ static void menu_state(uint8_t op, uint8_t arg)
         }
     }
 }
-
-/*==============================================================================
- *  外围
- *  下面全是"把某种输入翻译成 menu_state"，不写菜单业务。
- *============================================================================*/
-
 /**************************************************************************************************
  *                                        通道：只入队
  **************************************************************************************************/
-/* 所有命令的唯一入队口，先校验再发 */
-static rt_err_t menu_post_ex(uint8_t cmd, uint8_t id, int32_t value)
+rt_err_t menu_post(uint8_t cmd, uint8_t id, int32_t value)
 {
     menu_msg_t msg;
 
@@ -176,17 +168,6 @@ static rt_err_t menu_post_ex(uint8_t cmd, uint8_t id, int32_t value)
     msg.value = value;
 
     return rt_mq_send(s_menu_q, &msg, sizeof(msg));   /* 满时返回 -RT_EFULL */
-}
-
-rt_err_t menu_post(uint8_t cmd, uint8_t arg)
-{
-    return menu_post_ex(cmd, arg, 0);
-}
-
-/* ui_event.h 里的触摸入口：和按键一样只入队，由 UI 线程按页面分发 */
-void ui_post_event(uint8_t id, int32_t value)
-{
-    (void)menu_post_ex(5, id, value);   /* 5 = 触摸控件 */
 }
 
 /**************************************************************************************************
@@ -237,7 +218,7 @@ static void menu_handle(const menu_msg_t *msg)
 {
     switch(msg->cmd)
     {
-        case 0:     /* 模拟按键，id 是 key_id_t */
+        case 0:     /* 按键事件，id 是 key_id_t */
             menu_key((key_id_t)msg->id);
             break;
 
@@ -257,16 +238,8 @@ static void menu_handle(const menu_msg_t *msg)
             menu_state(3, 0);
             break;
 
-        case 5:     /* 触摸控件，id 是控件编号，value 是控件值 */
-            if(s_page == 1)
-            {
-                (void)task_runner_post_set(msg->id, msg->value);  /* 任务页：转发 */
-            }
-            else if((msg->id >= 1) && (msg->id <= 3))
-            {
-                /* 列表页：控件编号 1/2/3 就是 K1/K2/K3 */
-                menu_key((key_id_t)(msg->id - 1));
-            }
+        case 5:     /* 任务页的触摸控件，直接转给任务的 on_set */
+            (void)task_runner_post_set(msg->id, msg->value);
             break;
 
         default:
@@ -280,7 +253,7 @@ static void menu_handle(const menu_msg_t *msg)
 /* key 线程回调：只入队，不做任何菜单逻辑 */
 static void menu_on_key(key_id_t key)
 {
-    if(menu_post(0, (uint8_t)key) != RT_EOK)   /* 0 = 模拟按键 */
+    if(menu_post(0, (uint8_t)key, 0) != RT_EOK)   /* 0 = 按键事件 */
     {
         s_lost++;
     }
@@ -299,7 +272,7 @@ static void ui_entry(void *parameter)
     lv_port_indev_init();
 
     /* 2. 直接画列表页。
-     *    触摸不需要在这里注册回调：界面上的控件自己调 ui_post_event() */
+     *    触摸不需要在这里注册回调：界面上的控件自己发命令 */
     menu_draw_list();
 
     /* 3. 主循环：收命令 -> 渲染 -> 跑 LVGL */
@@ -329,18 +302,7 @@ static void ui_entry(void *parameter)
 
 void menu_start(void)
 {
-    if(task_runner_init() != 0)
-    {
-        return;
-    }
-
-    s_menu_q = rt_mq_create("menu", sizeof(menu_msg_t), MENU_MQ_DEPTH, RT_IPC_FLAG_FIFO);
-    if(s_menu_q == RT_NULL)
-    {
-        rt_kprintf("menu: mq create failed\r\n");
-        return;
-    }
-
+    s_menu_q = rt_mq_create("menu", sizeof(menu_msg_t), MENU_MQ_DEPTH, RT_IPC_FLAG_FIFO);   //
     key_event_register(menu_on_key);    /* 按键线程 -> 命令队列 */
     key_start();
 
